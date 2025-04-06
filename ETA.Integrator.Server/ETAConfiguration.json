@@ -1,0 +1,25 @@
+{
+  "Name": "ETA-EnvironmentVariables",
+  "Values": [
+    {
+      "Key": "apiBaseUrl",
+      "Value": "https://api.invoicing.eta.gov.eg"
+    },
+    {
+      "Key": "idSrvBaseUrl",
+      "Value": "https://id.eta.gov.eg"
+    },
+    {
+      "Key": "clientId",
+      "Value": "39a1f0cc-3fad-4b10-9dbc-5634a2509d00"
+    },
+    {
+      "Key": "clientSecret",
+      "Value": "8755ecf3-1b84-4a2c-881b-53bda46fa909"
+    },
+    {
+      "Key": "generatedAccessToken",
+      "Value": ""
+    }
+  ]
+}
