@@ -9,17 +9,13 @@ namespace ETA.Integrator.Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class CommonController : ControllerBase
+    public class TokenController : ControllerBase
     {
         private readonly IConfigurationService _ConfigurationService;
-
-        readonly RestClient _client;
-        public CommonController(
+        public TokenController(
             IConfigurationService configurationService)
         {
             _ConfigurationService = configurationService;
-
-            var opt = new RestClientOptions();
         }
         [HttpGet("Test")]
         public IActionResult Test()
@@ -54,27 +50,6 @@ namespace ETA.Integrator.Server.Controllers
 
                     var responseObject = new ResponseModel();
 
-                    //var client = _httpClientFactory.CreateClient();
-
-                    //var uriStringfied = idSrvUrl.Value + "/connect/token";
-
-                    //var formData = new Dictionary<string, string>() {
-                    //    {"grant_type", "client_credentials"},
-                    //    {"client_id", clientId.Value},
-                    //    {"client_secret", clientSecret.Value},
-                    //    {"scope", "InvoicingAPI"}
-                    //};
-
-                    //var request = new ConnectionRequestModel();
-
-                    //request.client_id = clientId.Value;
-                    //request.client_secret = clientSecret.Value;
-
-                    //var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-                    //var content = new FormUrlEncodedContent(formData);
-
-                    //var response = await client.PostAsync(uriStringfied, content);
                     if (response.Content != null)
                     {
                         responseObject = JsonSerializer.Deserialize<ResponseModel>(response.Content);
