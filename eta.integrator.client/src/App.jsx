@@ -5,23 +5,23 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Button, ConfigProvider, theme } from 'antd';
 import Settings from './Pages/Settings.jsx';
+// import {useConfig , CustomConfigProvider} from './Componenets/CustomConfigProvider.jsx';
 
 function App() {
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const [landing, setLanding] = useState('settings');
+    // const [landing, setLanding] = useState('settings');
 
     useEffect(() => {
-        fetch('/config/landing')
-            .then(res => res.json())
-            .then(data => setLanding(data.landing));
-
-        console.log(landing);
+        // fetch('/config/landing')
+        //     .then(res => res.json())
+        //     .then(data => setLanding(data.landing));
 
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         setIsDarkMode(prefersDark);
-    }, [landing]);
 
-    if (!landing) return <div>Loading...</div>;
+    }, []);
+
+    // if (!landing) return <div>Loading...</div>;
 
     return (
         <ConfigProvider
@@ -30,24 +30,32 @@ function App() {
             }}
         >
             <Router>
-                <Routes>
-                    <Route path="/" element={
-                        <Navigate to={`/${landing}`} replace />
-                    } />
-
-                    <Route path='/login' element={
-                        <Landing colorMode={isDarkMode}
-                            setColorMode={setIsDarkMode} />
-                    } />
-
-                    <Route path='/settings' element={
-                        <Settings />
-                    } />
-                </Routes>
+                <RoutedApp />
             </Router>
         </ConfigProvider>
     );
 
 }
+
+function RoutedApp({ isDarkMode, setIsDarkMode }) {
+
+    return (
+        <Routes>
+            <Route path="/" element={
+                <Navigate to={`/`} />
+            } />
+
+            <Route path='/login' element={
+                <Landing colorMode={isDarkMode}
+                    setColorMode={setIsDarkMode} />
+            } />
+
+            <Route path='/settings' element={
+                <Settings />
+            } />
+        </Routes>
+    );
+}
+
 
 export default App;

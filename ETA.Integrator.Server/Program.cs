@@ -36,13 +36,13 @@ app.MapFallbackToFile("/index.html");
 
 Env.Load();
 
-var HMS_API = Environment.GetEnvironmentVariable("HMS_API");
+//var HMS_API = Environment.GetEnvironmentVariable("HMS_API");
 
-app.MapGet("/config/landing", () =>
-{
-    var landing = HMS_API == null ? "settings" : "login";
-    return Results.Json(new { landing });
-});
+//app.MapGet("/config/landing", () =>
+//{
+//    var landing = HMS_API == null ? "settings" : "login";
+//    return Results.Json(new { landing });
+//});
 
 app.Run();
 
