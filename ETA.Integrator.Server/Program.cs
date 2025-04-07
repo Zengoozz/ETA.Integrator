@@ -1,3 +1,4 @@
+using DotNetEnv;
 using ETA.Integrator.Server.Interface;
 using ETA.Integrator.Server.Services;
 
@@ -33,4 +34,18 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
+Env.Load();
+
+var HMS_API = Environment.GetEnvironmentVariable("HMS_API");
+
+app.MapGet("/config/landing", () =>
+{
+    var landing = HMS_API == null ? "settings" : "login";
+    return Results.Json(new { landing });
+});
+
 app.Run();
+
+
+
+

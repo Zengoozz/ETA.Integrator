@@ -8,7 +8,7 @@ using System.Text.Json;
 namespace ETA.Integrator.Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("HMS/[controller]")]
     public class TokenController : ControllerBase
     {
         private readonly IConfigurationService _ConfigurationService;

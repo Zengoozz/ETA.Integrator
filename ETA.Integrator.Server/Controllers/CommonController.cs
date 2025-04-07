@@ -7,7 +7,7 @@ using RestSharp.Authenticators.OAuth2;
 
 namespace ETA.Integrator.Server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("HMS/[controller]")]
     [ApiController]
     public class CommonController : ControllerBase
     {
