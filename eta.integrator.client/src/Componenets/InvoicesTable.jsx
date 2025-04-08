@@ -1,7 +1,7 @@
-import React from 'react';
-import { Divider, Table } from 'antd';
+import React, { useMemo } from "react";
+import { Divider, Table } from "antd";
 
-import { InvoicesTableColumns } from '../Constants/InvoicesTableColumns';
+import { InvoicesTableColumns } from "../Constants/InvoicesTableColumns";
 
 // const data = [
 //     {
@@ -59,47 +59,55 @@ import { InvoicesTableColumns } from '../Constants/InvoicesTableColumns';
 // ];
 
 const biggerData = Array.from({ length: 46 }).map((_, i) => {
-    return ({
-        key: i,
-        receiptnumber: i,
-        visittype: 'OP',
-        company: 'Oscar Company-Ocsar Company-Class C',
-        taxregisterationnumber: 1232312312,
-        netprice: 87.50,
-        patientshare: 17.50,
-        financialshare: 70.00,
-        vatnet: 0.00,
-        date: new Date('03/12/2025'),
-        status: i % 4 ? false : true,
-    })
+   return {
+      key: i,
+      receiptnumber: i,
+      visittype: "OP",
+      company: "Oscar Company-Ocsar Company-Class C",
+      taxregisterationnumber: 1232312312,
+      netprice: 87.5,
+      patientshare: 17.5,
+      financialshare: 70.0,
+      vatnet: 0.0,
+      date: new Date("03/12/2025"),
+      status: i % 4 ? false : true,
+   };
 });
 
-
-// rowSelection object indicates the need for row selection
-const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-        //TODO: State
-    },
-    getCheckboxProps: record => ({
-        disabled: record.status === true, // Column configuration not to be checked
-        name: record.receiptnumber,
-    }),
-};
-
 const InvoicesTable = () => {
-    return (
-        <div>
-            <Divider />
-            <Table
-                bordered
-                rowSelection={Object.assign({ type: 'checkbox' }, rowSelection)}
-                columns={InvoicesTableColumns}
-                dataSource={biggerData}
-                pagination={{ pageSize: 10 }}
-                //TODO:  onChange={handleTableChange}  // For sorting/filtering
-            />
-        </div>
-    );
+   const data = useMemo(() => biggerData, []);
+
+   // rowSelection object indicates the need for row selection
+   const rowSelection = useMemo(
+      () => ({
+         onChange: (selectedRowKeys, selectedRows) => {
+            console.log(
+               `selectedRowKeys: ${selectedRowKeys}`,
+               "selectedRows: ",
+               selectedRows
+            );
+            //TODO: State
+         },
+         getCheckboxProps: (record) => ({
+            disabled: record.status === true, // Column configuration not to be checked
+            name: record.receiptnumber,
+         }),
+      }),
+      []
+   );
+
+   return (
+      <div>
+         <Divider />
+         <Table
+            bordered
+            rowSelection={Object.assign({ type: "checkbox" }, rowSelection)}
+            columns={InvoicesTableColumns}
+            dataSource={data}
+            pagination={{ pageSize: 10 }}
+            //TODO:  onChange={handleTableChange}  // For sorting/filtering
+         />
+      </div>
+   );
 };
 export default React.memo(InvoicesTable);

@@ -1,16 +1,12 @@
 import React from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
-// import { useNavigate } from 'react-router-dom';
 
 import { LoginFormValidationRules } from '../Constants/FormRules';
 import { useLoginForm } from '../Hooks/useLoginForm';
 
 const LoginForm = ({ setLogIn }) => {
     const { handleLogin, loading } = useLoginForm(setLogIn);
-    // const navigate = useNavigate();
-
-
     const onLoginFailed = errorInfo => {
         console.log('Failed:', errorInfo);
     };
