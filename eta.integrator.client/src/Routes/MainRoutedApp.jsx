@@ -5,6 +5,8 @@ import DefaultPage from '../Pages/DefaultPage.jsx';
 import LoginForm from '../Componenets/LoginForm.jsx'
 import Settings from '../Componenets/Settings.jsx'
 
+import { LoginContentStyle, HomeContentStyle } from '../assets/styles.js';
+
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 
@@ -14,21 +16,7 @@ const ProtectedRoute = ({ isLoggedIn, children }) => {
 };
 
 const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn }) => {
-    var loginContentStyle = {
-        padding: '0 48px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    };
-
-    var homeContentStyle = {
-        padding: '0 48px',
-        display: 'flex',
-        justifyContent: 'start',
-        alignItems: 'start',
-        height: '500px'
-    };
-
+    
     return (
         <>
 
@@ -50,7 +38,7 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn }) => {
                             mode={mode}
                             setMode={setMode}
                             maxWidthValue={400}
-                            contentStyle={loginContentStyle}
+                            contentStyle={LoginContentStyle}
                         />
                     }
                 >
@@ -67,7 +55,7 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn }) => {
                                 mode={mode}
                                 setMode={setMode}
                                 maxWidthValue="100%"
-                                contentStyle={homeContentStyle}
+                                contentStyle={HomeContentStyle}
                             />
                         </ProtectedRoute>
                     }
