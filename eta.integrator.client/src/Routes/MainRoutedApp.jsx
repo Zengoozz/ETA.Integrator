@@ -56,6 +56,7 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn }) => {
                                 setMode={setMode}
                                 maxWidthValue="100%"
                                 contentStyle={HomeContentStyle}
+                                isMarginedTop={true}
                             />
                         </ProtectedRoute>
                     }
