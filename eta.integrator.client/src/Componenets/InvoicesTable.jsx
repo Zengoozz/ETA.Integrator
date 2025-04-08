@@ -160,4 +160,4 @@ const InvoicesTable = () => {
         </div>
     );
 };
-export default InvoicesTable;
+export default React.memo(InvoicesTable);

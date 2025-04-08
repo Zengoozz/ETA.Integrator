@@ -20,4 +20,4 @@ const SaveButton = ({ loading, onSave }) => {
     )
 }
 
-export default SaveButton
+export default React.memo(SaveButton)
