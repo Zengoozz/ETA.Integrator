@@ -8,6 +8,11 @@ import Settings from '../Componenets/Settings.jsx'
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 
+const ProtectedRoute = ({ isLoggedIn, children }) => {
+    if (!isLoggedIn) return <Navigate to="/login" replace />;
+    return children;
+};
+
 const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn }) => {
     var loginContentStyle = {
         padding: '0 48px',
@@ -28,57 +33,54 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn }) => {
         <>
 
             <Routes>
+                {/* 🔁 Root route redirects to login or home */}
+                <Route
+                    path="/"
+                    element={
+                        isLoggedIn
+                            ? <Navigate to="/home" replace />
+                            : <Navigate to="/login" replace />
+                    }
+                />
 
-                <Route path="/" element={<DefaultPage mode={mode} setMode={setMode} maxWidthValue={400} contentStyle={loginContentStyle} />}>
+                {/* 🌐 Public layout: login + settings */}
+                <Route
+                    element={
+                        <DefaultPage
+                            mode={mode}
+                            setMode={setMode}
+                            maxWidthValue={400}
+                            contentStyle={loginContentStyle}
+                        />
+                    }
+                >
+                    <Route path="/login" element={<LoginForm setLogIn={setLogIn} />} />
+                    <Route path="/settings" element={<Settings />} />
+                </Route>
 
-                    <Route path="/"
-                        element={
-                            isLoggedIn ? (
-                                <Navigate to="/home" replace />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
-                        } />
-
-                    <Route path="/login" element={
-                        <LoginForm setLogIn={setLogIn}/>
-                    } />
-
-                    <Route path='/settings' element={
-                        <Settings />
-                    } />
-
+                {/* 🔒 Protected layout (needs login) */}
+                <Route
+                    path="/home"
+                    element={
+                        <ProtectedRoute isLoggedIn={isLoggedIn}>
+                            <DefaultPage
+                                mode={mode}
+                                setMode={setMode}
+                                maxWidthValue="100%"
+                                contentStyle={homeContentStyle}
+                            />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route index element={<Navigate to="/home/invoices" replace />} />
+                    <Route path="invoices" element={<InvoicesPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Route>
 
-
-                <Route path="/home" element={<DefaultPage mode={mode} setMode={setMode} maxWidthValue={'100%'} contentStyle={homeContentStyle} />}>
-
-                    <Route path="/home" element={
-                        isLoggedIn ? (
-                            <Navigate to="/home/invoices" replace />
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
-                    } />
-
-                    <Route path="/home/invoices" element={
-                        <InvoicesPage />
-                    } />
-
-                    {/* <Route path="/login" element={
-                        <HomePage />
-                    } />
-
-                    <Route path='/settings' element={
-                        <Settings />
-                    } /> */}
-
-                    <Route path="*" element={<NotFoundPage />} />
-                </Route>
-
-
+                {/* 🔚 Fallback */}
+                <Route path="*" element={<NotFoundPage />} />
             </Routes>
+
         </>
 
     );
