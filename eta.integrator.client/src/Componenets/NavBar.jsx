@@ -24,7 +24,7 @@ const Navbar = ({ colorMode, setColorMode }) => {
             width: '100%',
             // background: '#001529', // Default AntD dark header
         }}>
-            <Link to="/login">
+            <Link to="/">
                 <Title  level={3} style={{ color: '#fff', margin: 0 }}>
                     Global Soft
                 </Title>

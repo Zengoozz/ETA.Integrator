@@ -1,16 +1,14 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
-
-
 
 
 const LoginForm = ({ setLogIn }) => {
     const navigate = useNavigate();
 
     // eslint-disable-next-line no-unused-vars
-    const onLogin = async (values) => {
+    const onLogin = useCallback(async (values) => {
         setLogIn(true);
         navigate('/home');
         // console.log(values);
@@ -29,7 +27,7 @@ const LoginForm = ({ setLogIn }) => {
         // console.log(data);
 
 
-    }
+    }, [setLogIn, navigate])
 
     const onLoginFailed = errorInfo => {
         console.log('Failed:', errorInfo);
@@ -43,20 +41,7 @@ const LoginForm = ({ setLogIn }) => {
             onFinish={onLogin}
             onFinishFailed={onLoginFailed}
         >
-            <Form.Item
-                name="username"
-                rules={[{ required: true, message: 'Please input your Username!' }]}
-            >
-                <Input prefix={<UserOutlined />} placeholder="Username" />
-            </Form.Item>
-
-            <Form.Item
-                name="password"
-                rules={[{ required: true, message: 'Please input your Password!' }]}
-            >
-                <Input prefix={<LockOutlined />} type="password" placeholder="Password" />
-            </Form.Item>
-
+            <LoginFields />
             <Form.Item>
                 <Button block type="primary" htmlType="submit">
                     Log in
@@ -66,4 +51,25 @@ const LoginForm = ({ setLogIn }) => {
     )
 };
 
-export default LoginForm;
+export default React.memo(LoginForm);
+
+
+const LoginFields = React.memo(() => (
+    <>
+        <Form.Item
+            name="username"
+            rules={[{ required: true, message: 'Required' }]}
+        >
+            <Input prefix={<UserOutlined />} placeholder="Username" />
+        </Form.Item>
+        <Form.Item
+            name="password"
+            rules={[
+                { required: true, message: 'Required' },
+                { min: 6, message: 'Password too short' }
+            ]}
+        >
+            <Input prefix={<LockOutlined />} type="password" placeholder="Password" />
+        </Form.Item>
+    </>
+));
