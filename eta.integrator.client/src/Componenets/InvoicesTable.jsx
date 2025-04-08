@@ -154,6 +154,8 @@ const InvoicesTable = () => {
                 rowSelection={Object.assign({ type: 'checkbox' }, rowSelection)}
                 columns={columns}
                 dataSource={biggerData}
+                pagination={{ pageSize: 10 }}
+                //TODO:  onChange={handleTableChange}  // For sorting/filtering
             />
         </div>
     );

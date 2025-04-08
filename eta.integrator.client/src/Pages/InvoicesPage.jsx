@@ -1,29 +1,22 @@
-import React from 'react'
-import { SaveOutlined } from '@ant-design/icons';
-import { Button } from 'antd'
+import React, { useState } from 'react'
 
 import InvoicesTable from '../Componenets/InvoicesTable'
-
-
+import SaveButton from '../Componenets/SaveButton';
 
 const InvoicesPage = () => {
 
-  const onSave = () => {
+  const [loading, setLoading] = useState(false);
 
-  }
+  const onSave = async () => {
+    setLoading(true); // Start loading
+    //TODO: Simulate save operation (e.g., API call)
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds delay
+    setLoading(false); // End loading
+  };
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-        <Button
-          type='primary'
-          icon={<SaveOutlined />}
-          size='large'
-          onClick={onSave}
-        >
-          Save
-        </Button>
-      </div>
+      <SaveButton loading={loading} onSave={onSave} />
       <InvoicesTable />
     </>
   )
