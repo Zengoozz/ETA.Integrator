@@ -1,12 +1,10 @@
 import React from 'react';
 import { Layout, theme } from 'antd';
-
-import LoginForm from "../Componenets/LoginForm"
-import Navbar from '../Componenets/NavBar';
+import { Outlet } from 'react-router-dom';
 
 const { Content } = Layout;
 
-const Landing = ({ colorMode, setColorMode }) => {
+const LoginPage = () => {
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -16,7 +14,6 @@ const Landing = ({ colorMode, setColorMode }) => {
     <Layout
       style={{ minHeight: '100vh' }}
     >
-      <Navbar colorMode={colorMode} setColorMode={setColorMode} />
       <Content
         style={{
           padding: '0 48px',
@@ -35,10 +32,10 @@ const Landing = ({ colorMode, setColorMode }) => {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           }}
         >
-          <LoginForm />
+          <Outlet />
         </div>
       </Content>
     </Layout>
   );
 };
-export default Landing;
+export default LoginPage;

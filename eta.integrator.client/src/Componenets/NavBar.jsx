@@ -1,14 +1,15 @@
 import React from 'react';
 import { Layout, Typography, Space } from 'antd';
-import { SunOutlined, MoonOutlined } from '@ant-design/icons';
+import { SunOutlined, MoonOutlined, SettingOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 
 const { Header } = Layout;
 const { Title } = Typography;
 
 const Navbar = ({ colorMode, setColorMode }) => {
 
-    const toggleColorMode = () => {
-        setColorMode(!colorMode);
+    const toggleColorMode = (color) => {
+        setColorMode(color);
     };
 
     return (
@@ -23,22 +24,29 @@ const Navbar = ({ colorMode, setColorMode }) => {
             width: '100%',
             // background: '#001529', // Default AntD dark header
         }}>
-            <Title level={3} style={{ color: '#fff', margin: 0 }}>
-                Global Soft
-            </Title>
+            <Link to="/login">
+                <Title  level={3} style={{ color: '#fff', margin: 0 }}>
+                    Global Soft
+                </Title>
+            </Link>
 
-            <Space>
-                {
-                    colorMode ?
-                        (
-                            <SunOutlined onClick={toggleColorMode} style={{ fontSize: '20px', color: '#fff', cursor: 'pointer' }} />
-                        ) :
-                        (
-                            <MoonOutlined onClick={toggleColorMode} style={{ fontSize: '20px', color: '#fff', cursor: 'pointer' }} />
-                        )
-                }
+            <span style={{display: 'flex', gap: 20}}>
+                <Link to="/settings">
+                    <SettingOutlined style={{ fontSize: '20px', color: '#fff', cursor: 'pointer' }} />
+                </Link>
+                <Space>
+                    {
+                        colorMode == 'Dark' ?
+                            (
+                                <SunOutlined onClick={() => toggleColorMode('Light')} style={{ fontSize: '20px', color: '#fff', cursor: 'pointer' }} />
+                            ) :
+                            (
+                                <MoonOutlined onClick={() => toggleColorMode('Dark')} style={{ fontSize: '20px', color: '#fff', cursor: 'pointer' }} />
+                            )
+                    }
+                </Space>
+            </span>
 
-            </Space>
         </Header>
     );
 };

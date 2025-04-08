@@ -1,15 +1,17 @@
-import Landing from './Pages/Landing.jsx'
+import NotFoundPage from './Pages/NotFoundPage.jsx'
+import DefaultPage from './Pages/DefaultPage.jsx';
+import LoginForm from './Componenets/LoginForm.jsx'
+import Settings from './Componenets/Settings.jsx'
 // import './assets/css/App.css';
 
-import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Button, ConfigProvider, theme } from 'antd';
-import Settings from './Pages/Settings.jsx';
+import { useState, useEffect } from 'react';
+import { ConfigProvider, theme } from 'antd';
+import HomePage from './Pages/HomePage.jsx';
 // import {useConfig , CustomConfigProvider} from './Componenets/CustomConfigProvider.jsx';
 
 function App() {
-    const [isDarkMode, setIsDarkMode] = useState(false);
-    // const [landing, setLanding] = useState('settings');
+    const [mode, setMode] = useState('Light');
 
     useEffect(() => {
         // fetch('/config/landing')
@@ -17,7 +19,7 @@ function App() {
         //     .then(data => setLanding(data.landing));
 
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        setIsDarkMode(prefersDark);
+        prefersDark ? setMode('Dark') : setMode('Light');
 
     }, []);
 
@@ -26,36 +28,79 @@ function App() {
     return (
         <ConfigProvider
             theme={{
-                algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+                algorithm: mode == "Dark" ? theme.darkAlgorithm : theme.defaultAlgorithm,
             }}
         >
             <Router>
-                <RoutedApp />
+                <MainRoutedApp mode={mode} setMode={setMode} />
             </Router>
         </ConfigProvider>
     );
 
 }
 
-function RoutedApp({ isDarkMode, setIsDarkMode }) {
+export default App;
+
+
+function MainRoutedApp({ mode, setMode }) {
+    var loginContentStyle = {
+        padding: '0 48px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    };
+
+    var homeContentStyle = {
+        padding: '0 48px',
+        display: 'flex',
+        justifyContent: 'start',
+        alignItems: 'start',
+        height:'500px'
+    };
 
     return (
-        <Routes>
-            <Route path="/" element={
-                <Navigate to={`/`} />
-            } />
+        <>
 
-            <Route path='/login' element={
-                <Landing colorMode={isDarkMode}
-                    setColorMode={setIsDarkMode} />
-            } />
+            <Routes>
 
-            <Route path='/settings' element={
-                <Settings />
-            } />
-        </Routes>
+                <Route path="/" element={<DefaultPage mode={mode} setMode={setMode} maxWidthValue={400} contentStyle={loginContentStyle} />}>
+
+                    <Route path="/" element={
+                        <LoginForm />
+                    } />
+
+                    <Route path="/login" element={
+                        <LoginForm />
+                    } />
+
+                    <Route path='/settings' element={
+                        <Settings />
+                    } />
+
+                    <Route path="*" element={<NotFoundPage />} />
+                </Route>
+
+
+                <Route path="/home" element={<DefaultPage mode={mode} setMode={setMode} maxWidthValue={'100%'} contentStyle={homeContentStyle}/>}>
+
+                    <Route path="/home" element={
+                        <HomePage />
+                    } />
+
+                    {/* <Route path="/login" element={
+                        <HomePage />
+                    } />
+
+                    <Route path='/settings' element={
+                        <Settings />
+                    } /> */}
+
+                    <Route path="*" element={<NotFoundPage />} />
+                </Route>
+
+
+            </Routes>
+        </>
+
     );
 }
-
-
-export default App;
