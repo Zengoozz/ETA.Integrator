@@ -1,7 +1,7 @@
 import React from 'react';
 import { Divider, Table } from 'antd';
 
-import { InvoicesTableColumns } from '@/constants/InvoicesTableColumns';
+import { InvoicesTableColumns } from '../Constants/InvoicesTableColumns';
 
 // const data = [
 //     {
