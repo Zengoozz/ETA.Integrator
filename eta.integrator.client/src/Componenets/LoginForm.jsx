@@ -6,14 +6,15 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-const LoginForm = () => {
+const LoginForm = ({ setLogIn }) => {
     const navigate = useNavigate();
 
     // eslint-disable-next-line no-unused-vars
     const onLogin = async (values) => {
+        setLogIn(true);
         navigate('/home');
         // console.log(values);
-    
+
         // const response = await fetch('HMS/Login', {
         //     method: 'POST',
         //     headers: {
@@ -26,14 +27,14 @@ const LoginForm = () => {
         // });
         // const data = await response.json();
         // console.log(data);
-    
-        
+
+
     }
-    
+
     const onLoginFailed = errorInfo => {
         console.log('Failed:', errorInfo);
     };
-    
+
     return (
         <Form
             name="login"
