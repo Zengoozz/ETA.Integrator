@@ -2,11 +2,11 @@ import React from "react";
 import { Layout, theme } from "antd";
 import { Outlet } from "react-router-dom";
 
-import Navbar from "../Componenets/NavBar";
+import Navbar from "./NavBar";
 
 const { Content } = Layout;
 
-const DefaultPage = ({ mode, setMode, maxWidthValue, contentStyle, isMarginedTop }) => {
+const DefaultLayout = ({ mode, setMode, maxWidthValue, contentStyle, isMarginedTop }) => {
    const {
       token: { colorBgContainer, borderRadiusLG },
    } = theme.useToken();
@@ -36,4 +36,4 @@ const DefaultPage = ({ mode, setMode, maxWidthValue, contentStyle, isMarginedTop
       </Layout>
    );
 };
-export default DefaultPage;
+export default DefaultLayout;

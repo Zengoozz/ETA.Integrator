@@ -1,11 +1,11 @@
-export const LoginContentStyle = {
+export const loginContentStyle = {
    padding: "0 48px",
    display: "flex",
    justifyContent: "center",
    alignItems: "center",
 };
 
-export const HomeContentStyle = {
+export const homeContentStyle = {
    padding: "0 48px",
    display: "flex",
    justifyContent: "start",
@@ -13,24 +13,33 @@ export const HomeContentStyle = {
    height: "500px",
 };
 
-export const DarkNavbarTitleStyle = {
+export const darkNavbarTitleStyle = {
    margin: 0,
    color: "#000",
 };
 
-export const LightNavbarTitleStyle = {
+export const lightNavbarTitleStyle = {
    margin: 0,
    color: "#fff",
 };
 
-export const DarkNavbarIconStyle = {
+export const darkNavbarIconStyle = {
    fontSize: "20px",
    color: "#000",
    cursor: "pointer",
 };
 
-export const LightNavbarIconStyle = {
-    fontSize: "20px",
-    color: "#fff",
-    cursor: "pointer",
+export const lightNavbarIconStyle = {
+   fontSize: "20px",
+   color: "#fff",
+   cursor: "pointer",
+};
+
+export default {
+   loginContentStyle,
+   homeContentStyle,
+   darkNavbarIconStyle,
+   lightNavbarIconStyle,
+   darkNavbarTitleStyle,
+   lightNavbarTitleStyle,
 };

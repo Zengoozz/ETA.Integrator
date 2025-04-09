@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../Services/AuthService";
+import AuthService from "../Services/AuthService";
 
 export const useLoginForm = (setLogIn) => {
    const navigate = useNavigate();
@@ -11,8 +11,8 @@ export const useLoginForm = (setLogIn) => {
       try {
          //TODO: Add your real login logic here
 
-         const response = await login(values);
-         console.log(response);
+         // const response = await AuthService.login(values);
+         // console.log(response);
 
          console.log("Logging in...", values);
          setTimeout(() => {

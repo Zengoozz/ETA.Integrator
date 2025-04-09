@@ -1,4 +1,4 @@
-export const login = async (credentials) => {
+const login = async (credentials) => {
    const response = await fetch("HMS/Login", {
       method: "POST",
       headers: {
@@ -14,3 +14,5 @@ export const login = async (credentials) => {
 
    return data;
 };
+
+export default { login };

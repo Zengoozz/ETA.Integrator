@@ -6,7 +6,9 @@ import { LoginFormValidationRules } from "../Constants/FormRules";
 import { useLoginForm } from "../Hooks/useLoginForm";
 
 const LoginForm = ({ setLogIn }) => {
+   
    const { handleLogin, loading } = useLoginForm(setLogIn);
+   
    const onLoginFailed = (errorInfo) => {
       console.log("Failed:", errorInfo);
    };

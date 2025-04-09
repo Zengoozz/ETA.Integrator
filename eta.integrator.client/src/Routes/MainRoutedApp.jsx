@@ -1,11 +1,11 @@
 import InvoicesPage from '../Pages/InvoicesPage.jsx';
 import NotFoundPage from '../Pages/NotFoundPage.jsx'
-import DefaultPage from '../Pages/DefaultPage.jsx';
 
+import DefaultLayout from '../Componenets/DefaultLayout.jsx';
 import LoginForm from '../Componenets/LoginForm.jsx'
 import Settings from '../Componenets/Settings.jsx'
 
-import { LoginContentStyle, HomeContentStyle } from '../assets/styles.js';
+import Styles from '../assets/Styles.js';
 
 import { Routes, Route, Navigate } from 'react-router-dom';
 
@@ -34,11 +34,11 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn }) => {
                 {/* 🌐 Public layout: login + settings */}
                 <Route
                     element={
-                        <DefaultPage
+                        <DefaultLayout
                             mode={mode}
                             setMode={setMode}
                             maxWidthValue={400}
-                            contentStyle={LoginContentStyle}
+                            contentStyle={Styles.loginContentStyle}
                         />
                     }
                 >
@@ -51,11 +51,11 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn }) => {
                     path="/home"
                     element={
                         <ProtectedRoute isLoggedIn={isLoggedIn}>
-                            <DefaultPage
+                            <DefaultLayout
                                 mode={mode}
                                 setMode={setMode}
                                 maxWidthValue="100%"
-                                contentStyle={HomeContentStyle}
+                                contentStyle={Styles.homeContentStyle}
                                 isMarginedTop={true}
                             />
                         </ProtectedRoute>

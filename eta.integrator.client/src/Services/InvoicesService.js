@@ -1,7 +1,5 @@
-export const getInvoices = () => {
+const getInvoices = () => {};
 
-}
+const getInvoiceById = () => {};
 
-export const getInvoiceById = () => {
-    
-}
+export default { getInvoices, getInvoiceById };
