@@ -1,8 +1,10 @@
 ﻿using ETA.Integrator.Server.Interface;
+using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Requests;
 using ETA.Integrator.Server.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using RestSharp;
+using DotNetEnv;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -51,17 +53,44 @@ namespace ETA.Integrator.Server.Controllers
         {
             try
             {
-                SettingsResponseModel model = new SettingsResponseModel();
+                SettingsModel responseModel = new SettingsModel();
 
                 var connectionString = Environment.GetEnvironmentVariable("HMS_API");
 
                 var config = _configurationService.GetETAConfig();
 
-                model.ConnectionString = connectionString ?? "";
-                model.ClientId = config?.getClientId ?? "";
-                model.ClientSecret = config?.getClientSecret ?? "";
+                responseModel.ConnectionString = connectionString ?? "";
+                responseModel.ClientId = config?.getClientId ?? "";
+                responseModel.ClientSecret = config?.getClientSecret ?? "";
 
-                return Ok(model);
+                return Ok(responseModel);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [HttpPost("SaveSettings")]
+        public IActionResult SaveSettings([FromBody] SettingsModel requestModel)
+        {
+            try
+            {
+                var connectionString = Environment.GetEnvironmentVariable("HMS_API");
+
+                if(requestModel == null || string.IsNullOrWhiteSpace(requestModel.ConnectionString) || string.IsNullOrWhiteSpace(requestModel.ClientId) || string.IsNullOrWhiteSpace(requestModel.ClientSecret))
+                {
+                    return BadRequest("Empty Setting");
+                }
+                else
+                {
+                    System.IO.File.WriteAllText(".env", "HMS_API=" + requestModel.ConnectionString);
+                    //Reloading Env
+                    Env.Load();
+
+                    bool configResponse = _configurationService.SetETAConfig(clientId: requestModel.ClientId, clientSecret: requestModel.ClientSecret);
+
+                    return configResponse ? Ok("Success") : StatusCode(500, "Error: Saving ETA Config");
+                }
             }
             catch (Exception)
             {

@@ -1,6 +1,6 @@
-﻿namespace ETA.Integrator.Server.Models.Responses
+﻿namespace ETA.Integrator.Server.Models
 {
-    public class SettingsResponseModel
+    public class SettingsModel
     {
         public string ConnectionString { get; set; } = string.Empty;
         public string ClientId { get; set; } = string.Empty;
