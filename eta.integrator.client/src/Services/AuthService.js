@@ -15,4 +15,19 @@ const login = async (credentials) => {
    return data;
 };
 
-export default { login };
+const getSettings = async () => {
+   const response = await fetch("HMS/Login/Settings", {
+      method: "GET",
+   });
+
+   if(!response.ok)
+      throw new Error(`Fetching Settings: HTTP error! Status: ${response.status}`);
+
+   const data = await response.json();
+
+   return data;
+};
+
+const saveSettings = async () => {};
+
+export default { login, getSettings };
