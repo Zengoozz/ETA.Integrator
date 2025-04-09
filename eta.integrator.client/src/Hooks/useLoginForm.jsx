@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../Services/AuthService";
 
 export const useLoginForm = (setLogIn) => {
    const navigate = useNavigate();
@@ -10,18 +11,8 @@ export const useLoginForm = (setLogIn) => {
       try {
          //TODO: Add your real login logic here
 
-         const response = await fetch("HMS/Login", {
-            method: "POST",
-            headers: {
-               "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-               Username: values.username,
-               Password: values.password,
-            }),
-         });
-         const data = await response.json();
-         console.log(data);
+         const response = await login(values);
+         console.log(response);
 
          console.log("Logging in...", values);
          setTimeout(() => {
