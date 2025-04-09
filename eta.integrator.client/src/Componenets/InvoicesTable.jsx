@@ -78,19 +78,20 @@ const InvoicesTable = () => {
    const [data, _setData] = useState(biggerData);
 
    // rowSelection object indicates the need for row selection
-   const rowSelection = () => ({
-         onChange: (selectedRowKeys, selectedRows) => {
-            console.log(
-               `selectedRowKeys: ${selectedRowKeys}`,
-               `selectedRows: ${selectedRows}`,
-            );
-            //TODO: State
-         },
-         getCheckboxProps: (record) => ({
-            disabled: record.status === true, // Column configuration not to be checked
-            name: record.receiptnumber,
-         }),
-      });
+   const rowSelection = {
+      onChange: (selectedRowKeys, selectedRows) => {
+         console.log(
+            `selectedRowKeys: ${selectedRowKeys}`,
+            "selectedRows: ",
+            selectedRows
+         );
+         //TODO: State
+      },
+      getCheckboxProps: (record) => ({
+         disabled: record.status === true, // Column configuration not to be checked
+         name: record.receiptnumber,
+      }),
+   };
 
    return (
       <div>
