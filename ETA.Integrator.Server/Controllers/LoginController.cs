@@ -1,4 +1,6 @@
-﻿using ETA.Integrator.Server.Models.Requests;
+﻿using ETA.Integrator.Server.Interface;
+using ETA.Integrator.Server.Models.Requests;
+using ETA.Integrator.Server.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using RestSharp;
 
@@ -9,8 +11,11 @@ namespace ETA.Integrator.Server.Controllers
     public class LoginController : ControllerBase
     {
         readonly RestClient _client;
-        public LoginController()
+        private readonly IConfigurationService _configurationService;
+        public LoginController(IConfigurationService configurationService)
         {
+            _configurationService = configurationService;
+
             var connectionString = Environment.GetEnvironmentVariable("HMS_API");
             //var connectionString = Environment.GetEnvironmentVariable("HMS_PUBLISH");
 
@@ -30,12 +35,33 @@ namespace ETA.Integrator.Server.Controllers
             try
             {
                 var request = new RestRequest("/api/Auth/LogIn", Method.Post)
-                    .AddParameter("Email", model.Username)
-                    .AddParameter("Password", model.Password);
+                    .AddJsonBody(model);
 
-                var res = await _client.ExecuteAsync(request);
+                var response = await _client.ExecuteAsync<LoginResponseModel>(request);
 
                 return Ok("Hello");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [HttpGet("Settings")]
+        public IActionResult GetSettings()
+        {
+            try
+            {
+                SettingsResponseModel model = new SettingsResponseModel();
+
+                var connectionString = Environment.GetEnvironmentVariable("HMS_API");
+
+                var config = _configurationService.GetETAConfig();
+
+                model.ConnectionString = connectionString ?? "";
+                model.ClientId = config?.getClientId ?? "";
+                model.ClientSecret = config?.getClientSecret ?? "";
+
+                return Ok(model);
             }
             catch (Exception)
             {

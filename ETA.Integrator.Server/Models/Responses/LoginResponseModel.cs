@@ -1,8 +1,15 @@
-﻿namespace ETA.Integrator.Server.Models.Responses
+﻿using Newtonsoft.Json;
+
+namespace ETA.Integrator.Server.Models.Responses
 {
     public class LoginResponseModel
     {
-        public string LoginToken { get; set; } = string.Empty;
-        public int ExpiresIn { get; set; }
+        [JsonProperty("UserName")]
+        public string Username { get; set; } = string.Empty;
+        public int UserId { get; set; }
+        public string Token { get; set; } = string.Empty;
+        public bool IsError { get; set; } = true;
+        [JsonProperty("Msg")]
+        public string Message { get; set; } = string.Empty;
     }
 }
