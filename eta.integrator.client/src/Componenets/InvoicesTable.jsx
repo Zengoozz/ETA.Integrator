@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useState } from "react";
 import { Divider, Table } from "antd";
 
 import { InvoicesTableColumns } from "../Constants/InvoicesTableColumns";
@@ -75,16 +75,14 @@ const biggerData = Array.from({ length: 46 }).map((_, i) => {
 });
 
 const InvoicesTable = () => {
-   const data = useMemo(() => biggerData, []);
+   const [data, _setData] = useState(biggerData);
 
    // rowSelection object indicates the need for row selection
-   const rowSelection = useMemo(
-      () => ({
+   const rowSelection = () => ({
          onChange: (selectedRowKeys, selectedRows) => {
             console.log(
                `selectedRowKeys: ${selectedRowKeys}`,
-               "selectedRows: ",
-               selectedRows
+               `selectedRows: ${selectedRows}`,
             );
             //TODO: State
          },
@@ -92,9 +90,7 @@ const InvoicesTable = () => {
             disabled: record.status === true, // Column configuration not to be checked
             name: record.receiptnumber,
          }),
-      }),
-      []
-   );
+      });
 
    return (
       <div>
@@ -110,4 +106,4 @@ const InvoicesTable = () => {
       </div>
    );
 };
-export default React.memo(InvoicesTable);
+export default InvoicesTable;

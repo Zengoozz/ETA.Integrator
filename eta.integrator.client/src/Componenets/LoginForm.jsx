@@ -34,9 +34,9 @@ const LoginForm = ({ setLogIn }) => {
    );
 };
 
-export default React.memo(LoginForm);
+export default LoginForm;
 
-const LoginFields = React.memo(() => (
+const LoginFields = () => (
    <>
       <Form.Item
          name="username"
@@ -58,4 +58,4 @@ const LoginFields = React.memo(() => (
          />
       </Form.Item>
    </>
-));
+);
