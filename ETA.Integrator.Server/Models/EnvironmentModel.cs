@@ -2,6 +2,22 @@
 {
     public class EnvironmentModel
     {
+        public string? getClientId
+        {
+            get
+            {
+
+                return Values?.FirstOrDefault(v => v.Key == "clientId")?.Value;
+            }
+        }
+        public string? getClientSecret
+        {
+            get
+            {
+
+                return Values?.FirstOrDefault(v => v.Key == "clientSecret")?.Value;
+            }
+        }
         public required string Name { get; set; }
         public required List<EnvironmentVariableModel> Values { get; set; }
     }
