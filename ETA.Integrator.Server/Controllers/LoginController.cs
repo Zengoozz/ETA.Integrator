@@ -41,6 +41,14 @@ namespace ETA.Integrator.Server.Controllers
 
                 var response = await _client.ExecuteAsync<LoginResponseModel>(request);
 
+                //TODO: Check the settings 
+                var settings = _configurationService.GetSettings();
+
+                if(settings.ConnectionString == "" || settings.ClientId == "" || settings.ClientSecret == "")
+                {
+                    //return Redirect("/sett")
+                }
+
                 return Ok("Hello");
             }
             catch (Exception)
@@ -53,17 +61,9 @@ namespace ETA.Integrator.Server.Controllers
         {
             try
             {
-                SettingsModel responseModel = new SettingsModel();
+                var response = _configurationService.GetSettings();
 
-                var connectionString = Environment.GetEnvironmentVariable("HMS_API");
-
-                var config = _configurationService.GetETAConfig();
-
-                responseModel.ConnectionString = connectionString ?? "";
-                responseModel.ClientId = config?.getClientId ?? "";
-                responseModel.ClientSecret = config?.getClientSecret ?? "";
-
-                return Ok(responseModel);
+                return Ok(response);
             }
             catch (Exception)
             {

@@ -1,4 +1,5 @@
-﻿using HMS.Core.Models.ETA;
+﻿using ETA.Integrator.Server.Models;
+using HMS.Core.Models.ETA;
 
 namespace ETA.Integrator.Server.Interface
 {
@@ -6,5 +7,6 @@ namespace ETA.Integrator.Server.Interface
     {
         EnvironmentModel? GetETAConfig();
         bool SetETAConfig(string clientId = "", string clientSecret = "", string generatedToken = "");
+        SettingsModel GetSettings();
     }
 }

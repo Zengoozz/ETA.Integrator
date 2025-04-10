@@ -1,4 +1,5 @@
 ﻿using ETA.Integrator.Server.Interface;
+using ETA.Integrator.Server.Models;
 using HMS.Core.Models.ETA;
 using Newtonsoft.Json;
 
@@ -90,6 +91,21 @@ namespace ETA.Integrator.Server.Services
             {
                 throw;
             }
+        }
+
+        public SettingsModel GetSettings()
+        {
+            var settingsModel = new SettingsModel();
+
+            var connectionString = Environment.GetEnvironmentVariable("HMS_API");
+
+            var config = GetETAConfig();
+
+            settingsModel.ConnectionString = connectionString ?? "";
+            settingsModel.ClientId = config?.getClientId ?? "";
+            settingsModel.ClientSecret = config?.getClientSecret ?? "";
+
+            return settingsModel;
         }
     }
 }
