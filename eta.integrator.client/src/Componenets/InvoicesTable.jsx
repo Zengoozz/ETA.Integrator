@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Divider, Table } from "antd";
 
 import { InvoicesTableColumns } from "../Constants/InvoicesTableColumns";
+import InvoicesService from "../Services/InvoicesService";
 
 // const data = [
 //     {
@@ -58,6 +59,22 @@ import { InvoicesTableColumns } from "../Constants/InvoicesTableColumns";
 //     },
 // ];
 
+const InvoicesType = {
+    InoviceNumber : String,
+    InoviceType: String,
+    VatNet: Number,
+    NetPrice: Number,
+    PatShare: Number,
+    FinShare: Number,
+    VatFinShare: Number,
+    VatPatShare: Number,
+    InvoiceId: Number,
+    createdDate: Date,
+    IsReviewed: Boolean,
+    InovicingNumber: String,
+    FinancialClassName: String
+}
+
 const biggerData = Array.from({ length: 46 }).map((_, i) => {
    return {
       key: i,
@@ -75,7 +92,39 @@ const biggerData = Array.from({ length: 46 }).map((_, i) => {
 });
 
 const InvoicesTable = () => {
-   const [data, _setData] = useState(biggerData);
+   const [tableData, setTableData] = useState(biggerData);
+
+   useEffect(() => {
+      const fetchData = async () => {
+         try {
+            const response = await InvoicesService.getInvoices();
+            console.log("Fetched settings:", response);
+
+            const data = response.map((item) => {
+               return {
+                  key: item.InvoiceId,
+                  receiptnumber: item.InoviceNumber,
+                  visittype: item.InoviceType,
+                  company: item.FinancialClassName,
+                  taxregisterationnumber: item.InovicingNumber,
+                  netprice: item.NetPrice,
+                  patientshare: item.PatShare,
+                  financialshare: item.FinShare,
+                  vatnet: item.VatNet,
+                  date: item.createdDate,
+                  status: item.IsReviewed,
+               };
+            });
+
+            // Update form table dynamically
+            setTableData(data);
+         } catch (err) {
+            console.log("Failed to fetch invoices", err);
+         }
+      };
+
+      fetchData();
+   }, []);
 
    // rowSelection object indicates the need for row selection
    const rowSelection = {
@@ -100,7 +149,7 @@ const InvoicesTable = () => {
             bordered
             rowSelection={Object.assign({ type: "checkbox" }, rowSelection)}
             columns={InvoicesTableColumns}
-            dataSource={data}
+            dataSource={tableData}
             pagination={{ pageSize: 10 }}
             //TODO:  onChange={handleTableChange}  // For sorting/filtering
          />

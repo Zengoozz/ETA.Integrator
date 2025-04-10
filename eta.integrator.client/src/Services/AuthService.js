@@ -20,7 +20,7 @@ const getSettings = async () => {
       method: "GET",
    });
 
-   if(!response.ok)
+   if (!response.ok)
       throw new Error(`Fetching Settings: HTTP error! Status: ${response.status}`);
 
    const data = await response.json();
@@ -28,6 +28,26 @@ const getSettings = async () => {
    return data;
 };
 
-const saveSettings = async () => {};
+const saveSettings = async (values) => {
+   const response = await fetch("HMS/Login/SaveSettings", {
+      method: "POST",
+      headers: {
+         "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+         ConnectionString: values.connectionString,
+         ClientId: values.clientId,
+         ClientSecret: values.clientSecret
+      }),
+   });
 
-export default { login, getSettings };
+   if (!response.ok)
+      throw new Error(`Fetching Settings: HTTP error! Status: ${response.status} ${response.body}`);
+
+   const data = await Response.json();
+   console.log(data);
+
+   return data;
+};
+
+export default { login, getSettings, saveSettings };
