@@ -25,7 +25,7 @@ A modern integration platform for authentication and integration between ETA and
   </tr>
   <tr>
     <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dot-net/dot-net-original.svg" width="40" alt="V8.0" /><br/>ASP.NET Core</td>
-    <td align="center"><img src="https://avatars.githubusercontent.com/u/1742468?s=200&v=4" width="40" alt="V112.1.0" /><br/>RestSharp</td>
+    <td align="center"><img src="https://restsharp.dev/img/restsharp.png" width="40" alt="V112.1.0" /><br/>RestSharp</td>
     <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" width="40" alt="Git" /><br/>Git</td>
     <td align="center"><img src="https://seeklogo.com/images/P/postman-logo-0087CA0D15-seeklogo.com.png" width="40" alt="Postman" /><br/>Postman</td>
     <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/visualstudio/visualstudio-plain.svg" width="40" alt="Visual Studio" /><br/>Visual Studio</td>
