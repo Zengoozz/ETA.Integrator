@@ -1,11 +1,11 @@
 const login = async (credentials) => {
-   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login/Login`, {
+   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login`, {
       method: "POST",
       headers: {
          "Content-Type": "application/json",
       },
       body: JSON.stringify({
-         Username: credentials.username,
+         Email: credentials.username,
          Password: credentials.password,
       }),
    });
@@ -24,10 +24,6 @@ const login = async (credentials) => {
 };
 
 const getSettings = async () => {
-   // const response = await fetch(`HMS/Login/Settings`, {
-   //    method: "GET",
-   // });
-
    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login/Settings`, {
       method: "GET",
    });
@@ -43,7 +39,7 @@ const getSettings = async () => {
 };
 
 const saveSettings = async (values) => {
-   const response = await fetch(`HMS/Login/SaveSettings`, {
+   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login/SaveSettings`, {
       method: "POST",
       headers: {
          "Content-Type": "application/json",
