@@ -10,7 +10,8 @@ export const homeContentStyle = {
    display: "flex",
    justifyContent: "start",
    alignItems: "start",
-   height: "500px",
+   height: "auto", // Changed from fixed height
+   minHeight: 300,
 };
 
 export const darkNavbarTitleStyle = {
@@ -42,4 +43,12 @@ export default {
    lightNavbarIconStyle,
    darkNavbarTitleStyle,
    lightNavbarTitleStyle,
+};
+
+export const responsiveStyle = {
+   xs: { span: 24 },
+   sm: { span: 12 },
+   md: { span: 8 },
+   lg: { span: 6 },
+   xl: { span: 4 },
 };

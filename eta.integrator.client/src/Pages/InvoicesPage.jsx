@@ -1,10 +1,11 @@
 import React, { useState } from "react";
+import { Flex, Card } from "antd";
 
-import InvoicesTable from "../Componenets/InvoicesTable";
-import SaveButton from "../Componenets/SaveButton";
-import DateRangeSearch from "../Componenets/DateRangeSearch";
+import InvoicesTable from "../Components/InvoicesTable";
+import SaveButton from "../Components/SaveButton";
+import DateRangeSearch from "../Components/DateRangeSearch";
 
-const InvoicesPage = () => {
+const InvoicesPage = ({ isMobile }) => {
    const [loading, setLoading] = useState(false);
 
    const onSave = async () => {
@@ -15,14 +16,20 @@ const InvoicesPage = () => {
    };
 
    return (
-      <>
-         <DateRangeSearch />
-         <SaveButton
-            loading={loading}
-            onSave={onSave}
-         />
-         <InvoicesTable />
-      </>
+      <Card style={{ width: "100%" }}>
+         <Flex
+            vertical
+            gap="middle"
+         >
+            <DateRangeSearch isMobile={isMobile} />
+            <SaveButton
+               loading={loading}
+               onSave={onSave}
+               style={{ alignSelf: "flex-end" }}
+            />
+            <InvoicesTable isMobile={isMobile} />
+         </Flex>
+      </Card>
    );
 };
 

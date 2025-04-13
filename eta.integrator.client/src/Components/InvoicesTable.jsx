@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Divider, Table } from "antd";
+import { Divider, Table, Flex } from "antd";
 
 import { InvoicesTableColumns } from "../Constants/InvoicesTableColumns";
 import InvoicesService from "../Services/InvoicesService";
@@ -60,20 +60,20 @@ import InvoicesService from "../Services/InvoicesService";
 // ];
 
 const InvoicesType = {
-    InoviceNumber : String,
-    InoviceType: String,
-    VatNet: Number,
-    NetPrice: Number,
-    PatShare: Number,
-    FinShare: Number,
-    VatFinShare: Number,
-    VatPatShare: Number,
-    InvoiceId: Number,
-    createdDate: Date,
-    IsReviewed: Boolean,
-    InovicingNumber: String,
-    FinancialClassName: String
-}
+   InoviceNumber: String,
+   InoviceType: String,
+   VatNet: Number,
+   NetPrice: Number,
+   PatShare: Number,
+   FinShare: Number,
+   VatFinShare: Number,
+   VatPatShare: Number,
+   InvoiceId: Number,
+   createdDate: Date,
+   IsReviewed: Boolean,
+   InovicingNumber: String,
+   FinancialClassName: String,
+};
 
 const biggerData = Array.from({ length: 46 }).map((_, i) => {
    return {
@@ -91,7 +91,7 @@ const biggerData = Array.from({ length: 46 }).map((_, i) => {
    };
 });
 
-const InvoicesTable = () => {
+const InvoicesTable = ({ isMobile }) => {
    const [tableData, setTableData] = useState(biggerData);
 
    useEffect(() => {
@@ -143,18 +143,27 @@ const InvoicesTable = () => {
    };
 
    return (
-      <div style={{ padding: "0 1rem", overflowX: "auto" }}>
+      <Flex vertical style={{ overflowX: 'auto', width: '100%' }}>
          <Divider />
          <Table
-            bordered
-            scroll={{ x: "max-content" }}
             rowSelection={Object.assign({ type: "checkbox" }, rowSelection)}
-            columns={InvoicesTableColumns}
             dataSource={tableData}
-            pagination={{ pageSize: 10, responsive: true }}
+            bordered
+            scroll={{ x: isMobile ? "max-content" : "unset" }}
+            columns={InvoicesTableColumns.map((col) => ({
+               ...col,
+               ellipsis: true,
+               width: isMobile ? 150 : "auto",
+               responsive: ["md"],
+            }))}
+            pagination={{
+               pageSize: isMobile ? 5 : 10,
+               responsive: true,
+               position: ["bottomCenter"],
+            }}
             //TODO:  onChange={handleTableChange}  // For sorting/filtering
          />
-      </div>
+      </Flex>
    );
 };
 export default InvoicesTable;
