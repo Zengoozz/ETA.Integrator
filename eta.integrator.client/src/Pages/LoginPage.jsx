@@ -1,10 +1,10 @@
 import React from 'react';
-import { Layout, theme } from 'antd';
+import { Layout, theme, Flex } from 'antd';
 import { Outlet } from 'react-router-dom';
 
 const { Content } = Layout;
 
-const LoginPage = () => {
+const LoginPage = ({isMobile}) => {
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -16,24 +16,27 @@ const LoginPage = () => {
     >
       <Content
         style={{
-          padding: '0 48px',
+          padding: isMobile ? '16px' : '48px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
         }}
       >
-        <div
-          style={{
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-            padding: 24,
-            width: '100%',
-            maxWidth: '400px', // Optional: limits form width
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          }}
-        >
+        <Flex
+               vertical
+               align="center"
+               justify="center"
+               style={{
+                  background: colorBgContainer,
+                  borderRadius: borderRadiusLG,
+                  padding: isMobile ? '24px' : '36px',
+                  width: isMobile ? '100%' : '400px',
+                  maxWidth: '100%',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+               }}
+            >
           <Outlet />
-        </div>
+        </Flex>
       </Content>
     </Layout>
   );
