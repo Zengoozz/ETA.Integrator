@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Button, Form, Input, Flex } from "antd";
 import AuthService from "../Services/AuthService";
 
-const Settings = ({ isMobile }) => {
+const SettingsPage = ({ isMobile }) => {
    const [form] = Form.useForm();
 
    useEffect(() => {
@@ -100,4 +100,4 @@ const Settings = ({ isMobile }) => {
    );
 };
 
-export default Settings;
+export default SettingsPage;

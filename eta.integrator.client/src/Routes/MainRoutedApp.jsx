@@ -1,9 +1,9 @@
 import InvoicesPage from "../Pages/InvoicesPage.jsx";
 import NotFoundPage from "../Pages/NotFoundPage.jsx";
+import LoginFormPage from "../Pages/LoginFormPage.jsx";
+import SettingsPage from "../Pages/SettingsPage.jsx";
 
 import DefaultLayout from "../Components/DefaultLayout.jsx";
-import LoginForm from "../Components/LoginForm.jsx";
-import Settings from "../Components/Settings.jsx";
 
 import Styles from "../assets/Styles.js";
 
@@ -66,11 +66,11 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn, isMobile }) => {
             >
                <Route
                   path="/login"
-                  element={<LoginForm setLogIn={setLogIn} isMobile={isMobile} />}
+                  element={<LoginFormPage setLogIn={setLogIn} isMobile={isMobile} />}
                />
                <Route
                   path="/settings"
-                  element={<Settings isMobile={isMobile} />}
+                  element={<SettingsPage isMobile={isMobile} />}
                />
             </Route>
 
