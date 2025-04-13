@@ -16,12 +16,19 @@ const login = async (credentials) => {
 };
 
 const getSettings = async () => {
-   const response = await fetch("HMS/Login/Settings", {
+   // const response = await fetch(`HMS/Login/Settings`, {
+   //    method: "GET",
+   // });
+
+   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login/Settings`, {
       method: "GET",
    });
 
+
    if (!response.ok)
       throw new Error(`Fetching Settings: HTTP error! Status: ${response.status}`);
+
+   console.log(response);
 
    const data = await response.json();
 
@@ -37,12 +44,14 @@ const saveSettings = async (values) => {
       body: JSON.stringify({
          ConnectionString: values.connectionString,
          ClientId: values.clientId,
-         ClientSecret: values.clientSecret
+         ClientSecret: values.clientSecret,
       }),
    });
 
    if (!response.ok)
-      throw new Error(`Fetching Settings: HTTP error! Status: ${response.status} ${response.body}`);
+      throw new Error(
+         `Fetching Settings: HTTP error! Status: ${response.status} ${response.body}`
+      );
 
    const data = await Response.json();
    console.log(data);

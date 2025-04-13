@@ -143,14 +143,15 @@ const InvoicesTable = () => {
    };
 
    return (
-      <div>
+      <div style={{ padding: "0 1rem", overflowX: "auto" }}>
          <Divider />
          <Table
             bordered
+            scroll={{ x: "max-content" }}
             rowSelection={Object.assign({ type: "checkbox" }, rowSelection)}
             columns={InvoicesTableColumns}
             dataSource={tableData}
-            pagination={{ pageSize: 10 }}
+            pagination={{ pageSize: 10, responsive: true }}
             //TODO:  onChange={handleTableChange}  // For sorting/filtering
          />
       </div>

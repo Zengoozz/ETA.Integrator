@@ -16,16 +16,18 @@ const getInvoices = async (values) => {
 };
 
 const getInvoicesAccordingToDateAsQueryParams = async (values) => {
-   const response = await fetch(`HMS/Invoices/?fromDate=${values.dateFrom}&toDate=${values.dateTo}`, {
+   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Invoices/?fromDate=${values.dateFrom}&toDate=${values.dateTo}`, {
       method: "GET",
       headers: {
          "Content-Type": "application/json",
       },
    });
 
-   const data = await response.data();
+   console.log(response);
 
-   return data;
+   // const data = await response.data();
+
+   return 0;
 };
 
 const getInvoiceById = async (id) => {
@@ -41,4 +43,4 @@ const getInvoiceById = async (id) => {
    return data;
 };
 
-export default { getInvoices, getInvoiceById };
+export default { getInvoices, getInvoiceById, getInvoicesAccordingToDateAsQueryParams };
