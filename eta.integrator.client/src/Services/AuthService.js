@@ -1,5 +1,5 @@
 const login = async (credentials) => {
-   const response = await fetch("HMS/Login", {
+   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login/Login`, {
       method: "POST",
       headers: {
          "Content-Type": "application/json",
@@ -10,9 +10,17 @@ const login = async (credentials) => {
       }),
    });
 
-   const data = await response.json();
+   if (response.status != 200) {
+      throw new Error("Invalid username or password, Status: " + response.status);
+   } else {
+      const data = await response.json();
 
-   return data;
+      const token = data.token;
+
+      localStorage.setItem("HMS_Token", token);
+
+      return true;
+   }
 };
 
 const getSettings = async () => {
@@ -23,7 +31,6 @@ const getSettings = async () => {
    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login/Settings`, {
       method: "GET",
    });
-
 
    if (!response.ok)
       throw new Error(`Fetching Settings: HTTP error! Status: ${response.status}`);
@@ -36,7 +43,7 @@ const getSettings = async () => {
 };
 
 const saveSettings = async (values) => {
-   const response = await fetch("HMS/Login/SaveSettings", {
+   const response = await fetch(`HMS/Login/SaveSettings`, {
       method: "POST",
       headers: {
          "Content-Type": "application/json",

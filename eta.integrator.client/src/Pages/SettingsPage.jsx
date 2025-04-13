@@ -26,7 +26,9 @@ const SettingsPage = ({ isMobile }) => {
    }, [form]);
 
    const onSave = (values) => {
-      console.log("Saved:", values);
+      var response = AuthService.saveSettings(values);
+      console.log("Response:", response);
+      // console.log("Saved:", values);
    };
 
    const onSaveFailed = (errorInfo) => {

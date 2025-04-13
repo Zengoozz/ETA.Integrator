@@ -49,7 +49,7 @@ const DateRangeSearch = ({ isMobile }) => {
                style={{ flex: 1 }}
             >
                <DatePicker
-                  placeholder="From Date"
+                  placeholder="From"
                   style={{ width: "100%" }}
                />
             </Form.Item>
@@ -60,7 +60,7 @@ const DateRangeSearch = ({ isMobile }) => {
                style={{ flex: 1 }}
             >
                <DatePicker
-                  placeholder="To Date"
+                  placeholder="To"
                   style={{ width: "100%" }}
                />
             </Form.Item>

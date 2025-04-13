@@ -47,7 +47,7 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '^/HMS': {
+            '/HMS': {
                 target,
                 secure: false,
                 changeOrigin: true
