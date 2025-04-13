@@ -30,11 +30,8 @@ namespace ETA.Integrator.Server.Controllers
         {
             var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
 
-            if (fromDate != null && toDate != null)
-            {
-                request.AddParameter("dateFrom", fromDate, ParameterType.QueryString)
-                    .AddParameter("dateTo", toDate, ParameterType.QueryString);
-            }
+            request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
+                .AddParameter("toDate", toDate, ParameterType.QueryString);
 
             var response = await _client.ExecuteAsync<List<InvoiceResponseModel>>(request);
 
@@ -43,7 +40,7 @@ namespace ETA.Integrator.Server.Controllers
                 return StatusCode((int)response.StatusCode, response.ErrorMessage);
             }
 
-            return Ok(response);
+            return Ok(response.Data?.Count ?? 0);
         }
     }
 }
