@@ -41,7 +41,7 @@ namespace ETA.Integrator.Server.Controllers
             return Ok(response.Data);
         }
 
-        [HttpPost("/HMS/Submit")]
+        [HttpPost("Submit")]
         public async Task<IActionResult> SubmitInvoices(List<ProviderInvoiceViewModel> request)
         {
             return Ok();
