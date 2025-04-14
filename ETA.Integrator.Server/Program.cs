@@ -1,10 +1,8 @@
 using DotNetEnv;
 using ETA.Integrator.Server.Data;
-using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Interface;
 using ETA.Integrator.Server.Services;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
