@@ -1,8 +1,5 @@
-﻿using ETA.Integrator.Server.Interface;
-using ETA.Integrator.Server.Models.Provider;
-using ETA.Integrator.Server.Models.Responses;
+﻿using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Extensions;
 using RestSharp;
 
 namespace ETA.Integrator.Server.Controllers
@@ -44,10 +41,10 @@ namespace ETA.Integrator.Server.Controllers
             return Ok(response.Data);
         }
 
-        [HttpPost("/Submit")]
+        [HttpPost("/HMS/Submit")]
         public async Task<IActionResult> SubmitInvoices(List<ProviderInvoiceViewModel> request)
         {
-
+            return Ok();
         }
     }
 }
