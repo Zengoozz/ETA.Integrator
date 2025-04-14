@@ -1,65 +1,53 @@
+import GenericService from "./GenericService";
+
 const login = async (credentials) => {
-   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login`, {
-      method: "POST",
-      headers: {
-         "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+   try {
+      const response = await GenericService.makeRequest("POST", "/Login", {
          Email: credentials.username,
          Password: credentials.password,
-      }),
-   });
+      });
 
-   if (response.status != 200) {
-      throw new Error("Invalid username or password, Status: " + response.status);
-   } else {
-      const data = await response.json();
-
-      const token = data.token;
-
+      const token = response.token;
       localStorage.setItem("HMS_Token", token);
 
       return true;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
    }
 };
 
 const getSettings = async () => {
-   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login/Settings`, {
-      method: "GET",
-   });
+   try {
+      const response = await GenericService.makeRequest("GET", "/Login/Settings");
 
-   if (!response.ok)
-      throw new Error(`Fetching Settings: HTTP error! Status: ${response.status}`);
-
-   console.log(response);
-
-   const data = await response.json();
-
-   return data;
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
 };
 
-const saveSettings = async (values) => {
-   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Login/SaveSettings`, {
-      method: "POST",
-      headers: {
-         "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+const updateSettings = async (values) => {
+   try {
+      const updateSettings = {
          ConnectionString: values.connectionString,
          ClientId: values.clientId,
          ClientSecret: values.clientSecret,
-      }),
-   });
+      };
+      console.log("updateSettings", updateSettings);
 
-   if (!response.ok)
-      throw new Error(
-         `Fetching Settings: HTTP error! Status: ${response.status} ${response.body}`
+      const response = await GenericService.makeRequest(
+         "PUT",
+         "/Login/Settings",
+         updateSettings
       );
 
-   const data = await Response.json();
-   console.log(data);
-
-   return data;
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
 };
 
-export default { login, getSettings, saveSettings };
+export default { login, getSettings, updateSettings };

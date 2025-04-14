@@ -24,6 +24,7 @@ function App() {
    // if (!landing) return <div>Loading...</div>;
 
    return (
+      
       <ConfigProvider
          theme={{
             algorithm: mode == "Dark" ? theme.darkAlgorithm : theme.defaultAlgorithm,

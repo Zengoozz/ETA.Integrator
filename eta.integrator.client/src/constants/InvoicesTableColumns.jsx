@@ -1,52 +1,55 @@
 import { CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons';
-
+import dayjs from 'dayjs';
 
 export const InvoicesTableColumns = [
     {
         title: 'Receipt Number',
-        dataIndex: 'receiptnumber',
+        dataIndex: 'inoviceNumber',
         render: text => <a>{text}</a>,
     },
     {
         title: 'Visit Type',
-        dataIndex: 'visittype',
+        dataIndex: 'inoviceType',
+        render: text => text,
     },
     {
         title: 'Company',
-        dataIndex: 'company',
+        dataIndex: 'financialClassName',
+        render: text => text,
     },
     {
         title: 'Tax Registeration Number',
-        dataIndex: 'taxregisterationnumber',
+        dataIndex: 'inovicingNumber',
+        render: text => text,
     },
     {
         title: 'Net Price',
-        dataIndex: 'netprice',
+        dataIndex: 'netPrice',
         render: value => value.toFixed(2)
     },
     {
         title: 'Patient Share',
-        dataIndex: 'patientshare',
+        dataIndex: 'patShare',
         render: value => value.toFixed(2)
     },
     {
         title: 'Financial Share',
-        dataIndex: 'financialshare',
+        dataIndex: 'finShare',
         render: value => value.toFixed(2)
     },
     {
         title: 'Vat Net',
-        dataIndex: 'vatnet',
+        dataIndex: 'vatNet',
         render: value => value.toFixed(2)
     },
     {
         title: 'Date',
-        dataIndex: 'date',
-        render: value => <>{value.toLocaleDateString('en-GB')}</>
+        dataIndex: 'createdDate',
+        render: value => <>{dayjs(value).format("DD/MM/YYYY")}</>
     },
     {
         title: 'Status',
-        dataIndex: 'status',
+        dataIndex: 'isReviewed',
         render: value => {
             return (
                 <span style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>

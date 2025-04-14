@@ -1,23 +1,23 @@
 import React from 'react'
-import { SaveOutlined } from '@ant-design/icons';
+
 import { Button } from 'antd'
 
-const SaveButton = ({ loading, onSave }) => {
+const CustomButton = ({ name = 'Submit', icon, loading, handleClick }) => {
     return (
         <>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
                 <Button
                     type='primary'
-                    icon={<SaveOutlined />}
+                    icon={icon}
                     size='large'
-                    onClick={onSave}
+                    onClick={handleClick}
                     loading={loading}
                 >
-                    Save
+                    {name}
                 </Button>
             </div>
         </>
     )
 }
 
-export default React.memo(SaveButton)
+export default CustomButton
