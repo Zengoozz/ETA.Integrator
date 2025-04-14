@@ -1,6 +1,6 @@
-﻿namespace ETA.Integrator.Server.Models.Responses
+﻿namespace ETA.Integrator.Server.Models.Consumer.Response
 {
-    public class ConnectionResponseModel
+    public class ConsumerConnectionResponseModel
     {
         public string access_token { get; set; } = string.Empty;
         public int expires_in { get; set; }

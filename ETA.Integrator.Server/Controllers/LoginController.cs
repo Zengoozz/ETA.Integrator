@@ -1,10 +1,10 @@
 ﻿using ETA.Integrator.Server.Interface;
 using ETA.Integrator.Server.Models;
-using ETA.Integrator.Server.Models.Requests;
-using ETA.Integrator.Server.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using RestSharp;
 using DotNetEnv;
+using ETA.Integrator.Server.Models.Provider.Requests;
+using ETA.Integrator.Server.Models.Provider.Response;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -32,14 +32,14 @@ namespace ETA.Integrator.Server.Controllers
             }
         }
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody] LoginRequestModel model)
+        public async Task<IActionResult> Login([FromBody] ProviderLoginRequestModel model)
         {
             try
             {
                 var request = new RestRequest("/api/Auth/LogIn", Method.Post)
                     .AddJsonBody(model);
 
-                var response = await _client.ExecuteAsync<LoginResponseModel>(request);
+                var response = await _client.ExecuteAsync<ProviderLoginResponseModel>(request);
 
                 //TODO: Check the settings 
                 var settings = _configurationService.GetSettings();
@@ -49,7 +49,7 @@ namespace ETA.Integrator.Server.Controllers
                     //return Redirect("/sett")
                 }
 
-                return Ok("Hello");
+                return Ok(response);
             }
             catch (Exception)
             {

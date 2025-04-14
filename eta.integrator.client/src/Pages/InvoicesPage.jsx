@@ -1,35 +1,77 @@
 import React, { useState } from "react";
-import { Flex, Card } from "antd";
+import { Flex, Card, message } from "antd";
 
 import InvoicesTable from "../Components/InvoicesTable";
-import SaveButton from "../Components/SaveButton";
 import DateRangeSearch from "../Components/DateRangeSearch";
+
+import InvoicesService from "../Services/InvoicesService";
 
 const InvoicesPage = ({ isMobile }) => {
    const [loading, setLoading] = useState(false);
+   const [tableData, setTableData] = useState([]); // State to hold table data
+   const [messageApi, contextHolder] = message.useMessage();
 
-   const onSave = async () => {
-      setLoading(true); // Start loading
-      //TODO: Simulate save operation (e.g., API call)
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2 seconds delay
-      setLoading(false); // End loading
+   const onSubmit = async (selectedRows) => {
+      const loadingMessage = messageApi.open({
+         type: "loading",
+         content: "Action in progress..",
+         duration: 0,
+      });
+
+      // Start loading
+      setLoading(true);
+      
+      try {
+         await InvoicesService.submitInvoices(selectedRows);
+         messageApi.open({
+            type: "success",
+            content: "Selected rows saved successfully!",
+            duration: 2,
+         });
+      } catch (error) {
+         messageApi.error("Failed to save selected rows.");
+         console.error("Error saving selected rows", error);
+      } finally {
+         loadingMessage(); // Close the loading message
+         setLoading(false); // End loading
+      }
+   };
+
+   const handleSearch = async (values) => {
+      try {
+         const response = await InvoicesService.getInvoicesAccordingToDateAsQueryParams(
+            values
+         );
+         setTableData(response); // Update table data with the response
+      } catch (error) {
+         console.error("Failed to fetch invoices", error);
+      }
    };
 
    return (
-      <Card style={{ width: "100%" }}>
-         <Flex
-            vertical
-            gap="middle"
-         >
-            <DateRangeSearch isMobile={isMobile} />
-            <SaveButton
-               loading={loading}
-               onSave={onSave}
-               style={{ alignSelf: "flex-end" }}
-            />
-            <InvoicesTable isMobile={isMobile} />
-         </Flex>
-      </Card>
+      <>
+         {contextHolder}
+         <Card style={{ width: "100%" }}>
+            <Flex
+               vertical
+               gap="middle"
+            >
+               <DateRangeSearch
+                  isMobile={isMobile}
+                  handleSearch={handleSearch}
+                  messageApi={messageApi}
+               />
+
+               <InvoicesTable
+                  isMobile={isMobile}
+                  tableData={tableData}
+                  onSubmit={onSubmit}
+                  loading={loading}
+                  messageApi={messageApi}
+               />
+            </Flex>
+         </Card>
+      </>
    );
 };
 

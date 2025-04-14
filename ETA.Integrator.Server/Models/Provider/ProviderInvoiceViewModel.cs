@@ -1,6 +1,6 @@
-﻿namespace ETA.Integrator.Server.Models.Responses
+﻿namespace ETA.Integrator.Server.Models.Provider
 {
-    public class InvoiceResponseModel
+    public class ProviderInvoiceViewModel
     {
         public string InoviceNumber { get; set; } = string.Empty;
         public string InoviceType { set; get; } = string.Empty;

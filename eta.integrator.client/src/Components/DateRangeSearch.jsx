@@ -1,36 +1,62 @@
 import React, { useState } from "react";
-import { DatePicker, Button, Form, Flex, message } from "antd";
-// eslint-disable-next-line no-unused-vars
-import dayjs from "dayjs";
-import InvoicesService from "../Services/InvoicesService";
+import { DatePicker, Button, Form, Flex } from "antd";
 
 const { RangePicker } = DatePicker;
 
-const DateRangeSearch = ({ isMobile }) => {
+const DateRangeSearch = ({ isMobile, handleSearch, messageApi }) => {
    const [form] = Form.useForm();
-   const [loading, _setLoading] = useState(false);
+   const [loading, setLoading] = useState(false);
 
-   const handleSearch = () => {
+   const disabledDate = (current) => {
+      // Disable dates before today
+      return current && current > new Date().setHours(0, 0, 0, 0);
+   };
+
+   const onSearchClick = () => {
+      setLoading(true); // Start loading
+
+      const loadingMessage = messageApi.open({
+         type: "loading",
+         content: "Action in progress..",
+         duration: 0,
+      });
+
       form
          .validateFields()
          .then((values) => {
-            const { dateFrom, dateTo } = values;
+            const [dateFrom, dateTo] = values.dateRange || [];
+
+            if (dateFrom && dateTo && dateFrom.isAfter(dateTo)) {
+               throw {
+                  type: "validation",
+                  message: "Start date must be earlier than or equal to the end date.",
+               };
+            }
 
             const formattedValues = {
                dateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
                dateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
             };
 
-            message.success(
-               `Searching from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`
-            );
-            // Call your API here
-            var test =
-               InvoicesService.getInvoicesAccordingToDateAsQueryParams(formattedValues);
-            console.log(test);
+            return handleSearch(formattedValues).then(() => {
+               messageApi.open({
+                  type: "success",
+                  content: `Showing from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+                  duration: 2,
+               });
+            });
          })
-         .catch(() => {
-            message.error("Please select valid dates.");
+         .catch((error) => {
+            if (error.type === "validation") {
+               messageApi.error(error.message);
+            } else {
+               messageApi.error("Failed to fetch data. Please try again.");
+               console.error("Error:", error);
+            }
+         })
+         .finally(() => {
+            loadingMessage(); // Close the loading message
+            setLoading(false); // End loading
          });
    };
 
@@ -44,33 +70,29 @@ const DateRangeSearch = ({ isMobile }) => {
             wrap
          >
             <Form.Item
-               name="dateFrom"
-               rules={[{ required: true, message: "Please select start date" }]}
+               name="dateRange"
+               rules={[
+                  {
+                     required: true,
+                     message: "Please select a valid date range",
+                  },
+               ]}
                style={{ flex: 1 }}
             >
-               <DatePicker
-                  placeholder="From"
+               <RangePicker
+                  placeholder={["Start Date", "End Date"]}
                   style={{ width: "100%" }}
-               />
-            </Form.Item>
-
-            <Form.Item
-               name="dateTo"
-               rules={[{ required: true, message: "Please select end date" }]}
-               style={{ flex: 1 }}
-            >
-               <DatePicker
-                  placeholder="To"
-                  style={{ width: "100%" }}
+                  disabledDate={disabledDate}
                />
             </Form.Item>
 
             <Form.Item>
                <Button
                   type="primary"
-                  onClick={handleSearch}
+                  onClick={onSearchClick}
                   loading={loading}
                   block={isMobile} // Full width on mobile
+                  disabled={loading}
                >
                   Search
                </Button>

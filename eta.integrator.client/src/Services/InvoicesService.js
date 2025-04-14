@@ -1,46 +1,32 @@
-const getInvoices = async (values) => {
-   const response = await fetch("HMS/Invoices/", {
-      method: "POST",
-      headers: {
-         "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        fromDate: values.dateFrom,
-         toDate: values.dateTo,
-      }),
-   });
-
-   const data = await response.data();
-
-   return data;
-};
+import GenericService from "./GenericService";
 
 const getInvoicesAccordingToDateAsQueryParams = async (values) => {
-   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Invoices/?fromDate=${values.dateFrom}&toDate=${values.dateTo}`, {
-      method: "GET",
-      headers: {
-         "Content-Type": "application/json",
-      },
-   });
-
-   console.log(response);
-
-   // const data = await response.data();
-
-   return 0;
+   try {
+      const response = await GenericService.makeRequest(
+         "GET",
+         `/Invoices?fromDate=${values.dateFrom}&toDate=${values.dateTo}`
+      );
+      console.log(response);
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
 };
 
-const getInvoiceById = async (id) => {
-   const response = await fetch(`HMS/Invoices/${id}`, {
-      method: "GET",
-      headers: {
-         "Content-Type": "application/json",
-      },
-   });
-
-   const data = await response.data();
-
-   return data;
+const submitInvoices = async (invoices) => {
+   try {
+      const response = await GenericService.makeRequest(
+         "POST",
+         "/Invoices/Submit",
+         invoices
+      );
+      console.log(response);
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
 };
 
-export default { getInvoices, getInvoiceById, getInvoicesAccordingToDateAsQueryParams };
+export default { getInvoicesAccordingToDateAsQueryParams, submitInvoices };

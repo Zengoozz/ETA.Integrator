@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace ETA.Integrator.Server.Models.Responses
+namespace ETA.Integrator.Server.Models.Provider.Response
 {
-    public class LoginResponseModel
+    public class ProviderLoginResponseModel
     {
         [JsonProperty("UserName")]
         public string Username { get; set; } = string.Empty;

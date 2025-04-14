@@ -1,4 +1,4 @@
-﻿namespace ETA.Integrator.Server.Models.ETA
+﻿namespace ETA.Integrator.Server.Models.Consumer.ETA
 {
     public class PaymentModel
     {

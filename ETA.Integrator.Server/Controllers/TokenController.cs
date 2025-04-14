@@ -1,5 +1,5 @@
 ﻿using ETA.Integrator.Server.Interface;
-using ETA.Integrator.Server.Models.Responses;
+using ETA.Integrator.Server.Models.Consumer.Response;
 using HMS.Core.Models.ETA;
 using Microsoft.AspNetCore.Mvc;
 using RestSharp;
@@ -48,11 +48,11 @@ namespace ETA.Integrator.Server.Controllers
 
                     var response = await connectionClient.ExecuteAsync(request);
 
-                    var responseObject = new ConnectionResponseModel();
+                    var responseObject = new ConsumerConnectionResponseModel();
 
                     if (response.Content != null)
                     {
-                        responseObject = JsonSerializer.Deserialize<ConnectionResponseModel>(response.Content);
+                        responseObject = JsonSerializer.Deserialize<ConsumerConnectionResponseModel>(response.Content);
                     }
 
                     if (responseObject != null)
