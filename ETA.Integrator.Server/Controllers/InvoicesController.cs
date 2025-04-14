@@ -1,4 +1,5 @@
 ﻿using ETA.Integrator.Server.Interface;
+using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Extensions;
@@ -33,14 +34,20 @@ namespace ETA.Integrator.Server.Controllers
             request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
                 .AddParameter("toDate", toDate, ParameterType.QueryString);
 
-            var response = await _client.ExecuteAsync<List<InvoiceResponseModel>>(request);
+            var response = await _client.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
 
             if (!response.IsSuccessStatusCode)
             {
                 return StatusCode((int)response.StatusCode, response.ErrorMessage);
             }
 
-            return Ok(response.Data?.Count ?? 0);
+            return Ok(response.Data);
+        }
+
+        [HttpPost("/Submit")]
+        public async Task<IActionResult> SubmitInvoices(List<ProviderInvoiceViewModel> request)
+        {
+
         }
     }
 }

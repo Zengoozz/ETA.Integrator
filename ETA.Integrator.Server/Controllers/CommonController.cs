@@ -1,5 +1,5 @@
 ﻿using ETA.Integrator.Server.Interface;
-using ETA.Integrator.Server.Models.Responses;
+using ETA.Integrator.Server.Models.Consumer.Response;
 using HMS.Core.Models.ETA;
 using Microsoft.AspNetCore.Mvc;
 using RestSharp;
@@ -50,7 +50,7 @@ namespace ETA.Integrator.Server.Controllers
         [HttpGet("documentTypes")]
         public async Task<IActionResult> GetDocumentTypes()
         {
-            var response = await _client.GetAsync<DocumentTypesResponseModel>("/api/v1/documenttypes");
+            var response = await _client.GetAsync<ConsumerDocumentTypesResponseModel>("/api/v1/documenttypes");
 
             return Ok(response);
         }

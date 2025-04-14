@@ -1,6 +1,6 @@
-﻿namespace ETA.Integrator.Server.Models.Responses
+﻿namespace ETA.Integrator.Server.Models.Consumer.Response
 {
-    public class DocumentTypesResponseModel
+    public class ConsumerDocumentTypesResponseModel
     {
         public List<DocumentType> result { get; set; } = new List<DocumentType>();
     }
