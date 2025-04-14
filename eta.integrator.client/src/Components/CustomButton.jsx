@@ -12,6 +12,7 @@ const CustomButton = ({ name = 'Submit', icon, loading, handleClick }) => {
                     size='large'
                     onClick={handleClick}
                     loading={loading}
+                    disabled={loading}
                 >
                     {name}
                 </Button>
