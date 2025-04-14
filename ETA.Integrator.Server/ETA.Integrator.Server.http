@@ -1,6 +1,3 @@
 @ETA.Integrator.Server_HostAddress = http://localhost:5299
 
-GET {{ETA.Integrator.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
 ###

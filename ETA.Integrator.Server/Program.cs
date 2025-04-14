@@ -1,6 +1,9 @@
 using DotNetEnv;
+using ETA.Integrator.Server.Data;
+using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Interface;
 using ETA.Integrator.Server.Services;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,13 +39,9 @@ app.MapFallbackToFile("/index.html");
 
 Env.Load();
 
-//var HMS_API = Environment.GetEnvironmentVariable("HMS_API");
+//string projectRoot = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName;
 
-//app.MapGet("/config/landing", () =>
-//{
-//    var landing = HMS_API == null ? "settings" : "login";
-//    return Results.Json(new { landing });
-//});
+//string dataFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
 
 app.Run();
 
