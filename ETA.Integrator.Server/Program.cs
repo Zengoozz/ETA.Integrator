@@ -3,6 +3,7 @@ using ETA.Integrator.Server.Data;
 using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Interface;
 using ETA.Integrator.Server.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 
 builder.Services.AddTransient<IConfigurationService, ConfigurationService>();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(connectionString));
+
 
 var app = builder.Build();
 
@@ -39,9 +46,6 @@ app.MapFallbackToFile("/index.html");
 
 Env.Load();
 
-//string projectRoot = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName;
-
-//string dataFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
 
 app.Run();
 
