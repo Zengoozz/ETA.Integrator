@@ -9,7 +9,6 @@ import MainRoutedApp from "./Routes/MainRoutedApp";
 
 function App() {
    const [mode, setMode] = useState("Light");
-   const [isLoggedIn, setLogIn] = useState(false);
    const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
 
    useEffect(() => {
@@ -40,8 +39,6 @@ function App() {
             <MainRoutedApp
                mode={mode}
                setMode={setMode}
-               isLoggedIn={isLoggedIn}
-               setLogIn={setLogIn}
                isMobile={isMobile}
             />
          </Router>

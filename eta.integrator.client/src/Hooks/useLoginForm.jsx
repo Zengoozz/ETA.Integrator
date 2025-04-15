@@ -10,13 +10,23 @@ export const useLoginForm = (setLogIn) => {
       setLoading(true);
       try {
          //TODO: Add your real login logic here
-         const response = await AuthService.login(values);
-         console.log(response);
+         const loginResponse = await AuthService.login(values);
+         console.log("Login successful:", loginResponse);
+         if(loginResponse){
+            const progressResponse = await AuthService.getUserProgress();
+            console.log("User progress:", progressResponse);
 
-         if (response) {
-            navigate("/home");
-            setLogIn(true);
+            if (progressResponse.step === "completed") {
+               navigate("/home");
+            } else if (progressResponse.step === 2) {
+               navigate("/issuer-settings");
+            } else {
+               navigate("/connection-settings");
+            }
          }
+        
+
+         setLogIn(true);
       } catch (err) {
          console.error("Login failed:", err);
       } finally {

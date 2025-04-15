@@ -1,14 +1,15 @@
+import React, { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Flex } from "antd";
+
 import InvoicesPage from "../Pages/InvoicesPage.jsx";
 import NotFoundPage from "../Pages/NotFoundPage.jsx";
 import LoginFormPage from "../Pages/LoginFormPage.jsx";
-import SettingsPage from "../Pages/SettingsPage.jsx";
 
 import DefaultLayout from "../Components/DefaultLayout.jsx";
+import StepperWrapper from "../Components/StepperWrapper.jsx";
 
 import Styles from "../assets/Styles.js";
-
-import { Routes, Route, Navigate } from "react-router-dom";
-import { Flex } from "antd";
 
 const ProtectedRoute = ({ isLoggedIn, children }) => {
    if (!isLoggedIn)
@@ -21,14 +22,16 @@ const ProtectedRoute = ({ isLoggedIn, children }) => {
    return children;
 };
 
-const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn, isMobile }) => {
+const MainRoutedApp = ({ mode, setMode, isMobile }) => {
+   const [isLoggedIn, setLogIn] = useState(false);
+
    return (
       <Flex
          vertical
          style={{ minHeight: "100vh" }}
       >
          <Routes>
-            {/* 🔁 Root route redirects to login or home */}
+            {/* 🔁 Root route redirects to login or home/stepper */}
             <Route
                path="/"
                element={
@@ -46,16 +49,14 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn, isMobile }) => {
                }
             />
 
-            {/* 🌐 Public layout: login + settings */}
+            {/* 🌐 Public layout: login */}
             <Route
                element={
                   <DefaultLayout
                      mode={mode}
                      setMode={setMode}
-                    //  maxWidthValue={400}
-                    //  contentStyle={Styles.loginContentStyle}
-                    maxWidthValue={isMobile ? "100%" : 500}
-                    contentStyle={{
+                     maxWidthValue={isMobile ? "100%" : 500}
+                     contentStyle={{
                         ...Styles.loginContentStyle,
                         padding: isMobile ? "16px" : "48px", // Responsive padding
                      }}
@@ -66,17 +67,59 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn, isMobile }) => {
             >
                <Route
                   path="/login"
-                  element={<LoginFormPage setLogIn={setLogIn} isMobile={isMobile} />}
-               />
-               <Route
-                  path="/settings"
-                  element={<SettingsPage isMobile={isMobile} />}
+                  element={
+                     <LoginFormPage
+                        setLogIn={setLogIn}
+                        isMobile={isMobile}
+                     />
+                  }
                />
             </Route>
 
             {/* 🔒 Protected layout (needs login) */}
+            {/* 🚶 Stepper Flow */}
             <Route
-               path="/home"
+               path="/"
+               element={
+                  <ProtectedRoute isLoggedIn={isLoggedIn}>
+                     <DefaultLayout
+                        mode={mode}
+                        setMode={setMode}
+                        maxWidthValue={isMobile ? "100%" : 500}
+                        contentStyle={{
+                           ...Styles.loginContentStyle,
+                           padding: isMobile ? "16px" : "48px", // Responsive padding
+                        }}
+                        isMarginedTop={false}
+                        isMobile={isMobile}
+                     />
+                  </ProtectedRoute>
+               }
+            >
+               <Route
+                  path="/connection-settings"
+                  element={
+                     <StepperWrapper
+                        currentStep={1}
+                        isMobile={isMobile}
+                     />
+                  }
+               />
+               <Route
+                  path="/issuer-settings"
+                  element={
+                     <StepperWrapper
+                        currentStep={2}
+                        isMobile={isMobile}
+                     />
+                  }
+               />
+            </Route>
+
+            {/* 🔒 Protected layout (needs login) */}
+            {/* 🏠 Home Routes */}
+            <Route
+               path="/"
                element={
                   <ProtectedRoute isLoggedIn={isLoggedIn}>
                      <DefaultLayout
@@ -91,7 +134,7 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn, isMobile }) => {
                }
             >
                <Route
-                  index
+                  path="/home"
                   element={
                      <Navigate
                         to="/home/invoices"
@@ -100,7 +143,7 @@ const MainRoutedApp = ({ mode, setMode, isLoggedIn, setLogIn, isMobile }) => {
                   }
                />
                <Route
-                  path="invoices"
+                  path="/home/invoices"
                   element={<InvoicesPage isMobile={isMobile} />}
                />
                <Route

@@ -1,3 +1,4 @@
+import AuthServiceMock from "./AuthServiceMock";
 import GenericService from "./GenericService";
 
 const login = async (credentials) => {
@@ -17,7 +18,18 @@ const login = async (credentials) => {
    }
 };
 
-const getSettings = async () => {
+const getUserProgress = async () => {
+   try {
+      const response = await GenericService.makeRequest("GET", "/Login/UserProgress");
+
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
+};
+
+const getConnectionSettings = async () => {
    try {
       const response = await GenericService.makeRequest("GET", "/Login/Settings");
 
@@ -28,7 +40,7 @@ const getSettings = async () => {
    }
 };
 
-const updateSettings = async (values) => {
+const updateConnectionSettings = async (values) => {
    try {
       const updateSettings = {
          ConnectionString: values.connectionString,
@@ -50,4 +62,35 @@ const updateSettings = async (values) => {
    }
 };
 
-export default { login, getSettings, updateSettings };
+const updateIssuerSettings = async (values) => {
+   try {
+      const updateSettings = {
+         IssuerName: values.issuerName,
+         TaxId: values.taxId,
+      };
+      console.log("updateIssuerSettings", updateSettings);
+
+      const response = await GenericService.makeRequest(
+         "PUT",
+         "/Login/IssuerSettings",
+         updateSettings
+      );
+
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
+};
+
+// const AuthService = {
+//    login,
+//    getUserProgress,
+//    getConnectionSettings,
+//    updateConnectionSettings,
+//    updateIssuerSettings,
+// };
+
+const AuthService = AuthServiceMock;
+
+export default AuthService;

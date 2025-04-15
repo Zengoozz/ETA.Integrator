@@ -1,6 +1,6 @@
 import React from "react";
 import { Layout, Typography, Space, Flex } from "antd";
-import { SunOutlined, MoonOutlined, SettingOutlined } from "@ant-design/icons";
+import { SunOutlined, MoonOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
 const { Header } = Layout;
@@ -40,11 +40,6 @@ const Navbar = ({ colorMode, setColorMode, isMarginedTop, isMobile }) => {
                gap="16px"
                align="center"
             >
-               <Link to="/settings">
-                  <SettingOutlined
-                     style={{ fontSize: "20px", color: "#fff", cursor: "pointer" }}
-                  />
-               </Link>
                <Space>
                   {colorMode == "Dark" ? (
                      <SunOutlined
