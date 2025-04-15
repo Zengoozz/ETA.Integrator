@@ -7,9 +7,12 @@ const mockFunc = (text, values, obj = true) => {
    });
 };
 
-const login = async (credentials) => mockFunc("UserCredentials:", credentials);
+const login = async (credentials) => {
+   localStorage.setItem("HMS_Token", "token");
+   return mockFunc("UserCredentials:", credentials)
+};
 
-const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 2 });
+const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 1});
 
 const getConnectionSettings = async () =>
    mockFunc("ConnectionSettings:", "", {

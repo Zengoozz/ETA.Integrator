@@ -2,11 +2,11 @@ import React from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Flex } from "antd";
 
-import { LoginFormValidationRules } from "../Constants/FormRules";
-import { useLoginForm } from "../Hooks/useLoginForm";
+import { LoginFormValidationRules } from "../Constants/Constants";
+import { useLogin } from "../Hooks/useLogin";
 
 const LoginFormPage = ({ setLogIn, isMobile }) => {
-   const { handleLogin, loading } = useLoginForm(setLogIn);
+   const { handleLogin, loading } = useLogin(setLogIn);
 
    const onLoginFailed = (errorInfo) => {
       console.log("Failed:", errorInfo);

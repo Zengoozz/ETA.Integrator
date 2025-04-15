@@ -1,7 +1,17 @@
 import { CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
-export const InvoicesTableColumns = [
+const LoginFormValidationRules = {
+    username: [
+        { required: true, message: 'Required' }
+    ],
+    password: [
+        { required: true, message: 'Required' },
+        { min: 6, message: 'Password too short' }
+    ],
+};
+
+const InvoicesTableColumns = [
     {
         title: 'Receipt Number',
         dataIndex: 'inoviceNumber',
@@ -62,3 +72,13 @@ export const InvoicesTableColumns = [
         }
     },
 ];
+
+const ROUTES = {
+    HOME:"/home",
+    LOGIN: "/login",
+    FIRST_STEP: "/connection-settings",
+    SECOND_STEP: "/issuer-settings",
+    COMPLETED: "/home/invoices",
+ };
+
+export { LoginFormValidationRules, InvoicesTableColumns, ROUTES  };
