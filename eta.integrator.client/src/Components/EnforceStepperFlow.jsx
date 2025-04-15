@@ -3,11 +3,12 @@ import { Navigate } from "react-router-dom";
 import { isUndefined } from "../Constants/Helpers";
 import { ROUTES } from "../Constants/Constants";
 
-const EnforceStepperFlow = ({ userProgress, requiredStep, redirectTo, children }) => {
+const EnforceStepperFlow = ({ requiredStep, redirectTo, children }) => {
    // Redirect if the user is not on the correct step
+   const userProgress = localStorage.getItem("CHECKPOINT");
    console.log("ESF: User progress:", userProgress);
    console.log("ESF: requiredStep:", requiredStep);
-   if (userProgress !== requiredStep) {
+   if (Number(userProgress) !== requiredStep) {
       return isUndefined(userProgress) ? (
          <Navigate
             to={ROUTES.FIRST_STEP}
@@ -25,4 +26,4 @@ const EnforceStepperFlow = ({ userProgress, requiredStep, redirectTo, children }
    return children;
 };
 
-export default EnforceStepperFlow;
+export default React.memo(EnforceStepperFlow);

@@ -1,5 +1,5 @@
 const mockFunc = (text, values, obj = true) => {
-   console.log(text, values);
+   // console.log(text, values);
    return new Promise((resolve) => {
       setTimeout(() => {
          resolve(obj);
