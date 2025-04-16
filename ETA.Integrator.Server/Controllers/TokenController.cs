@@ -1,4 +1,4 @@
-﻿using ETA.Integrator.Server.Interface;
+﻿using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.Response;
 using HMS.Core.Models.ETA;
 using Microsoft.AspNetCore.Mvc;

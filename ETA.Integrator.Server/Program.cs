@@ -1,26 +1,9 @@
 using DotNetEnv;
-using ETA.Integrator.Server.Data;
-using ETA.Integrator.Server.Interface;
-using ETA.Integrator.Server.Services;
-using Microsoft.EntityFrameworkCore;
+using ETA.Integrator.Server.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddHttpClient();
-
-builder.Services.AddTransient<IConfigurationService, ConfigurationService>();
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(connectionString));
-
+builder.Services.AddAllServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -43,7 +26,6 @@ app.MapControllers();
 app.MapFallbackToFile("/index.html");
 
 Env.Load();
-
 
 app.Run();
 
