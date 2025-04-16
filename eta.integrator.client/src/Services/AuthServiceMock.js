@@ -12,7 +12,7 @@ const login = async (credentials) => {
    return mockFunc("UserCredentials:", credentials)
 };
 
-const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 1});
+const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 2});
 
 const getConnectionSettings = async () =>
    mockFunc("ConnectionSettings:", "", {

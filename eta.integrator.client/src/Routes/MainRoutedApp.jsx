@@ -1,39 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { Flex } from "antd";
 
-import InvoicesPage from "../Pages/InvoicesPage.jsx";
-import NotFoundPage from "../Pages/NotFoundPage.jsx";
 import LoginFormPage from "../Pages/LoginFormPage.jsx";
+import InvoicesPage from "../Pages/InvoicesPage";
+import NotFoundPage from "../Pages/NotFoundPage.jsx";
 
 import DefaultLayout from "../Components/DefaultLayout.jsx";
+import EnforceStepperFlow from "../Components/EnforceStepperFlow.jsx";
 import StepperWrapper from "../Components/StepperWrapper.jsx";
 
 import Styles from "../assets/Styles.js";
-import useAuthPresistence from "../Hooks/useAuthPresistence.jsx";
-import AuthService from "../Services/AuthService.js";
-import EnforceStepperFlow from "../Components/EnforceStepperFlow.jsx";
 import { ROUTES } from "../Constants/Constants.jsx";
 import { isUndefined } from "../Constants/Helpers.js";
+import AuthService from "../Services/AuthService.js";
+import useAuthPresistence from "../Hooks/useAuthPresistence.jsx";
 
-const ProtectedRoute = ({ isLoggedIn, children }) => {
-   if (!isLoggedIn)
-      return (
-         <Navigate
-            to="/login"
-            replace
-         />
-      );
-   return children;
-};
+import RootRoutes from "./RootRoutes.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const MainRoutedApp = ({ mode, setMode, isMobile }) => {
    const [isLoggedIn, setLogIn] = useState(false);
-   // const [userProgress, setUserProgress] = useState(null);
+   const [userProgress, setUserProgress] = useState(null);
    const [isLoading, setLoading] = useState(true);
 
    // useAuthPresistence(setLogIn);
-   const userCheckPoint = localStorage.setItem("CHECKPOINT", 1);
 
    useEffect(() => {
       const fetchUserProgress = async () => {
@@ -46,20 +37,17 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                   userProgressResponse.step &&
                   !isUndefined(userProgressResponse.step)
                ) {
-                  // setUserProgress((prev) =>
-                  //    prev !== userProgressResponse.step ? userProgressResponse.step : prev
-                  // );
-
-                  localStorage.setItem("CHECKPOINT", userProgressResponse.step);
+                  setUserProgress((prev) =>
+                     prev !== userProgressResponse.step ? userProgressResponse.step : prev
+                  );
 
                   console.log("User progress:", userProgressResponse.step);
+               } else {
+                  setUserProgress(1);
                }
-               // else {
-               //    // setUserProgress(1);
-               // }
             } catch (error) {
                console.error("Error fetching user progress:", error);
-               // setUserProgress(1);
+               setUserProgress(1);
             } finally {
                setLoading(false);
             }
@@ -86,29 +74,10 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
             <Route
                path="/"
                element={
-                  isLoggedIn ? (
-                     userCheckPoint === "completed" ? (
-                        <Navigate
-                           to={ROUTES.COMPLETED}
-                           replace
-                        />
-                     ) : Number(userCheckPoint) === 2 ? (
-                        <Navigate
-                           to={ROUTES.SECOND_STEP}
-                           replace
-                        />
-                     ) : (
-                        <Navigate
-                           to={ROUTES.FIRST_STEP}
-                           replace
-                        />
-                     )
-                  ) : (
-                     <Navigate
-                        to={ROUTES.LOGIN}
-                        replace
-                     />
-                  )
+                  <RootRoutes
+                     isLoggedIn={isLoggedIn}
+                     userProgress={userProgress}
+                  />
                }
             />
 
@@ -125,7 +94,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                      }}
                      isMarginedTop={false}
                      isMobile={isMobile}
-                  ></DefaultLayout>
+                  />
                }
             >
                <Route
@@ -163,7 +132,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                   path={ROUTES.FIRST_STEP}
                   element={
                      <EnforceStepperFlow
-                        // userProgress={userProgress}
+                        userProgress={userProgress}
                         requiredStep={1}
                         redirectTo={ROUTES.SECOND_STEP}
                      >
@@ -178,7 +147,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                   path={ROUTES.SECOND_STEP}
                   element={
                      <EnforceStepperFlow
-                        // userProgress={userProgress}
+                        userProgress={userProgress}
                         requiredStep={2}
                         redirectTo={ROUTES.COMPLETED}
                      >
@@ -204,9 +173,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                         contentStyle={Styles.homeContentStyle}
                         isMarginedTop={true}
                         isMobile={isMobile}
-                     >
-                        <InvoicesPage isMobile={isMobile} />
-                     </DefaultLayout>
+                     />
                   </ProtectedRoute>
                }
             >
