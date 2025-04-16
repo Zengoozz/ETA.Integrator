@@ -7,18 +7,38 @@ const EnforceStepperFlow = ({ userProgress, requiredStep, redirectTo, children }
    // Redirect if the user is not on the correct step
    console.log("ESF: User progress:", userProgress);
    console.log("ESF: requiredStep:", requiredStep);
-   if (Number(userProgress) !== requiredStep) {
-      return isUndefined(userProgress) ? (
+   
+   if (userProgress === "completed")
+      return (
          <Navigate
-            to={ROUTES.FIRST_STEP}
-            replace
-         />
-      ) : (
-         <Navigate
-            to={redirectTo}
+            to={ROUTES.COMPLETED}
             replace
          />
       );
+
+   if (userProgress !== requiredStep) {
+      if (isUndefined(userProgress)) {
+         return (
+            <Navigate
+               to={ROUTES.FIRST_STEP}
+               replace
+            />
+         );
+      } else if (userProgress < requiredStep) {
+         return (
+            <Navigate
+               to={ROUTES.FIRST_STEP}
+               replace
+            />
+         );
+      } else {
+         return (
+            <Navigate
+               to={redirectTo}
+               replace
+            />
+         );
+      }
    }
 
    // Render the child component if the user is allowed to access this route

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, useRouteError, Navigate } from "react-router-dom";
 import { Flex } from "antd";
 
 import LoginFormPage from "../Pages/LoginFormPage.jsx";
@@ -24,7 +24,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
    const [userProgress, setUserProgress] = useState(null);
    const [isLoading, setLoading] = useState(true);
 
-   // useAuthPresistence(setLogIn);
+   useAuthPresistence(setLogIn);
 
    useEffect(() => {
       const fetchUserProgress = async () => {
@@ -179,7 +179,16 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
             >
                <Route
                   path={ROUTES.COMPLETED}
-                  element={<InvoicesPage isMobile={isMobile} />}
+                  element={
+                     userProgress === "completed" ? (
+                        <InvoicesPage isMobile={isMobile} />
+                     ) : (
+                        <Navigate
+                           to="/"
+                           replace
+                        />
+                     )
+                  }
                />
                <Route
                   path="*"
