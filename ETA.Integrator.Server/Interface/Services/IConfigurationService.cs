@@ -1,7 +1,7 @@
 ﻿using ETA.Integrator.Server.Models;
 using HMS.Core.Models.ETA;
 
-namespace ETA.Integrator.Server.Interface
+namespace ETA.Integrator.Server.Interface.Services
 {
     public interface IConfigurationService
     {

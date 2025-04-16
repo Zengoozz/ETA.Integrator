@@ -1,10 +1,10 @@
-﻿using ETA.Integrator.Server.Interface;
-using ETA.Integrator.Server.Models;
+﻿using ETA.Integrator.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using RestSharp;
 using DotNetEnv;
 using ETA.Integrator.Server.Models.Provider.Requests;
 using ETA.Integrator.Server.Models.Provider.Response;
+using ETA.Integrator.Server.Interface.Services;
 
 namespace ETA.Integrator.Server.Controllers
 {
