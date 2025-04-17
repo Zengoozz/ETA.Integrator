@@ -85,6 +85,11 @@ namespace ETA.Integrator.Server.Controllers
             {
                 SettingsStep step = await _settingsStepRepository.GetByStepNumber(1);
 
+                //if (!String.IsNullOrWhiteSpace(step.Data))
+                //{
+                //    var test = JsonSerializer.Deserialize<ConnectionDTO>(step.Data);
+                //}
+
                 ConnectionDTO connectionDto = !String.IsNullOrWhiteSpace(step.Data) ?
                     JsonSerializer.Deserialize<ConnectionDTO>(step.Data) ?? new ConnectionDTO() :
                     new ConnectionDTO();

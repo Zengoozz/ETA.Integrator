@@ -6,7 +6,7 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
    const [form] = Form.useForm();
 
    const onSave = (values) => {
-      AuthService.updateIssuerSettings(values).then(() => {
+      AuthService.updateIssuerSettings(values, 2).then(() => {
          console.log("Issuer settings saved successfully");
          // Mark steps as completed in the backend
          //  AuthService.markStepsCompleted().then(() => {

@@ -36,7 +36,7 @@ export default {
    login,
    getUserProgress,
    getConnectionSettings,
-   updateConnectionSettings,
    getIssuerSettings,
+   updateConnectionSettings,
    updateIssuerSettings,
 };

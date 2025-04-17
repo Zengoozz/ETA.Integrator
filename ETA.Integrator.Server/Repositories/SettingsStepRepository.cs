@@ -19,10 +19,12 @@ namespace ETA.Integrator.Server.Repositories
         {
             try
             {
-                SettingsStep settingsStep = await GetByStepNumber(stepNumber);
-                settingsStep.Data = data;
-
-                await _context.SaveChangesAsync();
+                SettingsStep? settingsStep = await _dbSet.FirstOrDefaultAsync(t => t.Order == stepNumber);
+                if (settingsStep != null)
+                {
+                    settingsStep.Data = data;
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (Exception)
             {
