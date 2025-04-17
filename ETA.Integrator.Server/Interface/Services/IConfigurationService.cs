@@ -7,6 +7,6 @@ namespace ETA.Integrator.Server.Interface.Services
     {
         EnvironmentModel? GetETAConfig();
         bool SetETAConfig(string clientId = "", string clientSecret = "", string generatedToken = "");
-        SettingsModel GetSettings();
+        ConnectionSettingsModel GetSettings();
     }
 }

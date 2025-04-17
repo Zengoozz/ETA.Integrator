@@ -9,7 +9,6 @@ namespace ETA.Integrator.Server.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
-        public DbSet<Test> Tests { get; set; } = null!;
         public DbSet<SettingsStep> SettingsSteps { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -31,6 +30,10 @@ namespace ETA.Integrator.Server.Data
                     Name = "issuer-settings",
                     Data = null
                 });
+
+            modelBuilder.Entity<SettingsStep>().HasKey(s => s.Order);
+
+            modelBuilder.Entity<SettingsStep>().Property(s => s.Order).ValueGeneratedNever();
         }
     }
 }

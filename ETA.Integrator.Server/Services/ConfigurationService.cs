@@ -93,9 +93,9 @@ namespace ETA.Integrator.Server.Services
             }
         }
 
-        public SettingsModel GetSettings()
+        public ConnectionSettingsModel GetSettings()
         {
-            var settingsModel = new SettingsModel();
+            var settingsModel = new ConnectionSettingsModel();
 
             var connectionString = Environment.GetEnvironmentVariable("HMS_API");
 
