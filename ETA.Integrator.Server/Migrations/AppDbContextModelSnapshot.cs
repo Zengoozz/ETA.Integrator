@@ -19,7 +19,6 @@ namespace ETA.Integrator.Server.Migrations
             modelBuilder.Entity("ETA.Integrator.Server.Entities.SettingsStep", b =>
                 {
                     b.Property<int>("Order")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Data")
@@ -44,24 +43,6 @@ namespace ETA.Integrator.Server.Migrations
                             Order = 2,
                             Name = "issuer-settings"
                         });
-                });
-
-            modelBuilder.Entity("ETA.Integrator.Server.Entities.Test", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Test1")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Test2")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tests");
                 });
 #pragma warning restore 612, 618
         }
