@@ -31,6 +31,8 @@ namespace ETA.Integrator.Server.Extensions
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(connectionString));
 
+            services.Configure<CustomConfigurations>(configuration.GetSection("CustomConfigurations"));
+
             return services;
         }
 

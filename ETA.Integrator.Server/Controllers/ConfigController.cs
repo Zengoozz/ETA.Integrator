@@ -9,6 +9,7 @@ using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Entities;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -17,22 +18,32 @@ namespace ETA.Integrator.Server.Controllers
     public class ConfigController : ControllerBase
     {
         readonly RestClient _client;
+        private readonly CustomConfigurations _customConfig;
+
         private readonly ILogger<ConfigController> _logger;
 
         private readonly IConfigurationService _configurationService;
         private readonly ISettingsStepRepository _settingsStepRepository;
-        public ConfigController(IConfigurationService configurationService, ISettingsStepRepository settingsStepRepository, ILogger<ConfigController> logger)
+        public ConfigController(
+            IOptions<CustomConfigurations> customConfigurations,
+            ILogger<ConfigController> logger,
+            IConfigurationService configurationService,
+            ISettingsStepRepository settingsStepRepository
+            )
         {
+
+            _customConfig = customConfigurations.Value;
+            _logger = logger;
             _configurationService = configurationService;
             _settingsStepRepository = settingsStepRepository;
-            _logger = logger;
 
-            var connectionString = Environment.GetEnvironmentVariable("HMS_API");
+            //var connectionString = Environment.GetEnvironmentVariable("HMS_API");
             //var connectionString = Environment.GetEnvironmentVariable("HMS_PUBLISH");
+            var API_URL = _customConfig.API_URL;
 
-            if (connectionString != null)
+            if (API_URL != null)
             {
-                var opt = new RestClientOptions(connectionString);
+                var opt = new RestClientOptions(API_URL);
                 _client = new RestClient(opt);
             }
             else
@@ -52,18 +63,19 @@ namespace ETA.Integrator.Server.Controllers
                 var response = await _client.ExecuteAsync<ProviderLoginResponseModel>(request);
 
                 //TODO: Check the settings 
-                var settings = _configurationService.GetSettings();
+                //var settings = _configurationService.GetSettings();
 
-                if (settings.ConnectionString == "" || settings.ClientId == "" || settings.ClientSecret == "")
-                {
-                    //return Redirect("/sett")
-                }
+                //if (settings.ConnectionString == "" || settings.ClientId == "" || settings.ClientSecret == "")
+                //{
+                //    //return Redirect("/sett")
+                //}
 
                 return Ok(response);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                _logger.LogError(ex, "An error occured getting connection settings");
+                return StatusCode(500, "An unexpected error occurred getting connection settings");
             }
         }
         [HttpGet("ConnectionSettings")]
@@ -73,7 +85,9 @@ namespace ETA.Integrator.Server.Controllers
             {
                 SettingsStep step = await _settingsStepRepository.GetByStepNumber(1);
 
-                ConnectionDTO connectionDto = !String.IsNullOrWhiteSpace(step.Data) ? JsonSerializer.Deserialize<ConnectionDTO>(step.Data) ?? new ConnectionDTO() : new ConnectionDTO();
+                ConnectionDTO connectionDto = !String.IsNullOrWhiteSpace(step.Data) ?
+                    JsonSerializer.Deserialize<ConnectionDTO>(step.Data) ?? new ConnectionDTO() :
+                    new ConnectionDTO();
 
                 return Ok(connectionDto);
             }

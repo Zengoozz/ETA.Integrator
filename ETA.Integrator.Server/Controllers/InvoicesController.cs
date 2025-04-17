@@ -1,5 +1,6 @@
 ﻿using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using RestSharp;
 
 namespace ETA.Integrator.Server.Controllers
@@ -9,13 +10,22 @@ namespace ETA.Integrator.Server.Controllers
     public class InvoicesController : ControllerBase
     {
         readonly RestClient _client;
-        public InvoicesController()
-        {
-            var connectionString = Environment.GetEnvironmentVariable("HMS_API");
+        private readonly CustomConfigurations _customConfig;
 
-            if (connectionString != null)
+        private readonly ILogger<InvoicesController> _logger;
+
+        public InvoicesController (
+            IOptions<CustomConfigurations> customConfigurations,
+            ILogger<InvoicesController> logger
+            )
+        {
+            //var connectionString = Environment.GetEnvironmentVariable("HMS_API");
+            _logger = logger;
+            _customConfig = customConfigurations.Value;
+
+            if (_customConfig.API_URL != null)
             {
-                var opt = new RestClientOptions(connectionString);
+                var opt = new RestClientOptions(_customConfig.API_URL);
                 _client = new RestClient(opt);
             }
             else
