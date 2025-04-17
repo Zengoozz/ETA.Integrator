@@ -79,8 +79,8 @@ namespace ETA.Integrator.Server.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occured getting issuer settings");
-                return StatusCode(500, "An unexpected error occurred getting issuer settings");
+                _logger.LogError(ex, "An error occured getting connection settings");
+                return StatusCode(500, "An unexpected error occurred getting connection settings");
             }
         }
 
