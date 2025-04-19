@@ -20,6 +20,11 @@ const login = async (credentials) => {
 
 // const login = AuthServiceMock.login; // Use the mock login function for testing
 
+const logout = async () => {
+   localStorage.removeItem("HMS_Token");
+   return mockFunc("Logout:", "");
+};
+
 const getUserProgress = async () => {
    try {
       const response = await GenericService.makeRequestFactory(
@@ -80,6 +85,7 @@ const updateStep = async (values, step) => {
 
 let AuthService = {
    login,
+   logout,
    getUserProgress,
    getConnectionSettings,
    getIssuerSettings,

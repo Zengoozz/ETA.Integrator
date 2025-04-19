@@ -13,6 +13,7 @@ const DefaultLayout = ({
    contentStyle,
    isMarginedTop,
    isMobile,
+   isLoggedIn
 }) => {
    const {
       token: { colorBgContainer, borderRadiusLG },
@@ -25,6 +26,7 @@ const DefaultLayout = ({
             setColorMode={setMode}
             isMarginedTop={isMarginedTop}
             isMobile={isMobile}
+            isLoggedIn={isLoggedIn}
          />
          <Content
             style={{

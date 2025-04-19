@@ -1,14 +1,23 @@
 import React from "react";
 import { Layout, Typography, Space, Flex } from "antd";
-import { SunOutlined, MoonOutlined } from "@ant-design/icons";
+import { SunOutlined, MoonOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+
+import "../assets/css/Navbar.css";
+
+import AuthService from "../Services/AuthService";
 
 const { Header } = Layout;
 const { Title } = Typography;
 
-const Navbar = ({ colorMode, setColorMode, isMarginedTop, isMobile }) => {
+const Navbar = ({ colorMode, setColorMode, isMarginedTop, isMobile, isLoggedIn }) => {
    const toggleColorMode = (color) => {
       setColorMode(color);
+   };
+
+   const onLogoutClick = () => {
+      AuthService.logout();
+      window.location.reload();
    };
 
    return (
@@ -28,41 +37,36 @@ const Navbar = ({ colorMode, setColorMode, isMarginedTop, isMobile }) => {
       >
          <Link to="/">
             <Title
+               className="title-hover"
                level={3}
-               style={{ color: "#fff", margin: 0 }}
             >
                Global Soft
             </Title>
          </Link>
 
-         {!isMobile && (
-            <Flex
-               gap="16px"
-               align="center"
-            >
-               <Space>
-                  {colorMode == "Dark" ? (
-                     <SunOutlined
-                        onClick={() => toggleColorMode("Light")}
-                        style={{
-                           fontSize: "20px",
-                           color: "#fff",
-                           cursor: "pointer",
-                        }}
-                     />
-                  ) : (
-                     <MoonOutlined
-                        onClick={() => toggleColorMode("Dark")}
-                        style={{
-                           fontSize: "20px",
-                           color: "#fff",
-                           cursor: "pointer",
-                        }}
-                     />
-                  )}
-               </Space>
-            </Flex>
-         )}
+         <Flex
+            gap="10px"
+            align="center"
+            justify="center"
+         >
+            {colorMode == "Dark" ? (
+               <SunOutlined
+                  className="regular-btn"
+                  onClick={() => toggleColorMode("Light")}
+               />
+            ) : (
+               <MoonOutlined
+                  className="regular-btn"
+                  onClick={() => toggleColorMode("Dark")}
+               />
+            )}
+            {isLoggedIn && (
+               <LogoutOutlined
+                  className="small-btn"
+                  onClick={() => onLogoutClick()}
+               />
+            )}
+         </Flex>
       </Header>
    );
 };

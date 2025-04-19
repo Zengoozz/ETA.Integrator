@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../Constants/Constants";
-import { isUndefined } from "../Constants/Helpers";
+import { isNullOrEmptyOrUndefined } from "../Constants/Helpers";
 
 const useAuthPresistence = (setLogin) => {
    const navigate = useNavigate();
@@ -10,7 +10,7 @@ const useAuthPresistence = (setLogin) => {
       const storedToken = localStorage.getItem("HMS_Token");
       const currentPath = window.location.pathname;
 
-      if (!storedToken || isUndefined(storedToken)) {
+      if (!storedToken || isNullOrEmptyOrUndefined(storedToken)) {
          console.error("No valid token found. Redirecting to login...");
 
          if (currentPath !== ROUTES.LOGIN) {

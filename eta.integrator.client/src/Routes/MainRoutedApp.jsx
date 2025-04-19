@@ -94,6 +94,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                      }}
                      isMarginedTop={false}
                      isMobile={isMobile}
+                     isLoggedIn={isLoggedIn}
                   />
                }
             >
@@ -124,6 +125,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                         }}
                         isMarginedTop={false}
                         isMobile={isMobile}
+                        isLoggedIn={isLoggedIn}
                      />
                   </ProtectedRoute>
                }
@@ -163,7 +165,6 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
             {/* 🔒 Protected layout (needs login) */}
             {/* 🏠 Home Routes */}
             <Route
-               path={ROUTES.HOME}
                element={
                   <ProtectedRoute isLoggedIn={isLoggedIn}>
                      <DefaultLayout
@@ -173,6 +174,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                         contentStyle={Styles.homeContentStyle}
                         isMarginedTop={true}
                         isMobile={isMobile}
+                        isLoggedIn={isLoggedIn}
                      />
                   </ProtectedRoute>
                }

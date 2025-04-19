@@ -1,0 +1,22 @@
+.title-hover{
+    color: white !important;
+    margin: 0 !important;
+}
+.regular-btn {
+    font-size: 20px;
+    color: white;
+}
+
+.small-btn {
+    font-size: 18px;
+    color: white;
+}
+
+.title-hover:hover {
+    color: #8383fa !important;
+}
+
+.regular-btn:hover,
+.small-btn:hover {
+    color: #8383fa
+}

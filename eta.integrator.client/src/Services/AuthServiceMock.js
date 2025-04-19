@@ -9,15 +9,15 @@ const mockFunc = (text, values, obj = true) => {
 
 const login = async (credentials) => {
    localStorage.setItem("HMS_Token", "token");
-   return mockFunc("UserCredentials:", credentials)
+   return mockFunc("UserCredentials:", credentials);
 };
 
 const logout = async () => {
    localStorage.removeItem("HMS_Token");
    return mockFunc("Logout:", "");
-}
+};
 
-const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 2 });
+const getUserProgress = async () => mockFunc("UserProgress:", "", { step: "completed" });
 
 const getConnectionSettings = async () =>
    mockFunc("ConnectionSettings:", "", {
@@ -35,12 +35,13 @@ const getIssuerSettings = async () =>
 const updateStep = async (values, step) => {
    console.log("UpdateStep:", values, step);
    return mockFunc("UpdateStep:", values, true);
-}
+};
 
 export default {
    login,
    getUserProgress,
    getConnectionSettings,
    getIssuerSettings,
-   updateStep
+   updateStep,
+   logout
 };
