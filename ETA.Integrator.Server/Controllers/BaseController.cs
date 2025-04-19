@@ -6,7 +6,7 @@ namespace ETA.Integrator.Server.Controllers
 {
     public class BaseController : ControllerBase
     {
-        readonly RestClient _client;
+        //readonly RestClient _client;
         private readonly CustomConfigurations _customConfig;
         public BaseController(
             IOptions<CustomConfigurations> customConfigurations
@@ -14,10 +14,10 @@ namespace ETA.Integrator.Server.Controllers
         {
             _customConfig = customConfigurations.Value;
 
-            if (_customConfig.API_URL != null)
+            if (_customConfig.Provider_APIURL != null)
             {
-                var opt = new RestClientOptions(_customConfig.API_URL);
-                _client = new RestClient(opt);
+                //var opt = new RestClientOptions(_customConfig.Provider_APIURL);
+                //_client = new RestClient(opt);
             }
             else
             {

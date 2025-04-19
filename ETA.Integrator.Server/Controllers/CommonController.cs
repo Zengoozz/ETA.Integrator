@@ -1,7 +1,7 @@
-﻿using ETA.Integrator.Server.Interface.Services;
+﻿using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Models.Consumer.Response;
-using HMS.Core.Models.ETA;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using RestSharp;
 using RestSharp.Authenticators.OAuth2;
 
@@ -12,47 +12,57 @@ namespace ETA.Integrator.Server.Controllers
     public class CommonController : ControllerBase
     {
         readonly RestClient _client;
-        private readonly IConfigurationService _ConfigurationService;
-        public CommonController(IConfigurationService configurationService)
+        private readonly CustomConfigurations _customConfig;
+
+        private readonly ILogger<ConfigController> _logger;
+
+        private readonly ISettingsStepRepository _settingsStepRepository;
+
+        public CommonController(
+                        IOptions<CustomConfigurations> customConfigurations,
+            ILogger<ConfigController> logger,
+                        ISettingsStepRepository settingsStepRepository
+            )
         {
-            _ConfigurationService = configurationService;
 
-            var config = _ConfigurationService.GetETAConfig();
+            _customConfig = customConfigurations.Value;
+            _logger = logger;
+            _settingsStepRepository = settingsStepRepository;
 
-            if (config != null)
+            var token = "";
+
+            var connectionSettings = _settingsStepRepository.GetByStepNumber(1);
+
+            if (_customConfig.Consumer_APIBaseUrl != null && token != null)
             {
-                EnvironmentVariableModel? baseUrl = config.Values.FirstOrDefault(x => x.Key == "apiBaseUrl") ?? null;
-                EnvironmentVariableModel? token = config.Values.FirstOrDefault(x => x.Key == "generatedAccessToken") ?? null;
+                var authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
 
-                if (baseUrl != null && token != null)
+                var opt = new RestClientOptions(_customConfig.Consumer_APIBaseUrl)
                 {
-                    var authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token.Value, "Bearer");
+                    Authenticator = authenticator
+                };
 
-                    var opt = new RestClientOptions(baseUrl.Value)
-                    {
-                        Authenticator = authenticator
-                    };
-
-                    _client = new RestClient(opt);
-                }
-                else
-                {
-                    throw new Exception("Error: Config attributes are missing");
-                }
+                _client = new RestClient(opt);
             }
             else
             {
-                throw new Exception("Error: Config object does not exist");
+                throw new Exception("Error: Config attributes are missing");
             }
-
-
         }
         [HttpGet("documentTypes")]
         public async Task<IActionResult> GetDocumentTypes()
         {
-            var response = await _client.GetAsync<ConsumerDocumentTypesResponseModel>("/api/v1/documenttypes");
+            try
+            {
+                var response = await _client.GetAsync<ConsumerDocumentTypesResponseModel>("/api/v1/documenttypes");
 
-            return Ok(response);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occured while retrieving document types");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occured while retrieving document types");
+            }
         }
 
     }

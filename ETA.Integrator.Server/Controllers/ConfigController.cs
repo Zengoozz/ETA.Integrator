@@ -1,10 +1,7 @@
-﻿using ETA.Integrator.Server.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RestSharp;
-using DotNetEnv;
 using ETA.Integrator.Server.Models.Provider.Requests;
 using ETA.Integrator.Server.Models.Provider.Response;
-using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Entities;
@@ -22,35 +19,27 @@ namespace ETA.Integrator.Server.Controllers
 
         private readonly ILogger<ConfigController> _logger;
 
-        private readonly IConfigurationService _configurationService;
         private readonly ISettingsStepRepository _settingsStepRepository;
         public ConfigController(
             IOptions<CustomConfigurations> customConfigurations,
             ILogger<ConfigController> logger,
-            IConfigurationService configurationService,
             ISettingsStepRepository settingsStepRepository
             )
         {
 
             _customConfig = customConfigurations.Value;
             _logger = logger;
-            _configurationService = configurationService;
             _settingsStepRepository = settingsStepRepository;
 
-            //var connectionString = Environment.GetEnvironmentVariable("HMS_API");
-            //var connectionString = Environment.GetEnvironmentVariable("HMS_PUBLISH");
-            var API_URL = _customConfig.API_URL;
-
-            if (API_URL != null)
+            if (_customConfig.Provider_APIURL != null)
             {
-                var opt = new RestClientOptions(API_URL);
+                var opt = new RestClientOptions(_customConfig.Provider_APIURL);
                 _client = new RestClient(opt);
             }
             else
             {
-                throw new Exception("Error: Getting connection string");
+                throw new Exception("Error: Getting provider api url");
             }
-            _logger = logger;
         }
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] ProviderLoginRequestModel model)
@@ -62,20 +51,12 @@ namespace ETA.Integrator.Server.Controllers
 
                 var response = await _client.ExecuteAsync<ProviderLoginResponseModel>(request);
 
-                //TODO: Check the settings 
-                //var settings = _configurationService.GetSettings();
-
-                //if (settings.ConnectionString == "" || settings.ClientId == "" || settings.ClientSecret == "")
-                //{
-                //    //return Redirect("/sett")
-                //}
-
                 return Ok(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occured getting connection settings");
-                return StatusCode(500, "An unexpected error occurred getting connection settings");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred getting connection settings");
             }
         }
         [HttpGet("ConnectionSettings")]
@@ -84,11 +65,6 @@ namespace ETA.Integrator.Server.Controllers
             try
             {
                 SettingsStep step = await _settingsStepRepository.GetByStepNumber(1);
-
-                //if (!String.IsNullOrWhiteSpace(step.Data))
-                //{
-                //    var test = JsonSerializer.Deserialize<ConnectionDTO>(step.Data);
-                //}
 
                 ConnectionDTO connectionDto = !String.IsNullOrWhiteSpace(step.Data) ?
                     JsonSerializer.Deserialize<ConnectionDTO>(step.Data) ?? new ConnectionDTO() :
@@ -99,7 +75,7 @@ namespace ETA.Integrator.Server.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occured getting connection settings");
-                return StatusCode(500, "An unexpected error occurred getting connection settings");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred getting connection settings");
             }
         }
 
@@ -117,7 +93,7 @@ namespace ETA.Integrator.Server.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occured getting issuer settings");
-                return StatusCode(500, "An unexpected error occurred getting issuer settings");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred getting issuer settings");
             }
         }
         [HttpGet("UserProgress")]
@@ -134,7 +110,7 @@ namespace ETA.Integrator.Server.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occured getting user progress");
-                return StatusCode(500, "An unexpected error occurred while getting user progress.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while getting user progress.");
             }
 
         }
@@ -151,36 +127,9 @@ namespace ETA.Integrator.Server.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occured updating the step with number: {Order}", updateStepDTO.Order);
-                return StatusCode(500, "An unexpected error occurred while updating the step.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while updating the step.");
             }
         }
 
-        [HttpPost("SaveConnectionSettings")]
-        public IActionResult SaveConnectionSettings([FromBody] ConnectionSettingsModel requestModel)
-        {
-            try
-            {
-                var connectionString = Environment.GetEnvironmentVariable("HMS_API");
-
-                if (requestModel == null || string.IsNullOrWhiteSpace(requestModel.ConnectionString) || string.IsNullOrWhiteSpace(requestModel.ClientId) || string.IsNullOrWhiteSpace(requestModel.ClientSecret))
-                {
-                    return BadRequest("Empty Setting");
-                }
-                else
-                {
-                    System.IO.File.WriteAllText(".env", "HMS_API=" + requestModel.ConnectionString);
-                    //Reloading Env
-                    Env.Load();
-
-                    bool configResponse = _configurationService.SetETAConfig(clientId: requestModel.ClientId, clientSecret: requestModel.ClientSecret);
-
-                    return configResponse ? Ok("Success") : StatusCode(500, "Error: Saving ETA Config");
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
     }
 }

@@ -10,11 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <_ContentIncludedByDefault Remove="ETAConfiguration.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>9.0.4</Version>
     </PackageReference>
@@ -47,6 +42,11 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interface\Services\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

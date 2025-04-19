@@ -1,4 +1,3 @@
-using DotNetEnv;
 using ETA.Integrator.Server.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,8 +23,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
-
-Env.Load();
 
 app.Run();
 

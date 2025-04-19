@@ -14,7 +14,7 @@ namespace ETA.Integrator.Server.Controllers
 
         private readonly ILogger<InvoicesController> _logger;
 
-        public InvoicesController (
+        public InvoicesController(
             IOptions<CustomConfigurations> customConfigurations,
             ILogger<InvoicesController> logger
             )
@@ -23,9 +23,9 @@ namespace ETA.Integrator.Server.Controllers
             _logger = logger;
             _customConfig = customConfigurations.Value;
 
-            if (_customConfig.API_URL != null)
+            if (_customConfig.Provider_APIURL != null)
             {
-                var opt = new RestClientOptions(_customConfig.API_URL);
+                var opt = new RestClientOptions(_customConfig.Provider_APIURL);
                 _client = new RestClient(opt);
             }
             else
@@ -36,25 +36,38 @@ namespace ETA.Integrator.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetInvoices(DateTime? fromDate, DateTime? toDate)
         {
-            var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
-
-            request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
-                .AddParameter("toDate", toDate, ParameterType.QueryString);
-
-            var response = await _client.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                return StatusCode((int)response.StatusCode, response.ErrorMessage);
+                var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
+
+                if (fromDate != null && toDate != null)
+                {
+                    request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
+                        .AddParameter("toDate", toDate, ParameterType.QueryString);
+                }
+                request.AddParameter("fromDate", ParameterType.QueryString)
+                    .AddParameter("toDate", ParameterType.QueryString);
+
+                var response = await _client.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode((int)response.StatusCode, response.ErrorMessage);
+                }
+
+                return Ok(response.Data);
             }
-
-            return Ok(response.Data);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occured while retrieving invoices");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occured while retrieving invoices");
+            }
         }
 
-        [HttpPost("Submit")]
-        public async Task<IActionResult> SubmitInvoices(List<ProviderInvoiceViewModel> request)
-        {
-            return Ok();
-        }
+        //[HttpPost("Submit")]
+        //public async Task<IActionResult> SubmitInvoices(List<ProviderInvoiceViewModel> request)
+        //{
+        //    return Ok();
+        //}
     }
 }

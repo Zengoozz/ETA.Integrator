@@ -1,8 +1,6 @@
 ﻿using ETA.Integrator.Server.Data;
 using ETA.Integrator.Server.Interface.Repositories;
-using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Repositories;
-using ETA.Integrator.Server.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETA.Integrator.Server.Extensions
@@ -11,8 +9,6 @@ namespace ETA.Integrator.Server.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.AddTransient<IConfigurationService, ConfigurationService>();
-
             return services;
         }
 

@@ -1,9 +1,4 @@
-﻿using ETA.Integrator.Server.Interface.Services;
-using ETA.Integrator.Server.Models.Consumer.Response;
-using HMS.Core.Models.ETA;
-using Microsoft.AspNetCore.Mvc;
-using RestSharp;
-using System.Text.Json;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -11,64 +6,59 @@ namespace ETA.Integrator.Server.Controllers
     [Route("HMS/[controller]")]
     public class TokenController : ControllerBase
     {
-        private readonly IConfigurationService _ConfigurationService;
-        public TokenController(
-            IConfigurationService configurationService)
+        public TokenController()
         {
-            _ConfigurationService = configurationService;
         }
         [HttpGet("Test")]
         public IActionResult Test()
         {
-            var res = _ConfigurationService.SetETAConfig(generatedToken:"zengo");
-
-            return Ok(res);
+            return Ok();
         }
 
-        [HttpGet("Connect")]
-        public async Task<IActionResult?> ConnectToETA()
-        {
-            var config = _ConfigurationService.GetETAConfig();
+        //[HttpGet("Connect")]
+        //public async Task<IActionResult?> ConnectToETA()
+        //{
+        //    var config = _ConfigurationService.GetETAConfig();
 
-            if (config != null)
-            {
-                EnvironmentVariableModel? idSrvUrl = config.Values.FirstOrDefault(x => x.Key == "idSrvBaseUrl") ?? null;
-                EnvironmentVariableModel? clientId = config.Values.FirstOrDefault(x => x.Key == "clientId") ?? null;
-                EnvironmentVariableModel? clientSecret = config.Values.FirstOrDefault(x => x.Key == "clientSecret") ?? null;
+        //    if (config != null)
+        //    {
+        //        EnvironmentVariableModel? idSrvUrl = config.Values.FirstOrDefault(x => x.Key == "idSrvBaseUrl") ?? null;
+        //        EnvironmentVariableModel? clientId = config.Values.FirstOrDefault(x => x.Key == "clientId") ?? null;
+        //        EnvironmentVariableModel? clientSecret = config.Values.FirstOrDefault(x => x.Key == "clientSecret") ?? null;
 
-                if (idSrvUrl != null && clientId != null && clientSecret != null)
-                {
-                    var connectionClient = new RestClient(idSrvUrl.Value);
+        //        if (idSrvUrl != null && clientId != null && clientSecret != null)
+        //        {
+        //            var connectionClient = new RestClient(idSrvUrl.Value);
 
-                    var request = new RestRequest("/connect/token", Method.Post)
-                        .AddParameter("grant_type", "client_credentials")
-                        .AddParameter("client_id", clientId.Value)
-                        .AddParameter("client_secret", clientSecret.Value)
-                        .AddParameter("scope", "InvoicingAPI");
+        //            var request = new RestRequest("/connect/token", Method.Post)
+        //                .AddParameter("grant_type", "client_credentials")
+        //                .AddParameter("client_id", clientId.Value)
+        //                .AddParameter("client_secret", clientSecret.Value)
+        //                .AddParameter("scope", "InvoicingAPI");
 
-                    var response = await connectionClient.ExecuteAsync(request);
+        //            var response = await connectionClient.ExecuteAsync(request);
 
-                    var responseObject = new ConsumerConnectionResponseModel();
+        //            var responseObject = new ConsumerConnectionResponseModel();
 
-                    if (response.Content != null)
-                    {
-                        responseObject = JsonSerializer.Deserialize<ConsumerConnectionResponseModel>(response.Content);
-                    }
+        //            if (response.Content != null)
+        //            {
+        //                responseObject = JsonSerializer.Deserialize<ConsumerConnectionResponseModel>(response.Content);
+        //            }
 
-                    if (responseObject != null)
-                    {
-                        _ConfigurationService.SetETAConfig(generatedToken: responseObject.access_token);
-                        return Ok(responseObject);
-                    }
+        //            if (responseObject != null)
+        //            {
+        //                _ConfigurationService.SetETAConfig(generatedToken: responseObject.access_token);
+        //                return Ok(responseObject);
+        //            }
 
-                }
+        //        }
 
-                return StatusCode(StatusCodes.Status500InternalServerError, "Configuration values missing");
-            }
-            else
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "No configuration file");
-            }
-        }
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "Configuration values missing");
+        //    }
+        //    else
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "No configuration file");
+        //    }
+        //}
     }
 }
