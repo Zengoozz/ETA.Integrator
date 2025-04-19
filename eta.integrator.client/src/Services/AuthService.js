@@ -1,24 +1,24 @@
 import AuthServiceMock from "./AuthServiceMock";
 import GenericService from "./GenericService";
 
-// const login = async (credentials) => {
-//    try {
-//       const response = await GenericService.makeRequestFactory("POST", "/Config/Login", {
-//          Email: credentials.username,
-//          Password: credentials.password,
-//       });
+const login = async (credentials) => {
+   try {
+      const response = await GenericService.makeRequestFactory("POST", "/Config/Login", {
+         Email: credentials.username,
+         Password: credentials.password,
+      });
 
-//       const token = response.token;
-//       localStorage.setItem("HMS_Token", token);
+      const token = response.token;
+      localStorage.setItem("HMS_Token", token);
 
-//       return true;
-//    } catch (error) {
-//       console.error(error.message);
-//       throw error;
-//    }
-// };
+      return true;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
+};
 
-const login = AuthServiceMock.login; // Use the mock login function for testing
+// const login = AuthServiceMock.login; // Use the mock login function for testing
 
 const getUserProgress = async () => {
    try {
@@ -78,7 +78,7 @@ const updateStep = async (values, step) => {
    }
 };
 
-const AuthService = {
+let AuthService = {
    login,
    getUserProgress,
    getConnectionSettings,
@@ -86,6 +86,6 @@ const AuthService = {
    updateStep,
 };
 
-// const AuthService = AuthServiceMock;
+AuthService = AuthServiceMock;
 
 export default AuthService;

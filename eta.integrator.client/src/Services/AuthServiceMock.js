@@ -1,5 +1,5 @@
 const mockFunc = (text, values, obj = true) => {
-   // console.log(text, values);
+   console.log(text, values);
    return new Promise((resolve) => {
       setTimeout(() => {
          resolve(obj);
@@ -12,7 +12,12 @@ const login = async (credentials) => {
    return mockFunc("UserCredentials:", credentials)
 };
 
-const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 1 });
+const logout = async () => {
+   localStorage.removeItem("HMS_Token");
+   return mockFunc("Logout:", "");
+}
+
+const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 2 });
 
 const getConnectionSettings = async () =>
    mockFunc("ConnectionSettings:", "", {
@@ -21,22 +26,21 @@ const getConnectionSettings = async () =>
       ClientSecret: "",
    });
 
-const updateConnectionSettings = async (values) =>
-   mockFunc("updateConnectionSettings:", values);
-
 const getIssuerSettings = async () =>
    mockFunc("IssuerSettings:", "", {
       IssuerName: "",
       TaxId: "",
    });
 
-const updateIssuerSettings = async (values) => mockFunc("updateIssuerSettings:", values);
+const updateStep = async (values, step) => {
+   console.log("UpdateStep:", values, step);
+   return mockFunc("UpdateStep:", values, true);
+}
 
 export default {
    login,
    getUserProgress,
    getConnectionSettings,
    getIssuerSettings,
-   updateConnectionSettings,
-   updateIssuerSettings,
+   updateStep
 };

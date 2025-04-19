@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Outlet, useRouteError, Navigate } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { Flex } from "antd";
 
 import LoginFormPage from "../Pages/LoginFormPage.jsx";
@@ -59,7 +59,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
    }, [isLoggedIn]);
 
    // Ensure redirection happens while loading
-   //TODO: Add a loading spinner or some indication of loading state
+   // TODO: Add a loading spinner or some indication of loading state
    if (isLoading) {
       return <div>Loading...</div>;
    }
