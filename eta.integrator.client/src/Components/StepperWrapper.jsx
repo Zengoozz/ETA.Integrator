@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ConnectionSettingsPage from "../Pages/ConnectionSettingsPage.jsx";
 import IssuerSettingsPage from "../Pages/IssuerSettingsPage.jsx";
 
-import { ROUTES } from "../Constants/Constants.jsx";
+import { ROUTES } from "../Constants/Constants.js";
 
 const StepperWrapper = ({ currentStep, isMobile }) => {
    const navigate = useNavigate();

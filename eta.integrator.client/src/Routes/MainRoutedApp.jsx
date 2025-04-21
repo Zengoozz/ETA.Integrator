@@ -11,7 +11,7 @@ import EnforceStepperFlow from "../Components/EnforceStepperFlow.jsx";
 import StepperWrapper from "../Components/StepperWrapper.jsx";
 
 import Styles from "../assets/Styles.js";
-import { ROUTES } from "../Constants/Constants.jsx";
+import { ROUTES } from "../Constants/Constants.js";
 import { isUndefined } from "../Constants/Helpers.js";
 import AuthService from "../Services/AuthService.js";
 import useAuthPresistence from "../Hooks/useAuthPresistence.jsx";

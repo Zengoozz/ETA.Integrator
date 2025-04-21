@@ -34,6 +34,7 @@ const LoginFormPage = ({ setLogIn, isMobile }) => {
                   prefix={<UserOutlined />}
                   size={isMobile ? "large" : "middle"}
                   placeholder="Username"
+                  autoComplete="off"
                />
             </Form.Item>
 

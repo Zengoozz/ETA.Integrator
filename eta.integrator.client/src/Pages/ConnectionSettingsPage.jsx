@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Button, Form, Input, Flex } from "antd";
 
 import AuthService from "../Services/AuthService";
+import { SettingsValidationRules } from "../Constants/Constants.js";
 
 const ConnectionSettingsPage = ({ isMobile, onNext }) => {
    const [form] = Form.useForm();
@@ -54,21 +55,26 @@ const ConnectionSettingsPage = ({ isMobile, onNext }) => {
             onFinishFailed={onSaveFailed}
             requiredMark="optional"
          >
-
             <Form.Item
                label="Client Id"
                name="ClientId"
-               rules={[{ required: true, message: "Please input your client id!" }]}
+               rules={SettingsValidationRules.clientId}
             >
-               <Input.Password size={isMobile ? "large" : "middle"} />
+               <Input.Password
+                  size={isMobile ? "large" : "middle"}
+                  autoComplete="off"
+               />
             </Form.Item>
 
             <Form.Item
                label="Client Secret"
                name="ClientSecret"
-               rules={[{ required: true, message: "Please input your client secret!" }]}
+               rules={SettingsValidationRules.clientSecret}
             >
-               <Input.Password size={isMobile ? "large" : "middle"} />
+               <Input.Password
+                  size={isMobile ? "large" : "middle"}
+                  autoComplete="off"
+               />
             </Form.Item>
 
             <Form.Item>
