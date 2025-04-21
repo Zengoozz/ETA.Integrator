@@ -14,19 +14,13 @@ const StepperWrapper = ({ currentStep, isMobile }) => {
    const steps = [
       {
          title: "Connection Settings",
-         content: (
-            <ConnectionSettingsPage
-               isMobile={isMobile}
-               onNext={() => navigate(ROUTES.SECOND_STEP)}
-            />
-         ),
+         content: <ConnectionSettingsPage isMobile={isMobile} />,
       },
       {
          title: "Issuer Settings",
          content: (
             <IssuerSettingsPage
-               isMobile={isMobile}
-               onFinish={() => navigate(ROUTES.COMPLETED)} // Assuming you have a home route
+               isMobile={isMobile} // Assuming you have a home route
             />
          ),
       },

@@ -4,7 +4,7 @@ import { Button, Form, Input, Flex } from "antd";
 import AuthService from "../Services/AuthService";
 import { SettingsValidationRules } from "../Constants/Constants.js";
 
-const ConnectionSettingsPage = ({ isMobile, onNext }) => {
+const ConnectionSettingsPage = ({ isMobile }) => {
    const [form] = Form.useForm();
 
    useEffect(() => {
@@ -27,7 +27,6 @@ const ConnectionSettingsPage = ({ isMobile, onNext }) => {
    const onSave = async (values) => {
       var response = await AuthService.updateStep(values, 1);
       console.log("Response:", response);
-      onNext();
    };
 
    const onSaveFailed = (errorInfo) => {

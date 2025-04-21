@@ -8,7 +8,7 @@ import { IssuerTypes, SettingsValidationRules } from "../Constants/Constants";
 
 const { Option } = Select;
 
-const IssuerSettingsPage = ({ isMobile, onFinish }) => {
+const IssuerSettingsPage = ({ isMobile }) => {
    const [form] = Form.useForm();
    const [isBusinessType, setIsBusinessType] = React.useState(false);
 
@@ -32,7 +32,6 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
    const onSave = (values) => {
       AuthService.updateStep(values, 2).then(() => {
          console.log("Issuer settings saved successfully");
-         onFinish(); // Trigger navigation to the main app
       });
    };
 
@@ -53,7 +52,6 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
          align="center"
          justify="center"
          style={{
-            // minHeight: "100%",
             width: "100%",
          }}
       >
@@ -85,12 +83,12 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
                   onChange={onIssuerTypeChange}
                >
                   {IssuerTypes.map((type) => (
-                     <Select.Option
+                     <Option
                         key={type.value}
                         value={type.value}
                      >
                         {type.label}
-                     </Select.Option>
+                     </Option>
                   ))}
                </Select>
             </Form.Item>
