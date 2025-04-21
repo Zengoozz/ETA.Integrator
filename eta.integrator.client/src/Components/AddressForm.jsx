@@ -5,6 +5,8 @@ import {
    SettingsValidationRules,
 } from "../Constants/Constants";
 
+const { Option } = Select;
+
 const AddressForm = ({ isBusinessType, form }) => {
    useEffect(() => {
       if (!isBusinessType) {
@@ -90,7 +92,7 @@ const AddressForm = ({ isBusinessType, form }) => {
          </Space.Compact>
 
          {/* Branch ID */}
-         <Space.Compact>
+         <Space.Compact style={{ width: "100%" }}>
             <Form.Item
                name={["Address", "BranchId"]}
                rules={SettingsValidationRules.branchId}

@@ -7,6 +7,8 @@ const mockFunc = (text, values, obj = true) => {
    });
 };
 
+//e945b032-513d-4bd4-8678-6860bb490649
+
 const login = async (credentials) => {
    localStorage.setItem("HMS_Token", "token");
    return mockFunc("UserCredentials:", credentials);
@@ -17,7 +19,7 @@ const logout = async () => {
    return mockFunc("Logout:", "");
 };
 
-const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 2});
+const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 1});
 
 const getConnectionSettings = async () =>
    mockFunc("ConnectionSettings:", "", {
@@ -37,11 +39,17 @@ const updateStep = async (values, step) => {
    return mockFunc("UpdateStep:", values, true);
 };
 
+const connectToConsumer = async (values) => {
+   console.log("ConnectToETA:", values);
+   return mockFunc("ConnectToETA:", values, true);
+};
+
 export default {
    login,
+   logout,
    getUserProgress,
    getConnectionSettings,
    getIssuerSettings,
    updateStep,
-   logout
+   connectToConsumer
 };

@@ -3,10 +3,14 @@ import GenericService from "./GenericService";
 
 const login = async (credentials) => {
    try {
-      const response = await GenericService.makeRequestFactory("POST", "/Config/Login", {
-         Email: credentials.username,
-         Password: credentials.password,
-      });
+      const response = await GenericService.makeRequestFactory(
+         "POST",
+         "/Auth/ProviderConnect",
+         {
+            Email: credentials.username,
+            Password: credentials.password,
+         }
+      );
 
       const token = response.token;
       localStorage.setItem("HMS_Token", token);
@@ -87,6 +91,21 @@ const updateStep = async (values, step) => {
    }
 };
 
+const connectToConsumer = async (values) => {
+   try {
+      const response = await GenericService.makeRequestFactory(
+         "POST",
+         "/Auth/ConsumerConnect",
+         values
+      );
+
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
+};
+
 let AuthService = {
    login,
    logout,
@@ -94,6 +113,7 @@ let AuthService = {
    getConnectionSettings,
    getIssuerSettings,
    updateStep,
+   connectToConsumer
 };
 
 AuthService = AuthServiceMock;
