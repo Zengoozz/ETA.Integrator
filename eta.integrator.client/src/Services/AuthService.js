@@ -64,7 +64,12 @@ const getIssuerSettings = async () => {
          "/Config/IssuerSettings"
       );
 
-      return response;
+      const myResponse = {
+         IssuerName: response.issuerName,
+         TaxId: response.taxId,
+      };
+
+      return myResponse;
    } catch (error) {
       console.error(error.message);
       throw error;
@@ -91,6 +96,6 @@ let AuthService = {
    updateStep,
 };
 
-AuthService = AuthServiceMock;
+// AuthService = AuthServiceMock;
 
 export default AuthService;

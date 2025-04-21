@@ -10,8 +10,6 @@ const ConnectionSettingsPage = ({ isMobile, onNext }) => {
       const fetchSettings = async () => {
          try {
             const response = await AuthService.getConnectionSettings();
-            // console.log("Fetched settings:", response);
-
             // Update form fields dynamically
             form.setFieldsValue({
                ClientId: response.ClientId,

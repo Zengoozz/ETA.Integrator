@@ -1,18 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, Form, Input, Flex } from "antd";
 import AuthService from "../Services/AuthService";
 
 const IssuerSettingsPage = ({ isMobile, onFinish }) => {
    const [form] = Form.useForm();
 
+   useEffect(() => {
+      const fetchSettings = async () => {
+         try {
+            const response = await AuthService.getIssuerSettings();
+            // Update form fields dynamically
+            form.setFieldsValue({
+               IssuerName: response.IssuerName,
+               TaxId: response.TaxId,
+            });
+         } catch (err) {
+            console.log("Failed to fetch settings", err);
+         }
+      };
+      fetchSettings();
+   }, [form]);
+
    const onSave = (values) => {
-      AuthService.updateIssuerSettings(values, 2).then(() => {
+      AuthService.updateStep(values, 2).then(() => {
          console.log("Issuer settings saved successfully");
-         // Mark steps as completed in the backend
-         //  AuthService.markStepsCompleted().then(() => {
-         //     console.log("All steps completed");
-         //     onFinish(); // Trigger navigation to the main app
-         //  });
          onFinish(); // Trigger navigation to the main app
       });
    };
@@ -43,7 +54,7 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
          >
             <Form.Item
                label="Issuer Name"
-               name="issuerName"
+               name="IssuerName"
                rules={[{ required: true, message: "Please input the issuer name!" }]}
             >
                <Input size={isMobile ? "large" : "middle"} />
@@ -51,7 +62,7 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
 
             <Form.Item
                label="Tax ID"
-               name="taxId"
+               name="TaxId"
                rules={[{ required: true, message: "Please input the tax ID!" }]}
             >
                <Input size={isMobile ? "large" : "middle"} />
