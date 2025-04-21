@@ -28,7 +28,7 @@ namespace ETA.Integrator.Server.Controllers
         }
 
         [HttpPost("ProviderConnect")]
-        public async Task<IActionResult> Login([FromBody] ProviderLoginRequestModel model)
+        public async Task<IActionResult> ConnectToProvider([FromBody] ProviderLoginRequestModel model)
         {
             try
             {
