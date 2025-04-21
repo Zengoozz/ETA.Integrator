@@ -22,7 +22,6 @@ const login = async (credentials) => {
 
 const logout = async () => {
    localStorage.removeItem("HMS_Token");
-   return mockFunc("Logout:", "");
 };
 
 const getUserProgress = async () => {
