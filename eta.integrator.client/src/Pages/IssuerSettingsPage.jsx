@@ -1,9 +1,16 @@
 import React, { useEffect } from "react";
-import { Button, Form, Input, Flex } from "antd";
+import { Button, Form, Input, Flex, Select } from "antd";
+
+import AddressForm from "../Components/AddressForm";
+
 import AuthService from "../Services/AuthService";
+import { IssuerTypes, SettingsValidationRules } from "../Constants/Constants";
+
+const { Option } = Select;
 
 const IssuerSettingsPage = ({ isMobile, onFinish }) => {
    const [form] = Form.useForm();
+   const [isBusinessType, setIsBusinessType] = React.useState(false);
 
    useEffect(() => {
       const fetchSettings = async () => {
@@ -12,7 +19,8 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
             // Update form fields dynamically
             form.setFieldsValue({
                IssuerName: response.IssuerName,
-               TaxId: response.TaxId,
+               RegistrationNumber: response.RegistrationNumber,
+               IssuerType: response.IssuerType,
             });
          } catch (err) {
             console.log("Failed to fetch settings", err);
@@ -30,6 +38,14 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
 
    const onSaveFailed = (errorInfo) => {
       console.log("Failed:", errorInfo);
+   };
+
+   const onIssuerTypeChange = (value) => {
+      if (value === "B") {
+         setIsBusinessType(true);
+      } else {
+         setIsBusinessType(false);
+      }
    };
 
    return (
@@ -51,22 +67,65 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
             onFinish={onSave}
             onFinishFailed={onSaveFailed}
             requiredMark="optional"
+            initialValues={{
+               Address: {
+                  Country: "EG", // Default country
+                  Governorate: "cairo", // Default governorate
+                  Region: "cairo", // Default region
+               },
+            }}
          >
             <Form.Item
-               label="Issuer Name"
-               name="IssuerName"
-               rules={[{ required: true, message: "Please input the issuer name!" }]}
+               label="Issuer Type"
+               name="IssuerType"
+               rules={SettingsValidationRules.issuerType}
             >
-               <Input size={isMobile ? "large" : "middle"} />
+               <Select
+                  placeholder="Please select a type"
+                  onChange={onIssuerTypeChange}
+               >
+                  {IssuerTypes.map((type) => (
+                     <Select.Option
+                        key={type.value}
+                        value={type.value}
+                     >
+                        {type.label}
+                     </Select.Option>
+                  ))}
+               </Select>
             </Form.Item>
 
             <Form.Item
-               label="Tax ID"
-               name="TaxId"
-               rules={[{ required: true, message: "Please input the tax ID!" }]}
+               label="Issuer Name"
+               name="IssuerName"
+               rules={SettingsValidationRules.issuerName}
             >
-               <Input size={isMobile ? "large" : "middle"} />
+               <Input
+                  size={isMobile ? "large" : "middle"}
+                  autoComplete="off"
+               />
             </Form.Item>
+
+            <Form.Item
+               label="Registration Number"
+               name="RegistrationNumber"
+               rules={[
+                  { required: true, message: "Please input the registration number!" },
+                  { whitespace: true, message: "Username cannot be empty spaces" },
+               ]}
+            >
+               <Input.OTP
+                  formatter={(value) => value.replace(/\D/g, "")}
+                  length={12}
+                  size={isMobile ? "large" : "middle"}
+                  autoComplete="off"
+               />
+            </Form.Item>
+
+            <AddressForm
+               isBusinessType={isBusinessType}
+               form={form}
+            />
 
             <Form.Item>
                <Button
@@ -75,7 +134,7 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
                   htmlType="submit"
                   size={isMobile ? "large" : "middle"}
                >
-                  Finish Setup
+                  Save
                </Button>
             </Form.Item>
          </Form>

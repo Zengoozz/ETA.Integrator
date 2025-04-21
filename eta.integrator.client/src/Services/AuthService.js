@@ -96,6 +96,6 @@ let AuthService = {
    updateStep,
 };
 
-// AuthService = AuthServiceMock;
+AuthService = AuthServiceMock;
 
 export default AuthService;

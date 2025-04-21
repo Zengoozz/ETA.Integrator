@@ -17,7 +17,7 @@ const logout = async () => {
    return mockFunc("Logout:", "");
 };
 
-const getUserProgress = async () => mockFunc("UserProgress:", "", { step: "completed" });
+const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 2});
 
 const getConnectionSettings = async () =>
    mockFunc("ConnectionSettings:", "", {
