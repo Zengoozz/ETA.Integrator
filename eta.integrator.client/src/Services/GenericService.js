@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const makeRequest = async (method, url, data = null, headers = {}) => {
+const makeRequestFactory = async (method, url, data = null, headers = {}) => {
    try {
       const fullUrl =
          url.startsWith("http") || url.startsWith("https")
@@ -32,4 +32,20 @@ const makeRequest = async (method, url, data = null, headers = {}) => {
    }
 };
 
-export default { makeRequest };
+const updateStepFactory = async (values, step) => {
+   try {
+      const updateStepDTO = {
+         Order: step,
+         Data: JSON.stringify(values)
+      };
+      console.log("updateStep", updateStepDTO);
+
+      const response = await makeRequestFactory("POST", "/Config/UpdateStep", updateStepDTO);
+
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
+}
+export default { makeRequestFactory, updateStepFactory };

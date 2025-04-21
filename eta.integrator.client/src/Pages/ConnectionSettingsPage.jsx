@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { Button, Form, Input, Flex } from "antd";
+
 import AuthService from "../Services/AuthService";
+import { SettingsValidationRules } from "../Constants/Constants.js";
 
 const ConnectionSettingsPage = ({ isMobile, onNext }) => {
    const [form] = Form.useForm();
@@ -8,14 +10,11 @@ const ConnectionSettingsPage = ({ isMobile, onNext }) => {
    useEffect(() => {
       const fetchSettings = async () => {
          try {
-            const response = await AuthService.getSettings();
-            console.log("Fetched settings:", response);
-
+            const response = await AuthService.getConnectionSettings();
             // Update form fields dynamically
             form.setFieldsValue({
-               connectionString: response.connectionString,
-               clientId: response.clientId,
-               clientSecret: response.clientSecret,
+               ClientId: response.ClientId,
+               ClientSecret: response.ClientSecret,
             });
          } catch (err) {
             console.log("Failed to fetch settings", err);
@@ -25,8 +24,8 @@ const ConnectionSettingsPage = ({ isMobile, onNext }) => {
       fetchSettings();
    }, [form]);
 
-   const onSave = (values) => {
-      var response = AuthService.updateSettings(values);
+   const onSave = async (values) => {
+      var response = await AuthService.updateStep(values, 1);
       console.log("Response:", response);
       onNext();
    };
@@ -57,29 +56,25 @@ const ConnectionSettingsPage = ({ isMobile, onNext }) => {
             requiredMark="optional"
          >
             <Form.Item
-               label="Connection String"
-               name="connectionString"
-               rules={[
-                  { required: true, message: "Please input your connection string!" },
-               ]}
-            >
-               <Input size={isMobile ? "large" : "middle"} />
-            </Form.Item>
-
-            <Form.Item
                label="Client Id"
-               name="clientId"
-               rules={[{ required: true, message: "Please input your client id!" }]}
+               name="ClientId"
+               rules={SettingsValidationRules.clientId}
             >
-               <Input.Password size={isMobile ? "large" : "middle"} />
+               <Input.Password
+                  size={isMobile ? "large" : "middle"}
+                  autoComplete="off"
+               />
             </Form.Item>
 
             <Form.Item
                label="Client Secret"
-               name="clientSecret"
-               rules={[{ required: true, message: "Please input your client secret!" }]}
+               name="ClientSecret"
+               rules={SettingsValidationRules.clientSecret}
             >
-               <Input.Password size={isMobile ? "large" : "middle"} />
+               <Input.Password
+                  size={isMobile ? "large" : "middle"}
+                  autoComplete="off"
+               />
             </Form.Item>
 
             <Form.Item>

@@ -2,7 +2,7 @@ import React from "react";
 import { Divider, Table, Flex } from "antd";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 
-import { InvoicesTableColumns } from "../Constants/InvoicesTableColumns";
+import { InvoicesTableColumns } from "../Constants/ConstantsComponents";
 import CustomButton from "../Components/CustomButton";
 
 const InvoicesTable = ({ isMobile, tableData, onSubmit, loading, messageApi }) => {

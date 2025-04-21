@@ -19,10 +19,12 @@ namespace ETA.Integrator.Server.Repositories
         {
             try
             {
-                SettingsStep settingsStep = await GetByStepNumber(stepNumber);
-                settingsStep.Data = data;
-
-                await _context.SaveChangesAsync();
+                SettingsStep? settingsStep = await _dbSet.FirstOrDefaultAsync(t => t.Order == stepNumber);
+                if (settingsStep != null)
+                {
+                    settingsStep.Data = data;
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (Exception)
             {
@@ -35,9 +37,21 @@ namespace ETA.Integrator.Server.Repositories
             return await _dbSet.AsNoTracking().ToListAsync();
         }
 
+        public async Task<int> GetFirstUnCompletedStepOrder()
+        {
+            SettingsStep? settingStep = await _dbSet.AsNoTracking().FirstOrDefaultAsync(t => t.Data == null) ?? null;
+
+            if (settingStep == null)
+                return -1;
+            else
+                return settingStep.Order;
+        }
+
         public async Task<SettingsStep> GetByStepNumber(int stepNumber)
         {
             return await _dbSet.AsNoTracking().FirstOrDefaultAsync(t => t.Order == stepNumber) ?? new SettingsStep();
         }
+
+
     }
 }

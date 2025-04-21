@@ -1,29 +1,68 @@
-import React, { useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { Flex } from "antd";
 
-import InvoicesPage from "../Pages/InvoicesPage.jsx";
-import NotFoundPage from "../Pages/NotFoundPage.jsx";
 import LoginFormPage from "../Pages/LoginFormPage.jsx";
+import InvoicesPage from "../Pages/InvoicesPage";
+import NotFoundPage from "../Pages/NotFoundPage.jsx";
 
 import DefaultLayout from "../Components/DefaultLayout.jsx";
+import EnforceStepperFlow from "../Components/EnforceStepperFlow.jsx";
 import StepperWrapper from "../Components/StepperWrapper.jsx";
 
 import Styles from "../assets/Styles.js";
+import { ROUTES } from "../Constants/Constants.js";
+import { isUndefined } from "../Constants/Helpers.js";
+import AuthService from "../Services/AuthService.js";
+import useAuthPresistence from "../Hooks/useAuthPresistence.jsx";
 
-const ProtectedRoute = ({ isLoggedIn, children }) => {
-   if (!isLoggedIn)
-      return (
-         <Navigate
-            to="/login"
-            replace
-         />
-      );
-   return children;
-};
+import RootRoutes from "./RootRoutes.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const MainRoutedApp = ({ mode, setMode, isMobile }) => {
    const [isLoggedIn, setLogIn] = useState(false);
+   const [userProgress, setUserProgress] = useState(null);
+   const [isLoading, setLoading] = useState(true);
+
+   useAuthPresistence(setLogIn);
+
+   useEffect(() => {
+      const fetchUserProgress = async () => {
+         if (isLoggedIn) {
+            try {
+               const userProgressResponse = await AuthService.getUserProgress();
+
+               if (
+                  userProgressResponse &&
+                  userProgressResponse.step &&
+                  !isUndefined(userProgressResponse.step)
+               ) {
+                  setUserProgress((prev) =>
+                     prev !== userProgressResponse.step ? userProgressResponse.step : prev
+                  );
+
+                  console.log("User progress:", userProgressResponse.step);
+               } else {
+                  setUserProgress(1);
+               }
+            } catch (error) {
+               console.error("Error fetching user progress:", error);
+               setUserProgress(1);
+            } finally {
+               setLoading(false);
+            }
+         } else {
+            setLoading(false);
+         }
+      };
+      fetchUserProgress();
+   }, [isLoggedIn]);
+
+   // Ensure redirection happens while loading
+   // TODO: Add a loading spinner or some indication of loading state
+   if (isLoading) {
+      return <div>Loading...</div>;
+   }
 
    return (
       <Flex
@@ -31,21 +70,14 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
          style={{ minHeight: "100vh" }}
       >
          <Routes>
-            {/* 🔁 Root route redirects to login or home/stepper */}
+            {/* 🔁 Root route ROUTES to login or home/stepper */}
             <Route
                path="/"
                element={
-                  isLoggedIn ? (
-                     <Navigate
-                        to="/home"
-                        replace
-                     />
-                  ) : (
-                     <Navigate
-                        to="/login"
-                        replace
-                     />
-                  )
+                  <RootRoutes
+                     isLoggedIn={isLoggedIn}
+                     userProgress={userProgress}
+                  />
                }
             />
 
@@ -62,11 +94,12 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                      }}
                      isMarginedTop={false}
                      isMobile={isMobile}
+                     isLoggedIn={isLoggedIn}
                   />
                }
             >
                <Route
-                  path="/login"
+                  path={ROUTES.LOGIN}
                   element={
                      <LoginFormPage
                         setLogIn={setLogIn}
@@ -92,26 +125,39 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                         }}
                         isMarginedTop={false}
                         isMobile={isMobile}
+                        isLoggedIn={isLoggedIn}
                      />
                   </ProtectedRoute>
                }
             >
                <Route
-                  path="/connection-settings"
+                  path={ROUTES.FIRST_STEP}
                   element={
-                     <StepperWrapper
-                        currentStep={1}
-                        isMobile={isMobile}
-                     />
+                     <EnforceStepperFlow
+                        userProgress={userProgress}
+                        requiredStep={1}
+                        redirectTo={ROUTES.SECOND_STEP}
+                     >
+                        <StepperWrapper
+                           currentStep={1}
+                           isMobile={isMobile}
+                        />
+                     </EnforceStepperFlow>
                   }
                />
                <Route
-                  path="/issuer-settings"
+                  path={ROUTES.SECOND_STEP}
                   element={
-                     <StepperWrapper
-                        currentStep={2}
-                        isMobile={isMobile}
-                     />
+                     <EnforceStepperFlow
+                        userProgress={userProgress}
+                        requiredStep={2}
+                        redirectTo={ROUTES.COMPLETED}
+                     >
+                        <StepperWrapper
+                           currentStep={2}
+                           isMobile={isMobile}
+                        />
+                     </EnforceStepperFlow>
                   }
                />
             </Route>
@@ -119,7 +165,6 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
             {/* 🔒 Protected layout (needs login) */}
             {/* 🏠 Home Routes */}
             <Route
-               path="/"
                element={
                   <ProtectedRoute isLoggedIn={isLoggedIn}>
                      <DefaultLayout
@@ -129,22 +174,23 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                         contentStyle={Styles.homeContentStyle}
                         isMarginedTop={true}
                         isMobile={isMobile}
+                        isLoggedIn={isLoggedIn}
                      />
                   </ProtectedRoute>
                }
             >
                <Route
-                  path="/home"
+                  path={ROUTES.COMPLETED}
                   element={
-                     <Navigate
-                        to="/home/invoices"
-                        replace
-                     />
+                     userProgress === "completed" ? (
+                        <InvoicesPage isMobile={isMobile} />
+                     ) : (
+                        <Navigate
+                           to="/"
+                           replace
+                        />
+                     )
                   }
-               />
-               <Route
-                  path="/home/invoices"
-                  element={<InvoicesPage isMobile={isMobile} />}
                />
                <Route
                   path="*"

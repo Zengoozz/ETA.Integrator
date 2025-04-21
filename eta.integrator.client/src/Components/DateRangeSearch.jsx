@@ -83,6 +83,7 @@ const DateRangeSearch = ({ isMobile, handleSearch, messageApi }) => {
                   placeholder={["Start Date", "End Date"]}
                   style={{ width: "100%" }}
                   disabledDate={disabledDate}
+                  autoComplete="off"
                />
             </Form.Item>
 

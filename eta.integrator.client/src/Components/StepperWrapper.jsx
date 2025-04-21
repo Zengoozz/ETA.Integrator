@@ -1,8 +1,11 @@
 import React from "react";
 import { Steps, Button, Flex } from "antd";
 import { useNavigate } from "react-router-dom";
+
 import ConnectionSettingsPage from "../Pages/ConnectionSettingsPage.jsx";
 import IssuerSettingsPage from "../Pages/IssuerSettingsPage.jsx";
+
+import { ROUTES } from "../Constants/Constants.js";
 
 const StepperWrapper = ({ currentStep, isMobile }) => {
    const navigate = useNavigate();
@@ -14,7 +17,7 @@ const StepperWrapper = ({ currentStep, isMobile }) => {
          content: (
             <ConnectionSettingsPage
                isMobile={isMobile}
-               onNext={() => navigate("/issuer-settings")}
+               onNext={() => navigate(ROUTES.SECOND_STEP)}
             />
          ),
       },
@@ -23,7 +26,7 @@ const StepperWrapper = ({ currentStep, isMobile }) => {
          content: (
             <IssuerSettingsPage
                isMobile={isMobile}
-               onFinish={() => navigate("/home")}
+               onFinish={() => navigate(ROUTES.COMPLETED)} // Assuming you have a home route
             />
          ),
       },
@@ -32,9 +35,9 @@ const StepperWrapper = ({ currentStep, isMobile }) => {
    // Handle navigation to the next step
    const goToNextStep = () => {
       if (currentStep === 1) {
-         navigate("/issuer-settings");
+         navigate(ROUTES.SECOND_STEP);
       } else if (currentStep === 2) {
-         navigate("/home");
+         navigate(ROUTES.COMPLETED);
       }
    };
 

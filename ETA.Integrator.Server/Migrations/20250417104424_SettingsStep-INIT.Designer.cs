@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ETA.Integrator.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250416121923_AddSettingsSteps-Table")]
-    partial class AddSettingsStepsTable
+    [Migration("20250417104424_SettingsStep-INIT")]
+    partial class SettingsStepINIT
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,7 +22,6 @@ namespace ETA.Integrator.Server.Migrations
             modelBuilder.Entity("ETA.Integrator.Server.Entities.SettingsStep", b =>
                 {
                     b.Property<int>("Order")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Data")
@@ -35,24 +34,18 @@ namespace ETA.Integrator.Server.Migrations
                     b.HasKey("Order");
 
                     b.ToTable("SettingsSteps");
-                });
 
-            modelBuilder.Entity("ETA.Integrator.Server.Entities.Test", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Test1")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Test2")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tests");
+                    b.HasData(
+                        new
+                        {
+                            Order = 1,
+                            Name = "connection-settings"
+                        },
+                        new
+                        {
+                            Order = 2,
+                            Name = "issuer-settings"
+                        });
                 });
 #pragma warning restore 612, 618
         }
