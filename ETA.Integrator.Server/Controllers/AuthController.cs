@@ -44,7 +44,7 @@ namespace ETA.Integrator.Server.Controllers
 
                     var response = await connectionClient.ExecuteAsync<ProviderLoginResponseModel>(request);
 
-                    return StatusCode((int)response.StatusCode, response);
+                    return StatusCode((int)response.StatusCode, response.Data);
 
                 }
                 else
