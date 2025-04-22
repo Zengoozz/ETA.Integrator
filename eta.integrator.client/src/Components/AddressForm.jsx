@@ -52,14 +52,14 @@ const AddressForm = ({ isBusinessType, form }) => {
 
             {/* Governorate */}
             <Form.Item
-               name={["Address", "Governorate"]}
+               name={["Address", "Governate"]}
                rules={SettingsValidationRules.governorate}
                noStyle
             >
                <Select
                   disabled={true}
                 //   defaultValue={"cairo"}
-                  placeholder="Governorate/Province"
+                  placeholder="Governate/Province"
                   showSearch
                   optionFilterProp="children"
                   filterOption={(input, opt) =>
@@ -72,7 +72,7 @@ const AddressForm = ({ isBusinessType, form }) => {
 
             {/* Region/City */}
             <Form.Item
-               name={["Address", "Region"]}
+               name={["Address", "RegionCity"]}
                rules={SettingsValidationRules.region}
                noStyle
             >

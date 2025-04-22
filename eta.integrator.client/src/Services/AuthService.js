@@ -30,12 +30,14 @@ const logout = async () => {
 
 const getUserProgress = async () => {
    try {
-      const response = await GenericService.makeRequestFactory(
+      const stepResponse = await GenericService.makeRequestFactory(
          "GET",
          "/Config/UserProgress"
       );
 
-      return response;
+      console.log("UserProgress:", stepResponse);
+
+      return stepResponse;
    } catch (error) {
       console.error(error.message);
       throw error;
@@ -70,8 +72,19 @@ const getIssuerSettings = async () => {
 
       const myResponse = {
          IssuerName: response.issuerName,
-         TaxId: response.taxId,
+         RegistrationNumber: response.registrationNumber,
+         IssuerType: response.issuerType,
+         Address: {
+            Country: response.address.country,
+            Governate: response.address.governate,
+            RegionCity: response.address.regionCity,
+            BranchId: response.address.branchId,
+            BuildingNumber: response.address.buildingNumber,
+            Street: response.address.street,
+         },
       };
+
+      console.log("IssuerSettings:", myResponse);
 
       return myResponse;
    } catch (error) {
@@ -113,9 +126,9 @@ let AuthService = {
    getConnectionSettings,
    getIssuerSettings,
    updateStep,
-   connectToConsumer
+   connectToConsumer,
 };
 
-AuthService = AuthServiceMock;
+// AuthService = AuthServiceMock;
 
 export default AuthService;

@@ -2,7 +2,7 @@ import GenericService from "./GenericService";
 
 const getInvoicesAccordingToDateAsQueryParams = async (values) => {
    try {
-      const response = await GenericService.makeRequest(
+      const response = await GenericService.makeRequestFactory(
          "GET",
          `/Invoices?fromDate=${values.dateFrom}&toDate=${values.dateTo}`
       );
@@ -16,7 +16,7 @@ const getInvoicesAccordingToDateAsQueryParams = async (values) => {
 
 const submitInvoices = async (invoices) => {
    try {
-      const response = await GenericService.makeRequest(
+      const response = await GenericService.makeRequestFactory(
          "POST",
          "/Invoices/Submit",
          invoices

@@ -21,6 +21,14 @@ const IssuerSettingsPage = ({ isMobile }) => {
                IssuerName: response.IssuerName,
                RegistrationNumber: response.RegistrationNumber,
                IssuerType: response.IssuerType,
+               Address: {
+                  Country: response.Address.Country,
+                  Governate: response.Address.Governate,
+                  RegionCity: response.Address.RegionCity,
+                  BranchId: response.Address.BranchId,
+                  BuildingNumber: response.Address.BuildingNumber,
+                  Street: response.Address.Street,
+               },
             });
          } catch (err) {
             console.log("Failed to fetch settings", err);
@@ -68,8 +76,8 @@ const IssuerSettingsPage = ({ isMobile }) => {
             initialValues={{
                Address: {
                   Country: "EG", // Default country
-                  Governorate: "cairo", // Default governorate
-                  Region: "cairo", // Default region
+                  Governate: "cairo", // Default governorate
+                  RegionCity: "cairo", // Default region
                },
             }}
          >

@@ -34,14 +34,14 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
 
                if (
                   userProgressResponse &&
-                  userProgressResponse.step &&
-                  !isUndefined(userProgressResponse.step)
+                  userProgressResponse &&
+                  !isUndefined(userProgressResponse)
                ) {
                   setUserProgress((prev) =>
-                     prev !== userProgressResponse.step ? userProgressResponse.step : prev
+                     prev !== userProgressResponse ? userProgressResponse : prev
                   );
 
-                  console.log("User progress:", userProgressResponse.step);
+                  console.log("User progress:", userProgressResponse);
                } else {
                   setUserProgress(1);
                }
