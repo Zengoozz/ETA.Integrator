@@ -14,12 +14,12 @@ const InvoicesTableColumns = [
    },
    {
       title: "Company",
-      dataIndex: "financialClassName",
+      dataIndex: "receiverName",
       render: (text) => text,
    },
    {
       title: "Tax Registeration Number",
-      dataIndex: "invoicingNumber",
+      dataIndex: "registrationNumber",
       render: (text) => text,
    },
    {
