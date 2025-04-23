@@ -4,12 +4,12 @@ import dayjs from "dayjs";
 const InvoicesTableColumns = [
    {
       title: "Receipt Number",
-      dataIndex: "inoviceNumber",
+      dataIndex: "invoiceNumber",
       render: (text) => <a>{text}</a>,
    },
    {
       title: "Visit Type",
-      dataIndex: "inoviceType",
+      dataIndex: "invoiceType",
       render: (text) => text,
    },
    {
@@ -19,7 +19,7 @@ const InvoicesTableColumns = [
    },
    {
       title: "Tax Registeration Number",
-      dataIndex: "inovicingNumber",
+      dataIndex: "invoicingNumber",
       render: (text) => text,
    },
    {
