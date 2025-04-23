@@ -3,6 +3,7 @@ using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Entities;
 using System.Text.Json;
+using ETA.Integrator.Server.Interface.Services;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -14,13 +15,16 @@ namespace ETA.Integrator.Server.Controllers
         private readonly ILogger<ConfigController> _logger;
 
         private readonly ISettingsStepRepository _settingsStepRepository;
+        private readonly ISettingsStepService _settingsStepService;
         public ConfigController(
             ILogger<ConfigController> logger,
-            ISettingsStepRepository settingsStepRepository
+            ISettingsStepRepository settingsStepRepository,
+            ISettingsStepService settingsStepService
             )
         {
             _logger = logger;
             _settingsStepRepository = settingsStepRepository;
+            _settingsStepService = settingsStepService;
         }
 
         [HttpGet("ConnectionSettings")]
@@ -48,11 +52,9 @@ namespace ETA.Integrator.Server.Controllers
         {
             try
             {
-                SettingsStep step = await _settingsStepRepository.GetByStepNumber(2);
+                IssuerDTO? issuerDTO = await _settingsStepService.GetIssuerData();
 
-                IssuerDTO issuerDto = !String.IsNullOrWhiteSpace(step.Data) ? JsonSerializer.Deserialize<IssuerDTO>(step.Data) ?? new IssuerDTO() : new IssuerDTO();
-
-                return Ok(issuerDto);
+                return Ok(issuerDTO);
             }
             catch (Exception ex)
             {

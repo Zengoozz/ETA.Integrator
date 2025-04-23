@@ -1,4 +1,9 @@
-﻿using ETA.Integrator.Server.Models.Provider;
+﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Extensions;
+using ETA.Integrator.Server.Interface.Services;
+using ETA.Integrator.Server.Models.Consumer.ETA;
+using ETA.Integrator.Server.Models.Consumer.Response;
+using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using RestSharp;
@@ -9,24 +14,28 @@ namespace ETA.Integrator.Server.Controllers
     [ApiController]
     public class InvoicesController : ControllerBase
     {
-        readonly RestClient _client;
+        readonly RestClient _providerClient;
         private readonly CustomConfigurations _customConfig;
 
         private readonly ILogger<InvoicesController> _logger;
 
+        private readonly ISettingsStepService _settingsStepService;
+
         public InvoicesController(
             IOptions<CustomConfigurations> customConfigurations,
-            ILogger<InvoicesController> logger
+            ILogger<InvoicesController> logger,
+            ISettingsStepService settingsStepService
             )
         {
             //var connectionString = Environment.GetEnvironmentVariable("HMS_API");
             _logger = logger;
             _customConfig = customConfigurations.Value;
+            _settingsStepService = settingsStepService;
 
             if (_customConfig.Provider_APIURL != null)
             {
                 var opt = new RestClientOptions(_customConfig.Provider_APIURL);
-                _client = new RestClient(opt);
+                _providerClient = new RestClient(opt);
             }
             else
             {
@@ -48,7 +57,7 @@ namespace ETA.Integrator.Server.Controllers
                 request.AddParameter("fromDate", ParameterType.QueryString)
                     .AddParameter("toDate", ParameterType.QueryString);
 
-                var response = await _client.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
+                var response = await _providerClient.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -64,10 +73,30 @@ namespace ETA.Integrator.Server.Controllers
             }
         }
 
-        //[HttpPost("Submit")]
-        //public async Task<IActionResult> SubmitInvoices(List<ProviderInvoiceViewModel> request)
-        //{
-        //    return Ok();
-        //}
+        [HttpPost("SubmitInvoice")]
+        public async Task<IActionResult> SubmitInvoice(ProviderInvoiceViewModel invoiceViewModel)
+        {
+            #region PreparingData
+            InvoiceModel invoice = new InvoiceModel();
+
+            //Issuer Data
+            IssuerDTO? issuerData = await _settingsStepService.GetIssuerData();
+
+            if (issuerData == null)
+            {
+                return BadRequest(new GenericResponse<string>
+                {
+                    Success = false,
+                    Code = "ISSUER_NOT_FOUND",
+                    Message = "Issuer data not found!",
+                    Data = null
+                });
+            }
+
+            IssuerModel? issuerModel = issuerData.ToIssuerModel();
+
+            #endregion
+            return Ok(issuerModel);
+        }
     }
 }
