@@ -14,13 +14,31 @@ namespace ETA.Integrator.Server.Services
             _settingsStepRepository = settingsStepRepository;
             _logger = logger;
         }
+
+        public async Task<ConnectionDTO?> GetConnectionData()
+        {
+            try
+            {
+                var step = await _settingsStepRepository.GetByStepNumber(1);
+
+                ConnectionDTO? connectionDto = !String.IsNullOrWhiteSpace(step.Data) ? JsonSerializer.Deserialize<ConnectionDTO>(step.Data) ?? null : null;
+
+                return connectionDto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get Connection Settings from DB");
+                return null;
+            }
+        }
+
         public async Task<IssuerDTO?> GetIssuerData()
         {
             try
             {
                 var step = await _settingsStepRepository.GetByStepNumber(2);
 
-                IssuerDTO issuerDto = !String.IsNullOrWhiteSpace(step.Data) ? JsonSerializer.Deserialize<IssuerDTO>(step.Data) ?? new IssuerDTO() : new IssuerDTO();
+                IssuerDTO? issuerDto = !String.IsNullOrWhiteSpace(step.Data) ? JsonSerializer.Deserialize<IssuerDTO>(step.Data) ?? null : null;
 
                 return issuerDto;
             }
