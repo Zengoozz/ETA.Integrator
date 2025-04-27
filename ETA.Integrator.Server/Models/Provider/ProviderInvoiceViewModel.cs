@@ -7,8 +7,8 @@
         public string InvoiceNumber { get; set; } = string.Empty;
         public string RegistrationNumber { set; get; } = string.Empty;
         public DateTime CreatedDate { set; get; }
-        public string ReceiverName { set; get; } = string.Empty;
         public string ReceiverAddress { set; get; } = string.Empty;
+        public string ReceiverName { set; get; } = string.Empty;
         public int ReceiverId { set; get; }
         public bool IsReviewed { set; get; } = false;
         public decimal VatNet { set; get; }

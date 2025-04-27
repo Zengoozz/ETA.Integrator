@@ -144,7 +144,7 @@ namespace ETA.Integrator.Server.Controllers
 
             #region PREPARING_DATA
 
-            InvoiceModel toSubmitInvoice = new InvoiceModel();
+            InvoiceModel document = new InvoiceModel();
 
             #region ISSUER_PREP
 
@@ -163,11 +163,36 @@ namespace ETA.Integrator.Server.Controllers
 
             IssuerModel? issuer = issuerData.ToIssuerModel();
 
+            if (issuer == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError ,new GenericResponse<IssuerDTO>
+                {
+                    Success = false,
+                    Code = "ISSUER_MAPPING_FAILED",
+                    Message = "Failed to map Issuer Data!",
+                    Data = issuerData
+                });
+            }
             #endregion
 
             #region RECEIVER_PREP
 
+            // BUILDING NUMBER | STREET | REGION/CITY | GOVERNATE | COUNTRY
+            List<string> address = invoiceViewModel.ReceiverAddress.Split('-').ToList();
+
             ReceiverModel receiver = new ReceiverModel();
+
+            receiver.Type = "B";
+            receiver.Id = invoiceViewModel.RegistrationNumber;
+            receiver.Name = invoiceViewModel.ReceiverName;
+            receiver.Address = new ReceiverAddressModel
+            {
+                BuildingNumber = address[0],
+                Street = address[1],
+                RegionCity = address[2],
+                Governate = address[3],
+                Country = address[4]
+            };
 
             #endregion
 
@@ -177,7 +202,7 @@ namespace ETA.Integrator.Server.Controllers
 
             InvoiceLineModel invoiceLine = new InvoiceLineModel
             {
-                InternalCode = "" // Required
+                InternalCode = "" // REQUIRED
             };
 
             invoiceLineList.Add(invoiceLine);
@@ -188,9 +213,9 @@ namespace ETA.Integrator.Server.Controllers
 
             List<TaxTotalModel> taxTotalList = new List<TaxTotalModel>();
 
-            TaxTotalModel taxTotalModel = new TaxTotalModel();
+            //TaxTotalModel taxTotalModel = new TaxTotalModel();
 
-            taxTotalList.Add(taxTotalModel);
+            //taxTotalList.Add(taxTotalModel);
 
             #endregion
 
@@ -198,38 +223,42 @@ namespace ETA.Integrator.Server.Controllers
 
             List<SignatureModel> signatureList = new List<SignatureModel>();
 
-            SignatureModel signature = new SignatureModel();
+            //SignatureModel signature = new SignatureModel
+            //{
+            //    Type = "S",
+            //    //Value = "SignatureValue", // REQUIRED
+            //};
 
-            signatureList.Add(signature);
+            //signatureList.Add(signature);
 
             #endregion
 
             #region INVOICE_PREP
 
-            toSubmitInvoice.Issuer = issuer;
-            toSubmitInvoice.Receiver = receiver;
-            toSubmitInvoice.DocumentType = "i";
-            toSubmitInvoice.DocumentTypeVersion = "1.0";
-            toSubmitInvoice.DateTimeIssued = invoiceViewModel.CreatedDate;
-            toSubmitInvoice.TaxpayerActivityCode = "8610"; //Hospital activities
-            toSubmitInvoice.InternalId = invoiceViewModel.InvoiceId.ToString();
-            toSubmitInvoice.InvoiceLines = invoiceLineList;
-            toSubmitInvoice.TotalSalesAmount = 0;
-            toSubmitInvoice.TotalDiscountAmount = 0;
-            toSubmitInvoice.NetAmount = 0;
-            toSubmitInvoice.TaxTotals = taxTotalList;
-            toSubmitInvoice.ExtraDiscountAmount = 0;
-            toSubmitInvoice.TotalItemsDiscountAmount = 0;
-            toSubmitInvoice.TotalAmount = 0;
-            toSubmitInvoice.Signatures = signatureList;
-            //invoice.purchaseOrderReference = ; // Optional
-            //invoice.purchaseOrderDescription = ; // Optional
-            //invoice.salesOrderReference = ; // Optional
-            //invoice.salesOrderDescription = ; // Optional
-            //invoice.proformaInvoiceNumber = ; // Optional
-            //invoice.payment = ; // Optional
-            //invoice.delivery = ; // Optional
-            //invoice.ServiceDeliveryDate = ; //Optional
+            document.Issuer = issuer;
+            document.Receiver = receiver;
+            document.DocumentType = "i";
+            document.DocumentTypeVersion = "1.0";
+            document.DateTimeIssued = invoiceViewModel.CreatedDate;
+            document.TaxpayerActivityCode = "8610"; // HOSPITAL ACTIVITIES CODE
+            document.InternalId = invoiceViewModel.InvoiceId.ToString();
+            document.InvoiceLines = invoiceLineList;
+            document.NetAmount = invoiceViewModel.NetPrice;
+            document.TaxTotals = taxTotalList;
+            document.Signatures = signatureList;
+            document.TotalSalesAmount = 0; // SUM INVOICE LINES SALES
+            document.TotalDiscountAmount = 0; // SUM INVOICE LINES DISCOUNTS
+            document.TotalItemsDiscountAmount = 0; // ? SAME AS TOTAL DISCOUNT AMOUNT ????
+            document.ExtraDiscountAmount = 0; // DISCOUNT OVERALL DOCUMENT
+            document.TotalAmount = invoiceViewModel.NetPrice + taxTotalList.Sum(x => x.Amount); // NET + TOTAL TAX
+            //document.purchaseOrderReference = ; // OPTIONAL
+            //document.purchaseOrderDescription = ; // OPTIONAL
+            //document.salesOrderReference = ; // OPTIONAL
+            //document.salesOrderDescription = ; // OPTIONAL
+            //document.proformaInvoiceNumber = ; // OPTIONAL
+            //document.payment = ; // OPTIONAL
+            //document.delivery = ; // OPTIONAL
+            //document.ServiceDeliveryDate = ; //OPTIONAL
 
             #endregion
 
@@ -248,7 +277,7 @@ namespace ETA.Integrator.Server.Controllers
 
 
             var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
-                .AddBody(toSubmitInvoice);
+                .AddBody(document);
 
 
             #endregion
