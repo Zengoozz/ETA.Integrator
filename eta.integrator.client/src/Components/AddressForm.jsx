@@ -1,9 +1,6 @@
 import React, { useEffect } from "react";
 import { Form, Input, Select, Space } from "antd";
-import {
-   CountriesCodes,
-   SettingsValidationRules,
-} from "../Constants/Constants";
+import { CountriesCodes, SettingsValidationRules } from "../Constants/Constants";
 
 const { Option } = Select;
 
@@ -56,7 +53,7 @@ const AddressForm = ({ isBusinessType, form }) => {
                rules={SettingsValidationRules.governorate}
                noStyle
             >
-               <Select
+               {/* <Select
                   disabled={true}
                 //   defaultValue={"cairo"}
                   placeholder="Governate/Province"
@@ -67,7 +64,11 @@ const AddressForm = ({ isBusinessType, form }) => {
                   }
                >
                   <Option value="cairo">Cairo</Option>
-               </Select>
+               </Select> */}
+               <Input
+                  disabled={false}
+                  placeholder="Governate/Province"
+               />
             </Form.Item>
 
             {/* Region/City */}
@@ -76,9 +77,9 @@ const AddressForm = ({ isBusinessType, form }) => {
                rules={SettingsValidationRules.region}
                noStyle
             >
-               <Select
+               {/* <Select
                   disabled={true}
-                //   defaultValue={"cairo"}
+                  //   defaultValue={"cairo"}
                   placeholder="Region/City"
                   showSearch
                   optionFilterProp="children"
@@ -87,7 +88,11 @@ const AddressForm = ({ isBusinessType, form }) => {
                   }
                >
                   <Option value="cairo">Cairo</Option>
-               </Select>
+               </Select> */}
+               <Input
+                  disabled={false}
+                  placeholder="Region/City"
+               />
             </Form.Item>
          </Space.Compact>
 
@@ -123,6 +128,5 @@ const AddressForm = ({ isBusinessType, form }) => {
       </Form.Item>
    );
 };
-
 
 export default AddressForm;

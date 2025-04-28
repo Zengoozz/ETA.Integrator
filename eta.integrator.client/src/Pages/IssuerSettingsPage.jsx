@@ -8,7 +8,7 @@ import { IssuerTypes, SettingsValidationRules } from "../Constants/Constants";
 
 const { Option } = Select;
 
-const IssuerSettingsPage = ({ isMobile }) => {
+const IssuerSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    const [form] = Form.useForm();
    const [isBusinessType, setIsBusinessType] = React.useState(false);
 
@@ -37,10 +37,13 @@ const IssuerSettingsPage = ({ isMobile }) => {
       fetchSettings();
    }, [form]);
 
-   const onSave = (values) => {
-      AuthService.updateStep(values, 2).then(() => {
-         console.log("Issuer settings saved successfully");
-      });
+   const onSave = async (values) => {
+      var response = await AuthService.updateStep(values, 2);
+      if (response == "UPDATED") {
+         setSuccessfulSave(true);
+      } else {
+         setSuccessfulSave(false);
+      }
    };
 
    const onSaveFailed = (errorInfo) => {
@@ -76,8 +79,8 @@ const IssuerSettingsPage = ({ isMobile }) => {
             initialValues={{
                Address: {
                   Country: "EG", // Default country
-                  Governate: "cairo", // Default governorate
-                  RegionCity: "cairo", // Default region
+                  // Governate: "cairo", // Default governorate
+                  // RegionCity: "cairo", // Default region
                },
             }}
          >
