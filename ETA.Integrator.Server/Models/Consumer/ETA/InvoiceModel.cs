@@ -8,7 +8,7 @@
         public string DocumentTypeVersion { get; set; } = string.Empty; // Must be "1.0"
         public DateTime DateTimeIssued { get; set; }
         public string TaxpayerActivityCode { get; set; } = string.Empty;
-        public string InternalId { get; set; } = string.Empty;
+        public string InternalID { get; set; } = string.Empty;
         public string PurchaseOrderReference { get; set; } = string.Empty;
         public string PurchaseOrderDescription { get; set; } = string.Empty;
         public string SalesOrderReference { get; set; } = string.Empty;

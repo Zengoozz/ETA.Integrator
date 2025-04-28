@@ -22,16 +22,19 @@ namespace ETA.Integrator.Server.Controllers
 
         private readonly ISettingsStepService _settingsStepService;
 
+        private readonly IInvoiceService _invoiceService;
+
         public InvoicesController(
             IOptions<CustomConfigurations> customConfigurations,
             ILogger<InvoicesController> logger,
-            ISettingsStepService settingsStepService
+            ISettingsStepService settingsStepService,
+            IInvoiceService invoiceService
             )
         {
-            //var connectionString = Environment.GetEnvironmentVariable("HMS_API");
             _logger = logger;
             _customConfig = customConfigurations.Value;
             _settingsStepService = settingsStepService;
+            _invoiceService = invoiceService;
         }
         [HttpGet]
         public async Task<IActionResult> GetInvoices(DateTime? fromDate, DateTime? toDate)
@@ -66,7 +69,6 @@ namespace ETA.Integrator.Server.Controllers
                 {
                     return StatusCode((int)response.StatusCode, response.ErrorMessage);
                 }
-
                 return Ok(response.Data);
             }
             catch (Exception ex)
@@ -77,7 +79,7 @@ namespace ETA.Integrator.Server.Controllers
         }
 
         [HttpPost("SubmitInvoice")]
-        public async Task<IActionResult> SubmitInvoice(ProviderInvoiceViewModel invoiceViewModel)
+        public async Task<IActionResult> SubmitInvoice(List<ProviderInvoiceViewModel> ivoiceViewModelList)
         {
             #region API_CONNECT_CONFIG
 
@@ -142,9 +144,7 @@ namespace ETA.Integrator.Server.Controllers
             }
             #endregion
 
-            #region PREPARING_DATA
-
-            InvoiceModel document = new InvoiceModel();
+            List<InvoiceModel> documents = new List<InvoiceModel>();
 
             #region ISSUER_PREP
 
@@ -165,7 +165,7 @@ namespace ETA.Integrator.Server.Controllers
 
             if (issuer == null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError ,new GenericResponse<IssuerDTO>
+                return StatusCode(StatusCodes.Status500InternalServerError, new GenericResponse<IssuerDTO>
                 {
                     Success = false,
                     Code = "ISSUER_MAPPING_FAILED",
@@ -175,93 +175,13 @@ namespace ETA.Integrator.Server.Controllers
             }
             #endregion
 
-            #region RECEIVER_PREP
-
-            // BUILDING NUMBER | STREET | REGION/CITY | GOVERNATE | COUNTRY
-            List<string> address = invoiceViewModel.ReceiverAddress.Split('-').ToList();
-
-            ReceiverModel receiver = new ReceiverModel();
-
-            receiver.Type = "B";
-            receiver.Id = invoiceViewModel.RegistrationNumber;
-            receiver.Name = invoiceViewModel.ReceiverName;
-            receiver.Address = new ReceiverAddressModel
-            {
-                BuildingNumber = address[0],
-                Street = address[1],
-                RegionCity = address[2],
-                Governate = address[3],
-                Country = address[4]
-            };
-
-            #endregion
-
-            #region INVOICE_LINE_PREP
-
-            List<InvoiceLineModel> invoiceLineList = new List<InvoiceLineModel>();
-
-            InvoiceLineModel invoiceLine = new InvoiceLineModel
-            {
-                InternalCode = "" // REQUIRED
-            };
-
-            invoiceLineList.Add(invoiceLine);
-
-            #endregion
-
-            #region TAX_TOTAL_PREP
-
-            List<TaxTotalModel> taxTotalList = new List<TaxTotalModel>();
-
-            //TaxTotalModel taxTotalModel = new TaxTotalModel();
-
-            //taxTotalList.Add(taxTotalModel);
-
-            #endregion
-
-            #region SIGNATURES_PREP
-
-            List<SignatureModel> signatureList = new List<SignatureModel>();
-
-            //SignatureModel signature = new SignatureModel
-            //{
-            //    Type = "S",
-            //    //Value = "SignatureValue", // REQUIRED
-            //};
-
-            //signatureList.Add(signature);
-
-            #endregion
-
             #region INVOICE_PREP
+            foreach (var invoice in ivoiceViewModelList)
+            {
+                var doc = _invoiceService.PrepareInvoiceData(invoice, issuer);
 
-            document.Issuer = issuer;
-            document.Receiver = receiver;
-            document.DocumentType = "i";
-            document.DocumentTypeVersion = "1.0";
-            document.DateTimeIssued = invoiceViewModel.CreatedDate;
-            document.TaxpayerActivityCode = "8610"; // HOSPITAL ACTIVITIES CODE
-            document.InternalId = invoiceViewModel.InvoiceId.ToString();
-            document.InvoiceLines = invoiceLineList;
-            document.NetAmount = invoiceViewModel.NetPrice;
-            document.TaxTotals = taxTotalList;
-            document.Signatures = signatureList;
-            document.TotalSalesAmount = 0; // SUM INVOICE LINES SALES
-            document.TotalDiscountAmount = 0; // SUM INVOICE LINES DISCOUNTS
-            document.TotalItemsDiscountAmount = 0; // ? SAME AS TOTAL DISCOUNT AMOUNT ????
-            document.ExtraDiscountAmount = 0; // DISCOUNT OVERALL DOCUMENT
-            document.TotalAmount = invoiceViewModel.NetPrice + taxTotalList.Sum(x => x.Amount); // NET + TOTAL TAX
-            //document.purchaseOrderReference = ; // OPTIONAL
-            //document.purchaseOrderDescription = ; // OPTIONAL
-            //document.salesOrderReference = ; // OPTIONAL
-            //document.salesOrderDescription = ; // OPTIONAL
-            //document.proformaInvoiceNumber = ; // OPTIONAL
-            //document.payment = ; // OPTIONAL
-            //document.delivery = ; // OPTIONAL
-            //document.ServiceDeliveryDate = ; //OPTIONAL
-
-            #endregion
-
+                documents.Add(doc);
+            }
             #endregion
 
             #region SUBMIT
@@ -275,14 +195,20 @@ namespace ETA.Integrator.Server.Controllers
 
             var submitClient = new RestClient(submitOpt);
 
+            var submitRequestBody = new
+            {
+                documents = documents
+            };
 
             var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
-                .AddBody(document);
+                .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
 
+
+            var submitResponse = await submitClient.ExecuteAsync(submitRequest);
 
             #endregion
 
-            return Ok(issuer);
+            return Ok(submitRequestBody);
         }
     }
 }

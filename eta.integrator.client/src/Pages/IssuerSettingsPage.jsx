@@ -120,8 +120,8 @@ const IssuerSettingsPage = ({ isMobile }) => {
                   { whitespace: true, message: "Username cannot be empty spaces" },
                ]}
             >
-               <Input.OTP
-                  formatter={(value) => value.replace(/\D/g, "")}
+               <Input
+                  // formatter={(value) => value.replace(/\D/g, "")}
                   length={12}
                   size={isMobile ? "large" : "middle"}
                   autoComplete="off"

@@ -12,6 +12,7 @@ namespace ETA.Integrator.Server.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddTransient<ISettingsStepService, SettingsStepService>();
+            services.AddTransient<IInvoiceService, InvoiceService>();
 
             return services;
         }

@@ -1,4 +1,6 @@
-﻿namespace ETA.Integrator.Server.Models.Provider
+﻿using ETA.Integrator.Server.Models.Consumer.ETA;
+
+namespace ETA.Integrator.Server.Models.Provider
 {
     public class ProviderInvoiceViewModel
     {
@@ -17,5 +19,6 @@
         public decimal FinShare { set; get; }
         public decimal VatFinShare { set; get; }
         public decimal VatPatShare { set; get; }
+        public List<InvoiceLineModel> InvoiceItems { set; get; } = new();
     }
 }

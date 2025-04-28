@@ -55,7 +55,7 @@ const InvoicesTable = ({ isMobile, tableData, onSubmit, loading, messageApi }) =
                width: isMobile ? 150 : "auto",
                responsive: ["md"],
             }))}
-            rowKey={(record) => record.inoviceNumber}
+            rowKey={(record) => record.invoiceNumber}
             pagination={{
                pageSize: isMobile ? 5 : 10,
                responsive: true,
