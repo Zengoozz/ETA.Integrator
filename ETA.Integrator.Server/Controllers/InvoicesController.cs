@@ -37,7 +37,7 @@ namespace ETA.Integrator.Server.Controllers
             _invoiceService = invoiceService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetInvoices(DateTime? fromDate, DateTime? toDate)
+        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate)
         {
             try
             {
@@ -81,69 +81,23 @@ namespace ETA.Integrator.Server.Controllers
         [HttpPost("SubmitInvoice")]
         public async Task<IActionResult> SubmitInvoice(List<ProviderInvoiceViewModel> ivoiceViewModelList)
         {
-            #region API_CONNECT_CONFIG
-
-            var connectionConfig = await _settingsStepService.GetConnectionData();
-
-            // CLIENT_ID | CLIENT_SECRET VALIDATION
-            if (connectionConfig == null || string.IsNullOrWhiteSpace(connectionConfig.ClientId) || string.IsNullOrWhiteSpace(connectionConfig.ClientSecret))
+            #region CONSUMER AUTH
+            
+            if (String.IsNullOrWhiteSpace(_customConfig.Consumer_Token))
             {
-                _logger.LogError("Failed to get the manual connection config");
-
-                return StatusCode(StatusCodes.Status400BadRequest, new GenericResponse<string>
+                var authResponse = await AuthorizeConsumer();
+                if (authResponse.Success && authResponse.Data != null)
                 {
-                    Success = false,
-                    Code = "CONNECTION_CONFIG_NOT_FOUND",
-                    Message = "Connection configuration (Manual) not found",
-                    Data = null
-                });
-            }
-
-            var token = "";
-
-            // GENERATING CONSUMER TOKEN
-            if (!String.IsNullOrWhiteSpace(_customConfig.Consumer_IdSrvBaseUrl))
-            {
-                var authOpt = new RestClientOptions(_customConfig.Consumer_IdSrvBaseUrl);
-                var authClient = new RestClient(authOpt);
-
-                var authRequest = new RestRequest("/connect/token", Method.Post)
-                    .AddParameter("grant_type", "client_credentials")
-                    .AddParameter("client_id", connectionConfig.ClientId)
-                    .AddParameter("client_secret", connectionConfig.ClientSecret)
-                    .AddParameter("scope", "InvoicingAPI");
-
-                var response = await authClient.ExecuteAsync<ConsumerConnectionResponseModel>(authRequest);
-
-                if (response.Data != null && response.IsSuccessStatusCode)
-                {
-                    token = response.Data.access_token;
+                    _customConfig.Consumer_Token = authResponse.Data;
                 }
                 else
                 {
-                    _logger.LogError("Failed to connect to the consumer API");
-                    return StatusCode(StatusCodes.Status500InternalServerError, new GenericResponse<RestResponse<ConsumerConnectionResponseModel>?>
-                    {
-                        Success = false,
-                        Code = "CONSUMER_CONNECTION_FAILED",
-                        Message = "Connecting to consumer failed",
-                        Data = response
-                    });
+                    return StatusCode(authResponse.StatusCode ?? StatusCodes.Status500InternalServerError, authResponse);
                 }
             }
-            else
-            {
-                _logger.LogError("Failed to get the consumer IdSrvURL");
-                return StatusCode(StatusCodes.Status500InternalServerError, new GenericResponse<string>
-                {
-                    Success = false,
-                    Code = "CONNECTION_URL_NOT_FOUND",
-                    Message = "Connection configuration (IdSrvUrl) not found",
-                    Data = null
-                });
-            }
+            
             #endregion
-
+            
             List<InvoiceModel> documents = new List<InvoiceModel>();
 
             #region ISSUER_PREP
@@ -186,7 +140,7 @@ namespace ETA.Integrator.Server.Controllers
 
             #region SUBMIT
 
-            var authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(_customConfig.Consumer_Token, "Bearer");
 
             var submitOpt = new RestClientOptions(_customConfig.Consumer_APIBaseUrl)
             {
@@ -209,6 +163,141 @@ namespace ETA.Integrator.Server.Controllers
             #endregion
 
             return Ok(submitRequestBody);
+        }
+
+        [HttpGet("GetRecent")]
+        public async Task<IActionResult> GetRecentDocuments()
+        {
+            #region CONSUMER AUTH
+            
+            if (String.IsNullOrWhiteSpace(_customConfig.Consumer_Token))
+            {
+                var authResponse = await AuthorizeConsumer();
+
+                if (authResponse.Success && authResponse.Data != null)
+                {
+                    _customConfig.Consumer_Token = authResponse.Data;
+                }
+                else
+                {
+                    return StatusCode(authResponse.StatusCode ?? StatusCodes.Status500InternalServerError, authResponse);
+                }
+            }
+            
+            #endregion
+
+            var authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(_customConfig.Consumer_Token, "Bearer");
+
+            var submitOpt = new RestClientOptions(_customConfig.Consumer_APIBaseUrl)
+            {
+                Authenticator = authenticator
+            };
+
+            var submitClient = new RestClient(submitOpt);
+
+            DateTime utcNow = DateTime.UtcNow;
+
+            // Create a new DateTime without milliseconds
+            DateTime trimmedUtcNow = new DateTime(
+                utcNow.Year,
+                utcNow.Month,
+                utcNow.Day,
+                utcNow.Hour,
+                utcNow.Minute,
+                utcNow.Second,
+                DateTimeKind.Utc
+            );
+
+            var submitRequest = new RestRequest("/api/v1/documents/recent", Method.Get)
+                .AddHeader("Content-Type", "application/json")
+                .AddQueryParameter("pageNo", 1)
+                .AddQueryParameter("pageSize", 100)
+                .AddQueryParameter("submissionDateFrom", trimmedUtcNow.AddMonths(-1).ToString())
+                .AddQueryParameter("submissionDateTo", trimmedUtcNow.ToString())
+                .AddQueryParameter("documentType", "i");
+
+
+            var submitResponse = await submitClient.ExecuteAsync(submitRequest);
+
+            return Ok(submitResponse.Content);
+        }
+
+        private async Task<GenericResponse<string>> AuthorizeConsumer()
+        {
+            #region API_CONNECT_CONFIG
+
+            var connectionConfig = await _settingsStepService.GetConnectionData();
+
+            // CLIENT_ID | CLIENT_SECRET VALIDATION
+            if (connectionConfig == null || string.IsNullOrWhiteSpace(connectionConfig.ClientId) || string.IsNullOrWhiteSpace(connectionConfig.ClientSecret))
+            {
+                _logger.LogError("Failed to get the manual connection config");
+
+                return new GenericResponse<string>
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Success = false,
+                    Code = "CONNECTION_CONFIG_NOT_FOUND",
+                    Message = "Connection configuration (Manual) not found",
+                    Data = null
+                }
+                ;
+            }
+
+            var token = "";
+
+            // GENERATING CONSUMER TOKEN
+            if (!String.IsNullOrWhiteSpace(_customConfig.Consumer_IdSrvBaseUrl))
+            {
+                var authOpt = new RestClientOptions(_customConfig.Consumer_IdSrvBaseUrl);
+                var authClient = new RestClient(authOpt);
+
+                var authRequest = new RestRequest("/connect/token", Method.Post)
+                    .AddParameter("grant_type", "client_credentials")
+                    .AddParameter("client_id", connectionConfig.ClientId)
+                    .AddParameter("client_secret", connectionConfig.ClientSecret)
+                    .AddParameter("scope", "InvoicingAPI");
+
+                var response = await authClient.ExecuteAsync<ConsumerConnectionResponseModel>(authRequest);
+
+                if (response.Data != null && response.IsSuccessStatusCode)
+                {
+                    token = response.Data.access_token;
+                    return new GenericResponse<string>
+                    {
+                        StatusCode = (int)HttpStatusCode.OK,
+                        Success = true,
+                        Code = "TOKEN_CREATED",
+                        Message = "token created",
+                        Data = token
+                    };
+                }
+                else
+                {
+                    _logger.LogError("Failed to connect to the consumer API");
+                    return new GenericResponse<string>
+                    {
+                        StatusCode = (int)HttpStatusCode.InternalServerError,
+                        Success = false,
+                        Code = "CONSUMER_CONNECTION_FAILED",
+                        Message = "Connecting to consumer failed",
+                        Data = null
+                    };
+                }
+            }
+            else
+            {
+                _logger.LogError("Failed to get the consumer IdSrvURL");
+                return new GenericResponse<string>
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Success = false,
+                    Code = "CONNECTION_URL_NOT_FOUND",
+                    Message = "Connection configuration (IdSrvUrl) not found",
+                    Data = null
+                };
+            }
+            #endregion
         }
     }
 }
