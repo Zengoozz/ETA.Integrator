@@ -4,6 +4,7 @@ import { Flex, Card, message } from "antd";
 import InvoicesTable from "../Components/InvoicesTable";
 import DateRangeSearch from "../Components/DateRangeSearch";
 
+import { InvoicesTableColumns } from "../Constants/ConstantsComponents";
 import InvoicesService from "../Services/InvoicesService";
 
 const InvoicesPage = ({ isMobile }) => {
@@ -68,6 +69,8 @@ const InvoicesPage = ({ isMobile }) => {
                   onSubmit={onSubmit}
                   loading={loading}
                   messageApi={messageApi}
+                  tableType="W"
+                  tableColumns={InvoicesTableColumns}
                />
             </Flex>
          </Card>

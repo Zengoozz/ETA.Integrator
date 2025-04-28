@@ -1324,6 +1324,7 @@ const ROUTES = {
    FIRST_STEP: "/connection-settings",
    SECOND_STEP: "/issuer-settings",
    COMPLETED: "/home/invoices",
+   SUBMITTED: "/home/submitted-invoices",
 };
 
 export {

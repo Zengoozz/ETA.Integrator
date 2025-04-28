@@ -29,4 +29,22 @@ const submitInvoices = async (invoices) => {
    }
 };
 
-export default { getInvoicesAccordingToDateAsQueryParams, submitInvoices };
+const getSubmittedInvoices = async () => {
+   try {
+      const response = await GenericService.makeRequestFactory(
+         "GET",
+         "/Invoices/GetRecent"
+      );
+      console.log(response);
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
+};
+
+export default {
+   getInvoicesAccordingToDateAsQueryParams,
+   submitInvoices,
+   getSubmittedInvoices,
+};

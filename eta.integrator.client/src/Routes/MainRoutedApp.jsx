@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Outlet, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Flex } from "antd";
 
 import LoginFormPage from "../Pages/LoginFormPage.jsx";
@@ -18,6 +18,7 @@ import useAuthPresistence from "../Hooks/useAuthPresistence.jsx";
 
 import RootRoutes from "./RootRoutes.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import SubmittedInvoicesPage from "../Pages/SubmittedInvoicesPage.jsx";
 
 const MainRoutedApp = ({ mode, setMode, isMobile }) => {
    const [isLoggedIn, setLogIn] = useState(false);
@@ -193,6 +194,10 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                         />
                      )
                   }
+               />
+               <Route
+                  path={ROUTES.SUBMITTED}
+                  element={<SubmittedInvoicesPage isMobile={isMobile} />}
                />
                <Route
                   path="*"
