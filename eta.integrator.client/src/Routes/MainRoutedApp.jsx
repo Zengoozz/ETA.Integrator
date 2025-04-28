@@ -140,6 +140,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                      >
                         <StepperWrapper
                            currentStep={1}
+                           setUserProgress={setUserProgress}
                            isMobile={isMobile}
                         />
                      </EnforceStepperFlow>
@@ -155,6 +156,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                      >
                         <StepperWrapper
                            currentStep={2}
+                           setUserProgress={setUserProgress}
                            isMobile={isMobile}
                         />
                      </EnforceStepperFlow>

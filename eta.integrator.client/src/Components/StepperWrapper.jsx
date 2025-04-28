@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Steps, Button, Flex } from "antd";
 import { useNavigate } from "react-router-dom";
 
@@ -7,20 +7,27 @@ import IssuerSettingsPage from "../Pages/IssuerSettingsPage.jsx";
 
 import { ROUTES } from "../Constants/Constants.js";
 
-const StepperWrapper = ({ currentStep, isMobile }) => {
+const StepperWrapper = ({ currentStep, isMobile, setUserProgress }) => {
+   const [isSuccessfulSave, setSuccessfulSave] = useState(false);
    const navigate = useNavigate();
 
    // Define the steps
    const steps = [
       {
          title: "Connection Settings",
-         content: <ConnectionSettingsPage isMobile={isMobile} />,
+         content: (
+            <ConnectionSettingsPage
+               isMobile={isMobile}
+               setSuccessfulSave={setSuccessfulSave}
+            />
+         ),
       },
       {
          title: "Issuer Settings",
          content: (
             <IssuerSettingsPage
                isMobile={isMobile} // Assuming you have a home route
+               setSuccessfulSave={setSuccessfulSave}
             />
          ),
       },
@@ -29,8 +36,12 @@ const StepperWrapper = ({ currentStep, isMobile }) => {
    // Handle navigation to the next step
    const goToNextStep = () => {
       if (currentStep === 1) {
+         console.log("Navigating to second step");
+         setUserProgress(2); // Update user progress in the parent component
          navigate(ROUTES.SECOND_STEP);
       } else if (currentStep === 2) {
+         console.log("Navigating to completed step");
+         setUserProgress("completed"); // Update user progress in the parent component
          navigate(ROUTES.COMPLETED);
       }
    };
@@ -67,18 +78,19 @@ const StepperWrapper = ({ currentStep, isMobile }) => {
             justify="center"
             style={{ marginTop: "24px" }}
          >
-            {currentStep > 1 && (
+            {/* {currentStep > 1 && (
                <Button
                   onClick={() => navigate(-1)} // Go back to the previous step
                   size={isMobile ? "large" : "middle"}
                >
                   Previous
                </Button>
-            )}
+            )} */}
             <Button
                type="primary"
                onClick={goToNextStep}
                size={isMobile ? "large" : "middle"}
+               disabled={!isSuccessfulSave} // Disable if save is not successful
             >
                {currentStep === steps.length ? "Finish Setup" : "Next Step"}
             </Button>

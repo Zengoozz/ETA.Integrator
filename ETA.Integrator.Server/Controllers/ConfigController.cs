@@ -88,7 +88,7 @@ namespace ETA.Integrator.Server.Controllers
             try
             {
                 await _settingsStepRepository.UpdateStepWithData(updateStepDTO.Order, updateStepDTO.Data);
-                return Ok("Updated");
+                return Ok("UPDATED");
             }
             catch (Exception ex)
             {
