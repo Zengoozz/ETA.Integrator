@@ -1,0 +1,196 @@
+ const InvoicesType = {
+    InoviceNumber: String,
+    InoviceType: String,
+    VatNet: Number,
+    NetPrice: Number,
+    PatShare: Number,
+    FinShare: Number,
+    VatFinShare: Number,
+    VatPatShare: Number,
+    InvoiceId: Number,
+    createdDate: Date,
+    IsReviewed: Boolean,
+    InovicingNumber: String,
+    FinancialClassName: String,
+ };
+ 
+ const _biggerData = Array.from({ length: 46 }).map((_, i) => {
+    return {
+       key: i,
+       receiptnumber: i,
+       visittype: "OP",
+       company: "Oscar Company-Ocsar Company-Class C",
+       taxregisterationnumber: 1232312312,
+       netprice: 87.5,
+       patientshare: 17.5,
+       financialshare: 70.0,
+       vatnet: 0.0,
+       date: new Date("03/12/2025"),
+       status: i % 4 ? false : true,
+    };
+ });
+
+// RULES //
+
+Gross = 1500
+Net = 1350
+Qty = 2
+totalTaxableFees = 0 
+VAT = 0.14
+ValueDifference = 0 // الفرق اذا كان مدفوع عليه ضريبة قيمه مسبقه
+
+VatValue = Net/Unit * VatRate  = 1350 * 0.14 = 378
+ValueDifference =  
+SalesTotal = Gross/Unit * Qty // 3000
+ItemDiscount = (Gross/Unit - Net/Unit) * Qty // (1500-1350) * 2 = 300
+NetTotal = SalesTotal - itemDiscount // (Net * qty) // 2700
+Total = NetTotal + Sum(taxableItems.amount) + totalTaxableFees - valueDifference // 2700 + 378 + 0 - 0
+
+// TaxableItems /ex: (ضريبة القيمه المضافه)
+// totalTaxableFees /ex:(رسوم الخدمه او رسوم النقل او اي رسوم غير خاضعه للضريبه)
+---------------------------------------------------------------------------------------------------
+// NOTE // |
+-----------
+^ NetPrice/Unit = CashPayedService.PatShare +  CashPayedService.FinShare 
+^ GrossPrice/Unit = CashPayedService.NetPrice
+^ ItemDiscount/Unit = Gross - Net
+^ Qty = VisitService.Qty
+^ TotalInvoiceDiscount = CashUnitTransaction.Discount 
+
+
+
+{
+    "documents": [
+        {
+            "issuer": {
+                "type": "B",
+                "id": "530813904",
+                "name": "هشام لاشين وشركاه",
+                "address": {
+                    "branchId": "123",
+                    "country": "EG",
+                    "governate": "cairo",
+                    "regionCity": "cairo",
+                    "street": "580 Clementina Key, 7660 Melody Trail beside Townhall",
+                    "buildingNumber": "0",
+                    "postalCode": "",
+                    "floor": "",
+                    "room": "",
+                    "landmark": "",
+                    "additionalInformation": ""
+                }
+            },
+            "receiver": {
+                "type": "B",
+                "id": "313717919",
+                "name": "التعاون لبترول - التعاون لبترول - 25%",
+                "address": {
+                    "country": "EG",
+                    "governate": " القاهرة ",
+                    "regionCity": " قسم اول مدينة نصر ",
+                    "street": " ش غرب الاستاد الحى السادس - مدينه نصر ",
+                    "buildingNumber": "0 ",
+                    "postalCode": "",
+                    "floor": "",
+                    "room": "",
+                    "landmark": "",
+                    "additionalInformation": ""
+                }
+            },
+            "documentType": "i",
+            "documentTypeVersion": "0.9",
+            "dateTimeIssued": "2025-04-28T16:08:43Z",
+            "taxpayerActivityCode": "8610",
+            "internalID": "9344",
+            "purchaseOrderReference": "",
+            "purchaseOrderDescription": "",
+            "salesOrderReference": "",
+            "salesOrderDescription": "",
+            "proformaInvoiceNumber": "",
+            "payment": {
+                "bankName": "",
+                "bankAddress": "",
+                "bankAccountNo": "",
+                "bankAccountIBAN": "",
+                "swiftCode": "",
+                "terms": ""
+            },
+            "delivery": {
+                "approach": "",
+                "packaging": "",
+                "dateValidity": "",
+                "exportPort": "",
+                "countryOfOrigin": "",
+                "grossWeight": 0,
+                "netWeight": 0,
+                "terms": ""
+            },
+            "invoiceLines": [
+                {
+                    "description": "إختبار ضغط الأذن",
+                    "itemType": "EGS",
+                    "itemCode": "EG-530813904-E1",
+                    "unitType": "JOB",
+                    "quantity": 1,
+                    "unitValue": {
+                        "currencySold": "EGP",
+                        "amountEGP": 525,
+                        "amountSold": 0,
+                        "currencyExchangeRate": 0
+                    },
+                    "salesTotal": 210,
+                    "total": 525,
+                    "valueDifference": 315,
+                    "totalTaxableFees": 0,
+                    "netTotal": 210,
+                    "itemsDiscount": 315,
+                    "discount": {
+                        "rate": 0.6,
+                        "amount": 315
+                    },
+                    "taxableItems": [],
+                    "internalCode": "10863"
+                },
+                {
+                    "description": "إختبار السمع بالنغمات النقية",
+                    "itemType": "EGS",
+                    "itemCode": "EG-530813904-E1",
+                    "unitType": "JOB",
+                    "quantity": 1,
+                    "unitValue": {
+                        "currencySold": "EGP",
+                        "amountEGP": 750,
+                        "amountSold": 0,
+                        "currencyExchangeRate": 0
+                    },
+                    "salesTotal": 300,
+                    "total": 750,
+                    "valueDifference": 450,
+                    "totalTaxableFees": 0,
+                    "netTotal": 300,
+                    "itemsDiscount": 450,
+                    "discount": {
+                        "rate": 0.6,
+                        "amount": 450
+                    },
+                    "taxableItems": [],
+                    "internalCode": "10862"
+                }
+            ],
+            "totalSalesAmount": 510,
+            "totalDiscountAmount": 765,
+            "netAmount": 510,
+            "taxTotals": [],
+            "extraDiscountAmount": 0,
+            "totalItemsDiscountAmount": 765,
+            "totalAmount": 510,
+            "signatures": [
+                {
+                    "signatureType": "I",
+                    "value": "SignatureValue"
+                }
+            ],
+            "serviceDeliveryDate": null
+        }
+    ]
+}
