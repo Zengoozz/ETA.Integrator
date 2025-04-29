@@ -1,16 +1,21 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Flex, Card, message } from "antd";
+import { RightCircleOutlined } from "@ant-design/icons";
 
 import InvoicesTable from "../Components/InvoicesTable";
 import DateRangeSearch from "../Components/DateRangeSearch";
+import CustomButton from "../Components/CustomButton";
 
 import { InvoicesTableColumns } from "../Constants/ConstantsComponents";
 import InvoicesService from "../Services/InvoicesService";
+import { ROUTES } from "../Constants/Constants";
 
 const InvoicesPage = ({ isMobile }) => {
    const [loading, setLoading] = useState(false);
    const [tableData, setTableData] = useState([]); // State to hold table data
    const [messageApi, contextHolder] = message.useMessage();
+   const navigate = useNavigate();
 
    const onSubmit = async (selectedRows) => {
       const loadingMessage = messageApi.open({
@@ -21,7 +26,7 @@ const InvoicesPage = ({ isMobile }) => {
 
       // Start loading
       setLoading(true);
-      
+
       try {
          await InvoicesService.submitInvoices(selectedRows);
          messageApi.open({
@@ -57,11 +62,23 @@ const InvoicesPage = ({ isMobile }) => {
                vertical
                gap="middle"
             >
-               <DateRangeSearch
-                  isMobile={isMobile}
-                  handleSearch={handleSearch}
-                  messageApi={messageApi}
-               />
+               <Flex 
+               justify="space-between"
+               >
+                  <DateRangeSearch
+                     isMobile={isMobile}
+                     handleSearch={handleSearch}
+                     messageApi={messageApi}
+                  />
+
+                  <CustomButton
+                     name="Submitted Invoices"
+                     icon={<RightCircleOutlined />}
+                     handleClick={() => navigate(ROUTES.SUBMITTED)}
+                     type="link"
+                     style={{ padding: 0 }}
+                  />
+               </Flex>
 
                <InvoicesTable
                   isMobile={isMobile}

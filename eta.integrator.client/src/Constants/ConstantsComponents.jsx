@@ -70,4 +70,63 @@ const InvoicesTableColumns = [
    },
 ];
 
-export { InvoicesTableColumns };
+const SubmittedInvoiceColumns = [
+   {
+      title: "Id / InternalId",
+      // dataIndex: "internalId",
+      render: (_, record) => (
+         <>
+            <a>
+               {record.internalId} / {record.uuid}
+            </a>
+         </>
+      ),
+   },
+   {
+      title: "Date Time Received",
+      dataIndex: "dateTimeReceived",
+      render: (text) => (
+         <>
+            <a>{text}</a>
+         </>
+      ),
+   },
+   {
+      title: "Total Value",
+      dataIndex: "total",
+      render: (text) => (
+         <>
+            <a>{text}</a>
+         </>
+      ),
+   },
+   {
+      title: "Issuer",
+      dataIndex: "issuerName",
+      render: (text) => (
+         <>
+            <a>{text}</a>
+         </>
+      ),
+   },
+   {
+      title: "Receiver",
+      dataIndex: "receiverName",
+      render: (text) => (
+         <>
+            <a>{text}</a>
+         </>
+      ),
+   },
+   {
+      title: "Status",
+      dataIndex: "status",
+      render: (text) => (
+         <>
+            <a>{text}</a>
+         </>
+      ),
+   },
+];
+
+export { InvoicesTableColumns, SubmittedInvoiceColumns };

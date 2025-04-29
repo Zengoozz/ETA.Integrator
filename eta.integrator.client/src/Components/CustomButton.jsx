@@ -1,24 +1,32 @@
-import React from 'react'
+import React from "react";
 
-import { Button } from 'antd'
+import { Button } from "antd";
 
-const CustomButton = ({ name = 'Submit', icon, loading, handleClick }) => {
-    return (
-        <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-                <Button
-                    type='primary'
-                    icon={icon}
-                    size='large'
-                    onClick={handleClick}
-                    loading={loading}
-                    disabled={loading}
-                >
-                    {name}
-                </Button>
-            </div>
-        </>
-    )
-}
+const CustomButton = ({
+   name = "Submit",
+   icon,
+   loading,
+   handleClick,
+   type = "primary",
+   style = {}
+}) => {
+   return (
+      <>
+         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+            <Button
+               type={type}
+               icon={icon}
+               size="large"
+               onClick={handleClick}
+               loading={loading}
+               disabled={loading}
+               style={style}
+            >
+               {name}
+            </Button>
+         </div>
+      </>
+   );
+};
 
-export default CustomButton
+export default CustomButton;
