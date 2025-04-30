@@ -197,7 +197,16 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                />
                <Route
                   path={ROUTES.SUBMITTED}
-                  element={<SubmittedInvoicesPage isMobile={isMobile} />}
+                  element={
+                     userProgress === "completed" ? (
+                        <SubmittedInvoicesPage isMobile={isMobile} />
+                     ) : (
+                        <Navigate
+                           to="/"
+                           replace
+                        />
+                     )
+                  }
                />
                <Route
                   path="*"

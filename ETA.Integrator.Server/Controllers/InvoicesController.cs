@@ -7,8 +7,6 @@ using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using RestSharp.Authenticators.OAuth2;
-using System.Net;
 
 namespace ETA.Integrator.Server.Controllers
 {

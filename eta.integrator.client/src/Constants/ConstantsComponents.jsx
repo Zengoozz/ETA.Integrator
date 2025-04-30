@@ -77,7 +77,7 @@ const SubmittedInvoiceColumns = [
       render: (_, record) => (
          <>
             <a>
-               {record.internalId} / {record.uuid}
+               <span>{record.uuid}</span> / <span>{record.internalId}</span>
             </a>
          </>
       ),
@@ -85,47 +85,27 @@ const SubmittedInvoiceColumns = [
    {
       title: "Date Time Received",
       dataIndex: "dateTimeReceived",
-      render: (text) => (
-         <>
-            <a>{text}</a>
-         </>
-      ),
+      render: (text) => <>{text}</>,
    },
    {
       title: "Total Value",
       dataIndex: "total",
-      render: (text) => (
-         <>
-            <a>{text}</a>
-         </>
-      ),
+      render: (text) => <>{text}</>,
    },
    {
       title: "Issuer",
       dataIndex: "issuerName",
-      render: (text) => (
-         <>
-            <a>{text}</a>
-         </>
-      ),
+      render: (text) => <>{text}</>,
    },
    {
       title: "Receiver",
       dataIndex: "receiverName",
-      render: (text) => (
-         <>
-            <a>{text}</a>
-         </>
-      ),
+      render: (text) => <>{text}</>,
    },
    {
       title: "Status",
       dataIndex: "status",
-      render: (text) => (
-         <>
-            <a>{text}</a>
-         </>
-      ),
+      render: (text) => <>{text}</>,
    },
 ];
 
