@@ -79,6 +79,8 @@ namespace ETA.Integrator.Server.Services
 
             document.Issuer = issuer;
             document.Receiver = receiver;
+            document.TaxTotals = taxTotalList;
+            document.Signatures = signatureList;
             document.DocumentType = "i";
             document.DocumentTypeVersion = "0.9";
             document.DateTimeIssued = trimmedUtcNow;
@@ -86,13 +88,11 @@ namespace ETA.Integrator.Server.Services
             document.InternalID = invoiceViewModel.InvoiceId.ToString();
             document.InvoiceLines = invoiceViewModel.InvoiceItems;
             document.NetAmount = invoiceViewModel.NetPrice;
-            document.TaxTotals = taxTotalList;
-            document.Signatures = signatureList;
             document.TotalSalesAmount = invoiceViewModel.InvoiceItems.Sum(i => i.SalesTotal); // SUM INVOICE LINES SALES
-            document.TotalDiscountAmount = invoiceViewModel.InvoiceItems.Sum(i => i.Discount.Amount); // SUM INVOICE LINES DISCOUNTS
-            document.TotalItemsDiscountAmount = document.TotalDiscountAmount; // ? SAME AS TOTAL DISCOUNT AMOUNT ????
-            document.ExtraDiscountAmount = 0; // DISCOUNT OVERALL DOCUMENT
             document.TotalAmount = invoiceViewModel.NetPrice + taxTotalList.Sum(x => x.Amount); // NET + TOTAL TAX
+            document.TotalDiscountAmount = invoiceViewModel.InvoiceItems.Sum(i => i.Discount.Amount); // SUM INVOICE LINES DISCOUNTS
+            document.ExtraDiscountAmount = 0; // DISCOUNT OVERALL DOCUMENT
+            document.TotalItemsDiscountAmount = document.TotalDiscountAmount + document.ExtraDiscountAmount; // ? SAME AS TOTAL DISCOUNT AMOUNT ????
             //document.purchaseOrderReference = ; // OPTIONAL
             //document.purchaseOrderDescription = ; // OPTIONAL
             //document.salesOrderReference = ; // OPTIONAL

@@ -127,9 +127,9 @@ namespace ETA.Integrator.Server.Controllers
             var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
                 .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
 
-            var submitResponse = await _consumerRequestHandlerService.ExecuteWithAuthRetryAsync(submitRequest);
+            //var submitResponse = await _consumerRequestHandlerService.ExecuteWithAuthRetryAsync(submitRequest);
 
-            return Ok(submitResponse);
+            return Ok(submitRequestBody);
         }
 
         [HttpGet("GetRecent")]
