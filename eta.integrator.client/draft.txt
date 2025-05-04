@@ -194,3 +194,4 @@ Total = NetTotal + Sum(taxableItems.amount) + totalTaxableFees - valueDifference
         }
     ]
 }
+

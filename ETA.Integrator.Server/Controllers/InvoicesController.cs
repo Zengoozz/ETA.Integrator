@@ -127,9 +127,9 @@ namespace ETA.Integrator.Server.Controllers
             var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
                 .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
 
-            //var submitResponse = await _consumerRequestHandlerService.ExecuteWithAuthRetryAsync(submitRequest);
+            var submitResponse = await _consumerRequestHandlerService.ExecuteWithAuthRetryAsync(submitRequest);
 
-            return Ok(submitRequestBody);
+            return Ok(documents);
         }
 
         [HttpGet("GetRecent")]
@@ -160,6 +160,11 @@ namespace ETA.Integrator.Server.Controllers
 
             return Ok(response.Data.Content);
         }
+        [HttpGet("GetSignature")]
+        public async Task<IActionResult> GetSignature()
+        {
 
+            return Ok();
+        }
     }
 }

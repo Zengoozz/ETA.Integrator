@@ -34,9 +34,23 @@ namespace ETA.Integrator.Server.Services
             #region INVOICE_LINE_PREP
 
             //List<InvoiceLineModel> invoiceLineList = new List<InvoiceLineModel>();
-
-
-
+            foreach (var line in invoiceViewModel.InvoiceItems)
+            {
+                line.TaxableItems = [];
+                line.InternalCode = "";
+                if(line.TaxableItems.Count == 0)
+                {
+                    line.Discount = new DiscountModel
+                    {
+                        Rate = 0,
+                        Amount = 0
+                    };
+                    line.ItemsDiscount = 0;
+                    line.Total = line.NetTotal;
+                    line.SalesTotal = line.NetTotal;
+                    line.UnitValue.AmountEGP = line.NetTotal;
+                }
+            }
             #endregion
 
             #region TAX_TOTAL_PREP
@@ -91,8 +105,8 @@ namespace ETA.Integrator.Server.Services
             document.TotalSalesAmount = invoiceViewModel.InvoiceItems.Sum(i => i.SalesTotal); // SUM INVOICE LINES SALES
             document.TotalAmount = invoiceViewModel.NetPrice + taxTotalList.Sum(x => x.Amount); // NET + TOTAL TAX
             document.TotalDiscountAmount = invoiceViewModel.InvoiceItems.Sum(i => i.Discount.Amount); // SUM INVOICE LINES DISCOUNTS
-            document.ExtraDiscountAmount = 0; // DISCOUNT OVERALL DOCUMENT
             document.TotalItemsDiscountAmount = document.TotalDiscountAmount + document.ExtraDiscountAmount; // ? SAME AS TOTAL DISCOUNT AMOUNT ????
+            document.ExtraDiscountAmount = 0; // DISCOUNT OVERALL DOCUMENT
             //document.purchaseOrderReference = ; // OPTIONAL
             //document.purchaseOrderDescription = ; // OPTIONAL
             //document.salesOrderReference = ; // OPTIONAL
