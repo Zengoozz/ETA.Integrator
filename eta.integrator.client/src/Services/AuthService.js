@@ -3,10 +3,14 @@ import GenericService from "./GenericService";
 
 const login = async (credentials) => {
    try {
-      const response = await GenericService.makeRequestFactory("POST", "/Config/Login", {
-         Email: credentials.username,
-         Password: credentials.password,
-      });
+      const response = await GenericService.makeRequestFactory(
+         "POST",
+         "/Auth/ProviderConnect",
+         {
+            Email: credentials.username,
+            Password: credentials.password,
+         }
+      );
 
       const token = response.token;
       localStorage.setItem("HMS_Token", token);
@@ -26,12 +30,14 @@ const logout = async () => {
 
 const getUserProgress = async () => {
    try {
-      const response = await GenericService.makeRequestFactory(
+      const stepResponse = await GenericService.makeRequestFactory(
          "GET",
          "/Config/UserProgress"
       );
 
-      return response;
+      console.log("UserProgress:", stepResponse);
+
+      return stepResponse;
    } catch (error) {
       console.error(error.message);
       throw error;
@@ -66,8 +72,19 @@ const getIssuerSettings = async () => {
 
       const myResponse = {
          IssuerName: response.issuerName,
-         TaxId: response.taxId,
+         RegistrationNumber: response.registrationNumber,
+         IssuerType: response.issuerType,
+         Address: {
+            Country: response.address.country,
+            Governate: response.address.governate,
+            RegionCity: response.address.regionCity,
+            BranchId: response.address.branchId,
+            BuildingNumber: response.address.buildingNumber,
+            Street: response.address.street,
+         },
       };
+
+      console.log("IssuerSettings:", myResponse);
 
       return myResponse;
    } catch (error) {
@@ -87,6 +104,21 @@ const updateStep = async (values, step) => {
    }
 };
 
+const connectToConsumer = async (values) => {
+   try {
+      const response = await GenericService.makeRequestFactory(
+         "POST",
+         "/Auth/ConsumerConnect",
+         values
+      );
+
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
+};
+
 let AuthService = {
    login,
    logout,
@@ -94,8 +126,9 @@ let AuthService = {
    getConnectionSettings,
    getIssuerSettings,
    updateStep,
+   connectToConsumer,
 };
 
-AuthService = AuthServiceMock;
+// AuthService = AuthServiceMock;
 
 export default AuthService;

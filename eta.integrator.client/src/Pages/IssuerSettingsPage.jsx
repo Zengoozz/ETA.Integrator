@@ -8,7 +8,7 @@ import { IssuerTypes, SettingsValidationRules } from "../Constants/Constants";
 
 const { Option } = Select;
 
-const IssuerSettingsPage = ({ isMobile, onFinish }) => {
+const IssuerSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    const [form] = Form.useForm();
    const [isBusinessType, setIsBusinessType] = React.useState(false);
 
@@ -21,6 +21,14 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
                IssuerName: response.IssuerName,
                RegistrationNumber: response.RegistrationNumber,
                IssuerType: response.IssuerType,
+               Address: {
+                  Country: response.Address.Country,
+                  Governate: response.Address.Governate,
+                  RegionCity: response.Address.RegionCity,
+                  BranchId: response.Address.BranchId,
+                  BuildingNumber: response.Address.BuildingNumber,
+                  Street: response.Address.Street,
+               },
             });
          } catch (err) {
             console.log("Failed to fetch settings", err);
@@ -29,11 +37,13 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
       fetchSettings();
    }, [form]);
 
-   const onSave = (values) => {
-      AuthService.updateStep(values, 2).then(() => {
-         console.log("Issuer settings saved successfully");
-         onFinish(); // Trigger navigation to the main app
-      });
+   const onSave = async (values) => {
+      var response = await AuthService.updateStep(values, 2);
+      if (response == "UPDATED") {
+         setSuccessfulSave(true);
+      } else {
+         setSuccessfulSave(false);
+      }
    };
 
    const onSaveFailed = (errorInfo) => {
@@ -53,7 +63,6 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
          align="center"
          justify="center"
          style={{
-            // minHeight: "100%",
             width: "100%",
          }}
       >
@@ -70,8 +79,8 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
             initialValues={{
                Address: {
                   Country: "EG", // Default country
-                  Governorate: "cairo", // Default governorate
-                  Region: "cairo", // Default region
+                  // Governate: "cairo", // Default governorate
+                  // RegionCity: "cairo", // Default region
                },
             }}
          >
@@ -85,12 +94,12 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
                   onChange={onIssuerTypeChange}
                >
                   {IssuerTypes.map((type) => (
-                     <Select.Option
+                     <Option
                         key={type.value}
                         value={type.value}
                      >
                         {type.label}
-                     </Select.Option>
+                     </Option>
                   ))}
                </Select>
             </Form.Item>
@@ -114,8 +123,8 @@ const IssuerSettingsPage = ({ isMobile, onFinish }) => {
                   { whitespace: true, message: "Username cannot be empty spaces" },
                ]}
             >
-               <Input.OTP
-                  formatter={(value) => value.replace(/\D/g, "")}
+               <Input
+                  // formatter={(value) => value.replace(/\D/g, "")}
                   length={12}
                   size={isMobile ? "large" : "middle"}
                   autoComplete="off"

@@ -1,9 +1,8 @@
 import React, { useEffect } from "react";
 import { Form, Input, Select, Space } from "antd";
-import {
-   CountriesCodes,
-   SettingsValidationRules,
-} from "../Constants/Constants";
+import { CountriesCodes, SettingsValidationRules } from "../Constants/Constants";
+
+const { Option } = Select;
 
 const AddressForm = ({ isBusinessType, form }) => {
    useEffect(() => {
@@ -50,14 +49,14 @@ const AddressForm = ({ isBusinessType, form }) => {
 
             {/* Governorate */}
             <Form.Item
-               name={["Address", "Governorate"]}
+               name={["Address", "Governate"]}
                rules={SettingsValidationRules.governorate}
                noStyle
             >
-               <Select
+               {/* <Select
                   disabled={true}
                 //   defaultValue={"cairo"}
-                  placeholder="Governorate/Province"
+                  placeholder="Governate/Province"
                   showSearch
                   optionFilterProp="children"
                   filterOption={(input, opt) =>
@@ -65,18 +64,22 @@ const AddressForm = ({ isBusinessType, form }) => {
                   }
                >
                   <Option value="cairo">Cairo</Option>
-               </Select>
+               </Select> */}
+               <Input
+                  disabled={false}
+                  placeholder="Governate/Province"
+               />
             </Form.Item>
 
             {/* Region/City */}
             <Form.Item
-               name={["Address", "Region"]}
+               name={["Address", "RegionCity"]}
                rules={SettingsValidationRules.region}
                noStyle
             >
-               <Select
+               {/* <Select
                   disabled={true}
-                //   defaultValue={"cairo"}
+                  //   defaultValue={"cairo"}
                   placeholder="Region/City"
                   showSearch
                   optionFilterProp="children"
@@ -85,12 +88,16 @@ const AddressForm = ({ isBusinessType, form }) => {
                   }
                >
                   <Option value="cairo">Cairo</Option>
-               </Select>
+               </Select> */}
+               <Input
+                  disabled={false}
+                  placeholder="Region/City"
+               />
             </Form.Item>
          </Space.Compact>
 
          {/* Branch ID */}
-         <Space.Compact>
+         <Space.Compact style={{ width: "100%" }}>
             <Form.Item
                name={["Address", "BranchId"]}
                rules={SettingsValidationRules.branchId}
@@ -121,6 +128,5 @@ const AddressForm = ({ isBusinessType, form }) => {
       </Form.Item>
    );
 };
-
 
 export default AddressForm;

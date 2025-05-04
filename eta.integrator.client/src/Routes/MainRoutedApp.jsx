@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Outlet, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Flex } from "antd";
 
 import LoginFormPage from "../Pages/LoginFormPage.jsx";
@@ -18,6 +18,7 @@ import useAuthPresistence from "../Hooks/useAuthPresistence.jsx";
 
 import RootRoutes from "./RootRoutes.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import SubmittedInvoicesPage from "../Pages/SubmittedInvoicesPage.jsx";
 
 const MainRoutedApp = ({ mode, setMode, isMobile }) => {
    const [isLoggedIn, setLogIn] = useState(false);
@@ -34,14 +35,14 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
 
                if (
                   userProgressResponse &&
-                  userProgressResponse.step &&
-                  !isUndefined(userProgressResponse.step)
+                  userProgressResponse &&
+                  !isUndefined(userProgressResponse)
                ) {
                   setUserProgress((prev) =>
-                     prev !== userProgressResponse.step ? userProgressResponse.step : prev
+                     prev !== userProgressResponse ? userProgressResponse : prev
                   );
 
-                  console.log("User progress:", userProgressResponse.step);
+                  console.log("User progress:", userProgressResponse);
                } else {
                   setUserProgress(1);
                }
@@ -140,6 +141,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                      >
                         <StepperWrapper
                            currentStep={1}
+                           setUserProgress={setUserProgress}
                            isMobile={isMobile}
                         />
                      </EnforceStepperFlow>
@@ -155,6 +157,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                      >
                         <StepperWrapper
                            currentStep={2}
+                           setUserProgress={setUserProgress}
                            isMobile={isMobile}
                         />
                      </EnforceStepperFlow>
@@ -184,6 +187,19 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                   element={
                      userProgress === "completed" ? (
                         <InvoicesPage isMobile={isMobile} />
+                     ) : (
+                        <Navigate
+                           to="/"
+                           replace
+                        />
+                     )
+                  }
+               />
+               <Route
+                  path={ROUTES.SUBMITTED}
+                  element={
+                     userProgress === "completed" ? (
+                        <SubmittedInvoicesPage isMobile={isMobile} />
                      ) : (
                         <Navigate
                            to="/"

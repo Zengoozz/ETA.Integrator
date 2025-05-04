@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RestSharp;
-using ETA.Integrator.Server.Models.Provider.Requests;
-using ETA.Integrator.Server.Models.Provider.Response;
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Entities;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
+using ETA.Integrator.Server.Interface.Services;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -14,51 +11,22 @@ namespace ETA.Integrator.Server.Controllers
     [ApiController]
     public class ConfigController : ControllerBase
     {
-        readonly RestClient _client;
-        private readonly CustomConfigurations _customConfig;
 
         private readonly ILogger<ConfigController> _logger;
 
         private readonly ISettingsStepRepository _settingsStepRepository;
+        private readonly ISettingsStepService _settingsStepService;
         public ConfigController(
-            IOptions<CustomConfigurations> customConfigurations,
             ILogger<ConfigController> logger,
-            ISettingsStepRepository settingsStepRepository
+            ISettingsStepRepository settingsStepRepository,
+            ISettingsStepService settingsStepService
             )
         {
-
-            _customConfig = customConfigurations.Value;
             _logger = logger;
             _settingsStepRepository = settingsStepRepository;
-
-            if (_customConfig.Provider_APIURL != null)
-            {
-                var opt = new RestClientOptions(_customConfig.Provider_APIURL);
-                _client = new RestClient(opt);
-            }
-            else
-            {
-                throw new Exception("Error: Getting provider api url");
-            }
+            _settingsStepService = settingsStepService;
         }
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] ProviderLoginRequestModel model)
-        {
-            try
-            {
-                var request = new RestRequest("/api/Auth/LogIn", Method.Post)
-                    .AddJsonBody(model);
 
-                var response = await _client.ExecuteAsync<ProviderLoginResponseModel>(request);
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occured getting connection settings");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred getting connection settings");
-            }
-        }
         [HttpGet("ConnectionSettings")]
         public async Task<IActionResult> GetConnectionSettings()
         {
@@ -84,11 +52,9 @@ namespace ETA.Integrator.Server.Controllers
         {
             try
             {
-                SettingsStep step = await _settingsStepRepository.GetByStepNumber(2);
+                IssuerDTO? issuerDTO = await _settingsStepService.GetIssuerData();
 
-                IssuerDTO issuerDto = !String.IsNullOrWhiteSpace(step.Data) ? JsonSerializer.Deserialize<IssuerDTO>(step.Data) ?? new IssuerDTO() : new IssuerDTO();
-
-                return Ok(issuerDto);
+                return Ok(issuerDTO);
             }
             catch (Exception ex)
             {
@@ -122,7 +88,7 @@ namespace ETA.Integrator.Server.Controllers
             try
             {
                 await _settingsStepRepository.UpdateStepWithData(updateStepDTO.Order, updateStepDTO.Data);
-                return Ok("Updated");
+                return Ok("UPDATED");
             }
             catch (Exception ex)
             {

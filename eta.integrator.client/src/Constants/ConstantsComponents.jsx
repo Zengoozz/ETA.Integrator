@@ -4,22 +4,22 @@ import dayjs from "dayjs";
 const InvoicesTableColumns = [
    {
       title: "Receipt Number",
-      dataIndex: "inoviceNumber",
+      dataIndex: "invoiceNumber",
       render: (text) => <a>{text}</a>,
    },
    {
       title: "Visit Type",
-      dataIndex: "inoviceType",
+      dataIndex: "invoiceType",
       render: (text) => text,
    },
    {
       title: "Company",
-      dataIndex: "financialClassName",
+      dataIndex: "receiverName",
       render: (text) => text,
    },
    {
       title: "Tax Registeration Number",
-      dataIndex: "inovicingNumber",
+      dataIndex: "registrationNumber",
       render: (text) => text,
    },
    {
@@ -70,4 +70,43 @@ const InvoicesTableColumns = [
    },
 ];
 
-export { InvoicesTableColumns };
+const SubmittedInvoiceColumns = [
+   {
+      title: "Id / InternalId",
+      // dataIndex: "internalId",
+      render: (_, record) => (
+         <>
+            <a>
+               <span>{record.uuid}</span> / <span>{record.internalId}</span>
+            </a>
+         </>
+      ),
+   },
+   {
+      title: "Date Time Received",
+      dataIndex: "dateTimeReceived",
+      render: (text) => <>{text}</>,
+   },
+   {
+      title: "Total Value",
+      dataIndex: "total",
+      render: (text) => <>{text}</>,
+   },
+   {
+      title: "Issuer",
+      dataIndex: "issuerName",
+      render: (text) => <>{text}</>,
+   },
+   {
+      title: "Receiver",
+      dataIndex: "receiverName",
+      render: (text) => <>{text}</>,
+   },
+   {
+      title: "Status",
+      dataIndex: "status",
+      render: (text) => <>{text}</>,
+   },
+];
+
+export { InvoicesTableColumns, SubmittedInvoiceColumns };

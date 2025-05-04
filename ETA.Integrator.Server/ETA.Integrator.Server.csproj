@@ -44,9 +44,4 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Interface\Services\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-
 </Project>

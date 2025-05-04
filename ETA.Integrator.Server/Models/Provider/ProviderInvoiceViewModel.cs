@@ -1,19 +1,24 @@
-﻿namespace ETA.Integrator.Server.Models.Provider
+﻿using ETA.Integrator.Server.Models.Consumer.ETA;
+
+namespace ETA.Integrator.Server.Models.Provider
 {
     public class ProviderInvoiceViewModel
     {
-        public string InoviceNumber { get; set; } = string.Empty;
-        public string InoviceType { set; get; } = string.Empty;
+        public int InvoiceId { set; get; }
+        public string InvoiceType { set; get; } = string.Empty;
+        public string InvoiceNumber { get; set; } = string.Empty;
+        public string RegistrationNumber { set; get; } = string.Empty;
+        public DateTime CreatedDate { set; get; }
+        public string ReceiverAddress { set; get; } = string.Empty;
+        public string ReceiverName { set; get; } = string.Empty;
+        public int ReceiverId { set; get; }
+        public bool IsReviewed { set; get; } = false;
         public decimal VatNet { set; get; }
         public decimal NetPrice { set; get; }
         public decimal PatShare { set; get; }
         public decimal FinShare { set; get; }
         public decimal VatFinShare { set; get; }
         public decimal VatPatShare { set; get; }
-        public int InoviceId { set; get; }
-        public DateTime createdDate { set; get; }
-        public bool IsReviewed { set; get; } = false;
-        public string InovicingNumber { set; get; } = string.Empty;
-        public string FinancialClassName { set; get; } = string.Empty;
+        public List<InvoiceLineModel> InvoiceItems { set; get; } = new();
     }
 }

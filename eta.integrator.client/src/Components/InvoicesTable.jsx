@@ -2,10 +2,17 @@ import React from "react";
 import { Divider, Table, Flex } from "antd";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 
-import { InvoicesTableColumns } from "../Constants/ConstantsComponents";
 import CustomButton from "../Components/CustomButton";
 
-const InvoicesTable = ({ isMobile, tableData, onSubmit, loading, messageApi }) => {
+const InvoicesTable = ({
+   isMobile,
+   tableData,
+   onSubmit = null,
+   loading,
+   messageApi,
+   tableType,
+   tableColumns
+}) => {
    const [selectedRowToSubmit, setSelectedRowToSubmit] = React.useState([]);
    // rowSelection object indicates the need for row selection
    const rowSelection = {
@@ -37,25 +44,28 @@ const InvoicesTable = ({ isMobile, tableData, onSubmit, loading, messageApi }) =
          vertical
          style={{ overflowX: "auto", width: "100%" }}
       >
-         <CustomButton
-            icon={<CloudDownloadOutlined />}
-            loading={loading}
-            handleClick={handleSubmitButtonClick}
-            style={{ alignSelf: "flex-end" }}
-         />
+         {tableType == "W" && (
+            <CustomButton
+               icon={<CloudDownloadOutlined />}
+               loading={loading}
+               handleClick={handleSubmitButtonClick}
+               style={{ alignSelf: "flex-end" }}
+            />
+         )}
+
          <Divider />
          <Table
-            rowSelection={Object.assign({ type: "checkbox" }, rowSelection)}
+            rowSelection= {tableType == "W" ? Object.assign({ type: "checkbox" }, rowSelection) : undefined }
             dataSource={tableData}
             bordered
             scroll={{ x: isMobile ? "max-content" : "unset" }}
-            columns={InvoicesTableColumns.map((col) => ({
+            columns={tableColumns.map((col) => ({
                ...col,
                ellipsis: true,
                width: isMobile ? 150 : "auto",
                responsive: ["md"],
             }))}
-            rowKey={(record) => record.inoviceNumber}
+            rowKey={(record) => record.invoiceNumber}
             pagination={{
                pageSize: isMobile ? 5 : 10,
                responsive: true,
