@@ -1,11 +1,21 @@
 ﻿using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Provider;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using System.Text;
+using System.Security.Cryptography.Xml;
 
 namespace ETA.Integrator.Server.Services
 {
     public class InvoiceService : IInvoiceService
     {
+        private readonly ILogger<InvoiceService> _logger;
+        public InvoiceService(ILogger<InvoiceService> logger, ISignatureService signatureService)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         public InvoiceModel PrepareInvoiceData(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer)
         {
             InvoiceModel document = new InvoiceModel();
@@ -38,7 +48,7 @@ namespace ETA.Integrator.Server.Services
             {
                 line.TaxableItems = [];
                 line.InternalCode = "";
-                if(line.TaxableItems.Count == 0)
+                if (line.TaxableItems.Count == 0)
                 {
                     line.Discount = new DiscountModel
                     {
@@ -118,5 +128,6 @@ namespace ETA.Integrator.Server.Services
 
             return document;
         }
+
     }
 }

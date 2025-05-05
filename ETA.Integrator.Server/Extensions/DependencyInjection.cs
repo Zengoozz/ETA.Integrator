@@ -14,6 +14,7 @@ namespace ETA.Integrator.Server.Extensions
             services.AddTransient<ISettingsStepService, SettingsStepService>();
             services.AddTransient<IInvoiceService, InvoiceService>();
             services.AddTransient<IConsumerRequestsHandlerService, ConsumerRequestsHandlerService>();
+            services.AddTransient<ISignatureService, SignatureService>();
 
             return services;
         }

@@ -2,11 +2,13 @@
 using ETA.Integrator.Server.Extensions;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.ETA;
+using ETA.Integrator.Server.Models.Consumer.Requests;
 using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System.Text.Json;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -19,13 +21,15 @@ namespace ETA.Integrator.Server.Controllers
         private readonly ISettingsStepService _settingsStepService;
         private readonly IInvoiceService _invoiceService;
         private readonly IConsumerRequestsHandlerService _consumerRequestHandlerService;
+        private readonly ISignatureService _signatureService;
 
         public InvoicesController(
             IOptions<CustomConfigurations> customConfigurations,
             ILogger<InvoicesController> logger,
             ISettingsStepService settingsStepService,
             IInvoiceService invoiceService,
-            IConsumerRequestsHandlerService consumerRequestHandlerService
+            IConsumerRequestsHandlerService consumerRequestHandlerService,
+            ISignatureService signatureService
             )
         {
             _logger = logger;
@@ -33,6 +37,7 @@ namespace ETA.Integrator.Server.Controllers
             _settingsStepService = settingsStepService;
             _invoiceService = invoiceService;
             _consumerRequestHandlerService = consumerRequestHandlerService;
+            _signatureService = signatureService;
         }
         [HttpGet]
         public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate)
@@ -160,11 +165,23 @@ namespace ETA.Integrator.Server.Controllers
 
             return Ok(response.Data.Content);
         }
-        [HttpGet("GetSignature")]
-        public async Task<IActionResult> GetSignature()
+        [HttpPost("GetSignature")]
+        public IActionResult GetSignature([FromBody] RootDocumentModel model)
         {
+            foreach (var invoice in model.Documents)
+            {
+                //SerializedInvoiceModel serializedModel = invoice.ToSerialized();
 
+                //var json = JsonSerializer.Serialize(serializedModel);
+                _signatureService.SignDocument(invoice);
+
+            }
+            //SignatureModel signature = _invoiceService.GetSignature(invoiceJson);
             return Ok();
         }
+    }
+    public class RootDocumentModel
+    {
+        public List<InvoiceModel> Documents { get; set; } = new List<InvoiceModel>();
     }
 }
