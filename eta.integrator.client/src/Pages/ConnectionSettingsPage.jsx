@@ -3,7 +3,8 @@ import { Button, Form, Input, Flex } from "antd";
 
 import AuthService from "../Services/AuthService";
 import { SettingsValidationRules } from "../Constants/Constants.js";
-
+//TODO: Add Second Client Secret
+//TODO: Add The Token USB Pin Input
 const ConnectionSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    const [form] = Form.useForm();
 
