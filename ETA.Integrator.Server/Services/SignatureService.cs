@@ -245,13 +245,10 @@ namespace ETA.Integrator.Server.Services
         }
 
 
-        public void SignDocument(InvoiceModel model)
+        public void SignDocument(InvoiceModel model,string tokenPin)
         {
             SignatureModel signature = new SignatureModel();
             signature.SignatureType = "I";
-
-            //TODO: ConnectionSettings Fetch
-            var tokenPin = "";
 
             var serializedJson = SerializeToJson(model.ToDTO());
 

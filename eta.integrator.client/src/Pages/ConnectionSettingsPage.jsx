@@ -16,6 +16,7 @@ const ConnectionSettingsPage = ({ isMobile, setSuccessfulSave }) => {
             form.setFieldsValue({
                ClientId: response.ClientId,
                ClientSecret: response.ClientSecret,
+               TokenPin: response.TokenPin
             });
          } catch (err) {
             console.log("Failed to fetch settings", err);
@@ -75,6 +76,17 @@ const ConnectionSettingsPage = ({ isMobile, setSuccessfulSave }) => {
                label="Client Secret"
                name="ClientSecret"
                rules={SettingsValidationRules.clientSecret}
+            >
+               <Input.Password
+                  size={isMobile ? "large" : "middle"}
+                  autoComplete="off"
+               />
+            </Form.Item>
+
+            <Form.Item
+               label="Token Pin"
+               name="TokenPin"
+               rules={SettingsValidationRules.tokenPin}
             >
                <Input.Password
                   size={isMobile ? "large" : "middle"}

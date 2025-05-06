@@ -166,17 +166,17 @@ namespace ETA.Integrator.Server.Controllers
             return Ok(response.Data.Content);
         }
         [HttpPost("GetSignature")]
-        public IActionResult GetSignature([FromBody] RootDocumentModel model)
+        public async Task<IActionResult> GetSignature([FromBody] RootDocumentModel model)
         {
+            var connectionSettings = await _settingsStepService.GetConnectionData();
+
+            if (connectionSettings is null || String.IsNullOrWhiteSpace(connectionSettings.TokenPin))
+                return BadRequest("Connection Settings is not valid");
+
             foreach (var invoice in model.Documents)
             {
-                //SerializedInvoiceModel serializedModel = invoice.ToSerialized();
-
-                //var json = JsonSerializer.Serialize(serializedModel);
-                _signatureService.SignDocument(invoice);
-
+                _signatureService.SignDocument(invoice, connectionSettings.TokenPin);
             }
-            //SignatureModel signature = _invoiceService.GetSignature(invoiceJson);
             return Ok();
         }
     }

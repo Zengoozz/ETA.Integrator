@@ -4,6 +4,6 @@ namespace ETA.Integrator.Server.Interface.Services
 {
     public interface ISignatureService
     {
-        void SignDocument(InvoiceModel model);
+        void SignDocument(InvoiceModel model, string tokenPin);
     }
 }
