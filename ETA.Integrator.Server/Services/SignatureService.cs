@@ -2,10 +2,10 @@
 using ETA.Integrator.Server.Extensions;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.ETA;
+using ETA.Integrator.Server.Models.Core;
 using MediatR;
 using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
-using Net.Pkcs11Interop.HighLevelAPI40;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1;
@@ -15,7 +15,6 @@ using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using ISession = Net.Pkcs11Interop.HighLevelAPI.ISession;
 
 namespace ETA.Integrator.Server.Services
@@ -31,8 +30,22 @@ namespace ETA.Integrator.Server.Services
         private void SerializeToken(JToken request, StringBuilder serialized)
         {
             {
+                if (request is null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SERIALIZE_TOKEN_INTERNAL_ERR",
+                        detail: "Serialize token failed."
+                        );
+
                 if (request.Parent is null)
                 {
+                    if (request.First is null)
+                        throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SERIALIZE_TOKEN_INTERNAL_ERR",
+                        detail: "Serialize token failed."
+                        );
+
                     SerializeToken(request.First, serialized);
                 }
                 else
@@ -169,13 +182,7 @@ namespace ETA.Integrator.Server.Services
             session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CERTIFICATE_TYPE, CKC.CKC_X_509)
         };
 
-                IObjectHandle certificate = session.FindAllObjects(certificateSearchAttributes).FirstOrDefault();
-
-                if (certificate == null)
-                {
-                    _logger.LogError("SignatureService/FindCertificate: Certificate not found");
-                    return null;
-                }
+                IObjectHandle? certificate = session.FindAllObjects(certificateSearchAttributes).FirstOrDefault();
 
                 return certificate;
             }
@@ -193,12 +200,6 @@ namespace ETA.Integrator.Server.Services
                 store.Open(OpenFlags.MaxAllowed);
                 var foundCerts = store.Certificates.Find(X509FindType.FindByIssuerName, tokenCertificate, false);
                 store.Close();
-
-                if (foundCerts.Count == 0)
-                {
-                    _logger.LogError("SignatureService/FindCertificateInStore: No matching certificate found");
-                    return null;
-                }
 
                 return foundCerts[0];
             }
@@ -245,7 +246,7 @@ namespace ETA.Integrator.Server.Services
         }
 
 
-        public void SignDocument(InvoiceModel model,string tokenPin)
+        public void SignDocument(InvoiceModel model, string tokenPin)
         {
             SignatureModel signature = new SignatureModel();
             signature.SignatureType = "I";
@@ -254,32 +255,42 @@ namespace ETA.Integrator.Server.Services
 
             var canonicalString = GenerateCanonicalString(serializedJson);
 
-            IPkcs11Library? PkcsLibrary = LoadPkcsLibrary();
+            IPkcs11Library pkcsLibrary = LoadPkcsLibrary();
+            if (pkcsLibrary is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "PKCS_LIB_INTERNAL_ERR",
+                    detail: "SignatureService/LoadPkcsLibrary: Loading library failed."
+                    );
 
-            if (PkcsLibrary == null)
-            {
-                _logger.LogError("SignatureService/SignDocument: PKCS_Library Load Failed");
-                return;
-            }
-
-            ISlot slot = PkcsLibrary.GetSlotList(SlotsType.WithTokenPresent).FirstOrDefault();
-            if (slot == null)
-            {
-                _logger.LogError("SignatureService/GetFirstAvailableSlot: No slots found");
-                return;
-            }
+            ISlot? slot = pkcsLibrary?.GetSlotList(SlotsType.WithTokenPresent).FirstOrDefault() ?? null;
+            if (slot is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SLOTS_INTERNAL_ERR",
+                    detail: "SignatureService/GetFirstAvailableSlot: No slots found."
+                    );
 
             ISession session = slot.OpenSession(SessionType.ReadWrite);
 
             Unit loginResult = TokenLogin(session, tokenPin);
 
             IObjectHandle? certificate = FindCertificate(session);
-            if (certificate == null)
-                return;
+            if (certificate is null)
+                throw new ProblemDetailsException(
+                   statusCode: StatusCodes.Status500InternalServerError,
+                   message: "CERT_INTERNAL_ERR",
+                   detail: "SignatureService/FindCertificate: No certificate found."
+                   );
+
             //TODO: Check Signature Certificate Issuer Name
             X509Certificate2? certificateForSigning = FindCertificateInStore("MCDR CA 2018");
-            if (certificateForSigning == null)
-                return;
+            if (certificateForSigning is null)
+                throw new ProblemDetailsException(
+                  statusCode: StatusCodes.Status500InternalServerError,
+                  message: "STORE_CERT_INTERNAL_ERR",
+                  detail: "SignatureService/FindCertificateInStore: No matching certificate found."
+                  );
 
             SignedCms signedCms = CreateSignedCms(Encoding.UTF8.GetBytes(canonicalString), certificate, certificateForSigning);
 
@@ -288,22 +299,6 @@ namespace ETA.Integrator.Server.Services
             signature.Value = Convert.ToBase64String(encodedCms);
 
             model.Signatures.Add(signature);
-
-            //var removableDrives = DriveInfo.GetDrives()
-            //    .Where(d => d.DriveType == DriveType.Removable && d.IsReady);
-
-            //foreach (var drive in removableDrives)
-            //{
-            //    Console.WriteLine($"Found removable drive: {drive.Name}");
-            //    // Look for your certificate file
-            //    //var certPath = Path.Combine(drive.RootDirectory.FullName, "yourCertificate.pfx");
-
-            //    //if (File.Exists(certPath))
-            //    //{
-            //    //    Console.WriteLine($"Certificate found: {certPath}");
-
-            //    //}
-            //}
         }
     }
 }

@@ -12,8 +12,8 @@ namespace ETA.Integrator.Server.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddTransient<ISettingsStepService, SettingsStepService>();
-            services.AddTransient<IInvoiceService, InvoiceService>();
-            services.AddTransient<IConsumerRequestsHandlerService, ConsumerRequestsHandlerService>();
+            services.AddTransient<IConsumerService, ConsumerService>();
+            services.AddTransient<IRequestHandlerService, RequestHandlerService>();
             services.AddTransient<ISignatureService, SignatureService>();
 
             return services;
@@ -25,7 +25,6 @@ namespace ETA.Integrator.Server.Extensions
 
             return services;
         }
-
 
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
