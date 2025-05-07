@@ -2,7 +2,6 @@
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Extensions;
 using RestSharp;
@@ -161,14 +160,14 @@ namespace ETA.Integrator.Server.Services
             document.TotalDiscountAmount = invoiceViewModel.InvoiceItems.Sum(i => i.Discount.Amount); // SUM INVOICE LINES DISCOUNTS
             document.TotalItemsDiscountAmount = document.TotalDiscountAmount + document.ExtraDiscountAmount; // ? SAME AS TOTAL DISCOUNT AMOUNT ????
             document.ExtraDiscountAmount = 0; // DISCOUNT OVERALL DOCUMENT
-                                              //document.purchaseOrderReference = ; // OPTIONAL
-                                              //document.purchaseOrderDescription = ; // OPTIONAL
-                                              //document.salesOrderReference = ; // OPTIONAL
-                                              //document.salesOrderDescription = ; // OPTIONAL
-                                              //document.proformaInvoiceNumber = ; // OPTIONAL
-                                              //document.payment = ; // OPTIONAL
-                                              //document.delivery = ; // OPTIONAL
-                                              //document.ServiceDeliveryDate = ; //OPTIONAL
+            //document.purchaseOrderReference = ; // OPTIONAL
+            //document.purchaseOrderDescription = ; // OPTIONAL
+            //document.salesOrderReference = ; // OPTIONAL
+            //document.salesOrderDescription = ; // OPTIONAL
+            //document.proformaInvoiceNumber = ; // OPTIONAL
+            //document.payment = ; // OPTIONAL
+            //document.delivery = ; // OPTIONAL
+            //document.ServiceDeliveryDate = ; //OPTIONAL
 
             #region SIGNATURES_PREP
             
