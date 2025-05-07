@@ -1277,6 +1277,10 @@ const SettingsValidationRules = {
       { required: true, message: "Please input your client secret!" },
       { whitespace: true, message: "Client secrect cannot be empty spaces" },
    ],
+   tokenPin: [
+      { required: true, message: "Please input your token pin!" },
+      { whitespace: true, message: "Token pin cannot be empty spaces" },
+   ],
    issuerType: [{ required: true, message: "Please select the issuer type!" }],
    issuerName: [
       { required: true, message: "Please input the issuer name!" },
