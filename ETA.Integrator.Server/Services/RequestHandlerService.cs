@@ -40,15 +40,6 @@ namespace ETA.Integrator.Server.Services
                     message: "CONNECTION_CONFIG_NOT_FOUND",
                     detail: "Connection configuration (Manual) not found"
                     );
-                //return new GenericResponse<string>
-                //{
-                //    StatusCode = (int)HttpStatusCode.BadRequest,
-                //    Success = false,
-                //    Code = "CONNECTION_CONFIG_NOT_FOUND",
-                //    Message = "Connection configuration (Manual) not found",
-                //    Data = null
-                //}
-                //;
             }
 
             var token = "";
@@ -74,15 +65,6 @@ namespace ETA.Integrator.Server.Services
                     _customConfig.Consumer_Token = token;
 
                     return token;
-
-                    //return new GenericResponse<string>
-                    //{
-                    //    StatusCode = (int)HttpStatusCode.OK,
-                    //    Success = true,
-                    //    Code = "TOKEN_CREATED",
-                    //    Message = "token created",
-                    //    Data = token
-                    //};
                 }
                 else
                 {
@@ -92,14 +74,6 @@ namespace ETA.Integrator.Server.Services
                            message: "CONSUMER_CONNECTION_FAILED",
                            detail: "Connecting to consumer failed"
                         );
-                    //return new GenericResponse<string>
-                    //{
-                    //    StatusCode = (int)HttpStatusCode.InternalServerError,
-                    //    Success = false,
-                    //    Code = "CONSUMER_CONNECTION_FAILED",
-                    //    Message = "Connecting to consumer failed",
-                    //    Data = null
-                    //};
                 }
             }
             else
@@ -110,14 +84,6 @@ namespace ETA.Integrator.Server.Services
                            message: "CONNECTION_URL_NOT_FOUND",
                            detail: "Connection configuration (IdSrvUrl) not found"
                         );
-                //return new GenericResponse<string>
-                //{
-                //    StatusCode = (int)HttpStatusCode.InternalServerError,
-                //    Success = false,
-                //    Code = "CONNECTION_URL_NOT_FOUND",
-                //    Message = "Connection configuration (IdSrvUrl) not found",
-                //    Data = null
-                //};
             }
             #endregion
         }
@@ -133,33 +99,14 @@ namespace ETA.Integrator.Server.Services
             {
                 var authToken = await AuthorizeConsumer();
 
-                if (String.IsNullOrWhiteSpace(authToken))
+                if (!String.IsNullOrWhiteSpace(authToken))
                 {
                     var retryClient = CreateClient();
 
                     var retryResponse = await retryClient.ExecuteAsync<RestResponse>(request);
 
                     return retryResponse;
-                    //return new GenericResponse<RestResponse?>
-                    //{
-                    //    StatusCode = (int)retryResponse.StatusCode,
-                    //    Success = retryResponse.IsSuccessful,
-                    //    Code = retryResponse.ErrorMessage?.ToUpper() ?? "",
-                    //    Message = retryResponse.ErrorMessage ?? "",
-                    //    Data = retryResponse
-                    //};
                 }
-                //else if (authResponse != null && !authResponse.Success)
-                //{
-                //    return new GenericResponse<RestResponse?>
-                //    {
-                //        StatusCode = authResponse.StatusCode,
-                //        Success = authResponse.Success,
-                //        Code = authResponse.Code,
-                //        Message = authResponse.Message,
-                //        Data = null
-                //    };
-                //}
                 else
                 {
                     throw new ProblemDetailsException(
@@ -167,28 +114,11 @@ namespace ETA.Integrator.Server.Services
                         message: "UNKNOWN_INTERNAL_ERROR",
                         detail: "Unknown internal error"
                         );
-                    //_logger.LogError("Unknown internal error");
-                    //return new GenericResponse<RestResponse?>
-                    //{
-                    //    StatusCode = StatusCodes.Status500InternalServerError,
-                    //    Success = false,
-                    //    Code = "UNKNOWN_INTERNAL_ERROR",
-                    //    Message = "Unknown internal error",
-                    //    Data = null
-                    //};
                 }
             }
             #endregion
-            
+
             return response;
-            //return new GenericResponse<RestResponse?>
-            //{
-            //    StatusCode = (int)response.StatusCode,
-            //    Success = response.IsSuccessful,
-            //    Code = response.ErrorMessage?.ToUpper() ?? "",
-            //    Message = response.ErrorMessage ?? "",
-            //    Data = response
-            //};
         }
 
         private RestClient CreateClient()
