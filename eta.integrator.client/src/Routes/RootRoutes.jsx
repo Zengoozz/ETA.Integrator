@@ -21,19 +21,10 @@ const RootRoutes = ({ isLoggedIn, userProgress }) => {
          />
       );
    }
-
-   if (Number(userProgress) === 2) {
-      return (
-         <Navigate
-            to={ROUTES.SECOND_STEP}
-            replace
-         />
-      );
-   }
-
+   
    return (
       <Navigate
-         to={ROUTES.FIRST_STEP}
+         to={ROUTES.CONFIG}
          replace
       />
    );

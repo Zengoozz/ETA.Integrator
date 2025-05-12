@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { isUndefined } from "../Constants/Helpers";
 import { ROUTES } from "../Constants/Constants";
 
+//TODO: Remove this component and move stepperWrapper to pages and move the components used within it to the components folder
 const EnforceStepperFlow = ({ userProgress, requiredStep, redirectTo, children }) => {
    // Redirect if the user is not on the correct step
    console.log("ESF: User progress:", userProgress);

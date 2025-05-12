@@ -130,6 +130,6 @@ let AuthService = {
    connectToConsumer,
 };
 
-// AuthService = AuthServiceMock;
+AuthService = AuthServiceMock;
 
 export default AuthService;

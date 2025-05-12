@@ -11,17 +11,17 @@ const useAuthPresistence = (setLogin) => {
       const currentPath = window.location.pathname;
 
       if (!storedToken || isNullOrEmptyOrUndefined(storedToken)) {
-         console.error("No valid token found. Redirecting to login...");
+         console.warn("No valid token found. Redirecting to login...");
 
          if (currentPath !== ROUTES.LOGIN) {
             navigate(ROUTES.LOGIN, { replace: true });
          }
       } else {
          setLogin(true);
-         console.log("Valid token found. User is authenticated.");
+         console.info("Valid token found. User is authenticated.");
 
          if (currentPath === ROUTES.LOGIN) {
-            navigate(ROUTES.DEFAULT, { replace: true });
+            navigate("/", { replace: true });
          }
       }
    }, [navigate, setLogin]);

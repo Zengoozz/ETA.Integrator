@@ -7,6 +7,8 @@ import IssuerSettingsPage from "../Pages/IssuerSettingsPage.jsx";
 
 import { ROUTES } from "../Constants/Constants.js";
 
+
+//TODO: Fix the force routing to the /config route which raises an error
 const StepperWrapper = ({ currentStep, isMobile, setUserProgress }) => {
    const [isSuccessfulSave, setSuccessfulSave] = useState(false);
    const navigate = useNavigate();
@@ -41,6 +43,7 @@ const StepperWrapper = ({ currentStep, isMobile, setUserProgress }) => {
          navigate(ROUTES.SECOND_STEP);
       } else if (currentStep === 2) {
          console.log("Navigating to completed step");
+         localStorage.setItem("userProgressFlag", "completed");
          setUserProgress("completed"); // Update user progress in the parent component
          navigate(ROUTES.COMPLETED);
       }

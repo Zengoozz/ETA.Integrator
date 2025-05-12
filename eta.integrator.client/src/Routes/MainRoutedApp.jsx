@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Flex } from "antd";
 
@@ -7,7 +7,6 @@ import InvoicesPage from "../Pages/InvoicesPage";
 import NotFoundPage from "../Pages/NotFoundPage.jsx";
 
 import DefaultLayout from "../Components/DefaultLayout.jsx";
-import EnforceStepperFlow from "../Components/EnforceStepperFlow.jsx";
 import StepperWrapper from "../Components/StepperWrapper.jsx";
 
 import Styles from "../assets/Styles.js";
@@ -19,12 +18,11 @@ import useAuthPresistence from "../Hooks/useAuthPresistence.jsx";
 import RootRoutes from "./RootRoutes.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import SubmittedInvoicesPage from "../Pages/SubmittedInvoicesPage.jsx";
-//FIXME: Routing unNecessary between Stepper components like just need a main page for the stepper and the steps will be inside as they gonna just switch between as components no pages
+
 const MainRoutedApp = ({ mode, setMode, isMobile }) => {
    const [isLoggedIn, setLogIn] = useState(false);
    const [userProgress, setUserProgress] = useState(null);
    const [isLoading, setLoading] = useState(true);
-
    useAuthPresistence(setLogIn);
 
    useEffect(() => {
@@ -41,6 +39,8 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                   setUserProgress((prev) =>
                      prev !== userProgressResponse ? userProgressResponse : prev
                   );
+                  if (userProgressResponse === "completed")
+                     localStorage.setItem("userProgressFlag", userProgressResponse);
 
                   console.log("User progress:", userProgressResponse);
                } else {
@@ -56,11 +56,14 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
             setLoading(false);
          }
       };
-      fetchUserProgress();
+      const storedUserProgressFlag = localStorage.getItem("userProgressFlag");
+      if (storedUserProgressFlag === "completed") {
+         setUserProgress(storedUserProgressFlag);
+         setLoading(false);
+      } else fetchUserProgress();
    }, [isLoggedIn]);
 
-   // Ensure redirection happens while loading
-   // TODO: Add a loading spinner or some indication of loading state
+   // TODO: Implement a loading component
    if (isLoading) {
       return <div>Loading...</div>;
    }
@@ -71,14 +74,18 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
          style={{ minHeight: "100vh" }}
       >
          <Routes>
-            {/* 🔁 Root route ROUTES to login or home/stepper */}
+            {/* 🔁 Root route ROUTES to login or stepper or home */}
             <Route
                path="/"
                element={
-                  <RootRoutes
-                     isLoggedIn={isLoggedIn}
-                     userProgress={userProgress}
-                  />
+                  userProgress === null ? (
+                     <div>Loading...</div>
+                  ) : (
+                     <RootRoutes
+                        isLoggedIn={isLoggedIn}
+                        userProgress={userProgress}
+                     />
+                  )
                }
             />
 
@@ -113,7 +120,6 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
             {/* 🔒 Protected layout (needs login) */}
             {/* 🚶 Stepper Flow */}
             <Route
-               path="/"
                element={
                   <ProtectedRoute isLoggedIn={isLoggedIn}>
                      <DefaultLayout
@@ -132,35 +138,17 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                }
             >
                <Route
-                  path={ROUTES.FIRST_STEP}
+                  path={ROUTES.CONFIG}
                   element={
-                     <EnforceStepperFlow
-                        userProgress={userProgress}
-                        requiredStep={1}
-                        redirectTo={ROUTES.SECOND_STEP}
-                     >
+                     userProgress === null ? (
+                        <div>Loading...</div>
+                     ) : (
                         <StepperWrapper
-                           currentStep={1}
+                           currentStep={userProgress}
                            setUserProgress={setUserProgress}
                            isMobile={isMobile}
                         />
-                     </EnforceStepperFlow>
-                  }
-               />
-               <Route
-                  path={ROUTES.SECOND_STEP}
-                  element={
-                     <EnforceStepperFlow
-                        userProgress={userProgress}
-                        requiredStep={2}
-                        redirectTo={ROUTES.COMPLETED}
-                     >
-                        <StepperWrapper
-                           currentStep={2}
-                           setUserProgress={setUserProgress}
-                           isMobile={isMobile}
-                        />
-                     </EnforceStepperFlow>
+                     )
                   }
                />
             </Route>

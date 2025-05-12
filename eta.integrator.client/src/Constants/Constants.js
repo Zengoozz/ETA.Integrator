@@ -1325,6 +1325,7 @@ const IssuerTypes = [
 const ROUTES = {
    HOME: "/home",
    LOGIN: "/login",
+   CONFIG: "/config",
    FIRST_STEP: "/connection-settings",
    SECOND_STEP: "/issuer-settings",
    COMPLETED: "/home/invoices",

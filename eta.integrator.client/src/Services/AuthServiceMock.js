@@ -19,7 +19,7 @@ const logout = async () => {
    return mockFunc("Logout:", "");
 };
 
-const getUserProgress = async () => mockFunc("UserProgress:", "", { step: 1});
+const getUserProgress = async () => mockFunc("UserProgress:", "", "completed");
 
 const getConnectionSettings = async () =>
    mockFunc("ConnectionSettings:", "", {
@@ -36,7 +36,7 @@ const getIssuerSettings = async () =>
 
 const updateStep = async (values, step) => {
    console.log("UpdateStep:", values, step);
-   return mockFunc("UpdateStep:", values, true);
+   return mockFunc("UpdateStep:", values, "UPDATED");
 };
 
 const connectToConsumer = async (values) => {
