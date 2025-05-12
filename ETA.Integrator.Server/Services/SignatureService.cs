@@ -19,6 +19,7 @@ using ISession = Net.Pkcs11Interop.HighLevelAPI.ISession;
 
 namespace ETA.Integrator.Server.Services
 {
+    //TODO: Throw problemDetailsException rather than just exception
     public class SignatureService : ISignatureService
     {
         private readonly ILogger<SignatureService> _logger;
@@ -148,8 +149,12 @@ namespace ETA.Integrator.Server.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError("SignatureService/TokenLogin: " + ex.Message);
-                throw;
+                _logger.LogError("SignatureService/LoadPkcsLibrary: " + ex.Message);
+                throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "PCKS_LOADING_ERR",
+                        detail: ex.Message
+                        );
             }
         }
         private Unit TokenLogin(ISession session, string tokenPin)
@@ -260,7 +265,7 @@ namespace ETA.Integrator.Server.Services
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
                     message: "PKCS_LIB_INTERNAL_ERR",
-                    detail: "SignatureService/LoadPkcsLibrary: Loading library failed."
+                    detail: "SignatureService/LoadPkcsLibrary: Library is null."
                     );
 
             ISlot? slot = pkcsLibrary?.GetSlotList(SlotsType.WithTokenPresent).FirstOrDefault() ?? null;
