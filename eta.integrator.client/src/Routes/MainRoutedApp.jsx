@@ -7,7 +7,7 @@ import InvoicesPage from "../Pages/InvoicesPage";
 import NotFoundPage from "../Pages/NotFoundPage.jsx";
 
 import DefaultLayout from "../Components/DefaultLayout.jsx";
-import StepperWrapper from "../Components/StepperWrapper.jsx";
+import StepperWrapperPage from "../Pages/StepperWrapperPage.jsx";
 
 import Styles from "../assets/Styles.js";
 import { ROUTES } from "../Constants/Constants.js";
@@ -143,7 +143,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                      userProgress === null ? (
                         <div>Loading...</div>
                      ) : (
-                        <StepperWrapper
+                        <StepperWrapperPage
                            currentStep={userProgress}
                            setUserProgress={setUserProgress}
                            isMobile={isMobile}

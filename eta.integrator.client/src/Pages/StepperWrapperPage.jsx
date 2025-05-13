@@ -9,7 +9,7 @@ import { ROUTES } from "../Constants/Constants.js";
 
 
 //TODO: Fix the force routing to the /config route which raises an error
-const StepperWrapper = ({ currentStep, isMobile, setUserProgress }) => {
+const StepperWrapperPage = ({ currentStep, isMobile, setUserProgress }) => {
    const [isSuccessfulSave, setSuccessfulSave] = useState(false);
    const navigate = useNavigate();
 
@@ -102,4 +102,4 @@ const StepperWrapper = ({ currentStep, isMobile, setUserProgress }) => {
    );
 };
 
-export default StepperWrapper;
+export default StepperWrapperPage;

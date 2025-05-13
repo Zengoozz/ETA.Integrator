@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import { ROUTES } from "../Constants/Constants";
 
 const RootRoutes = ({ isLoggedIn, userProgress }) => {
+   console.warn("RootRoutes", isLoggedIn, userProgress);
    if (!isLoggedIn) {
       return (
          <Navigate
