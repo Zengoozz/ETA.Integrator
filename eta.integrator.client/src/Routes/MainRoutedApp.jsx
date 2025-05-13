@@ -3,11 +3,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Flex } from "antd";
 
 import LoginFormPage from "../Pages/LoginFormPage.jsx";
+import StepperWrapperPage from "../Pages/StepperWrapperPage.jsx";
 import InvoicesPage from "../Pages/InvoicesPage";
+import SubmittedInvoicesPage from "../Pages/SubmittedInvoicesPage.jsx";
 import NotFoundPage from "../Pages/NotFoundPage.jsx";
 
 import DefaultLayout from "../Components/DefaultLayout.jsx";
-import StepperWrapperPage from "../Pages/StepperWrapperPage.jsx";
+import Loading from "../Components/Loading.jsx";
 
 import Styles from "../assets/Styles.js";
 import { ROUTES } from "../Constants/Constants.js";
@@ -17,7 +19,6 @@ import useAuthPresistence from "../Hooks/useAuthPresistence.jsx";
 
 import RootRoutes from "./RootRoutes.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
-import SubmittedInvoicesPage from "../Pages/SubmittedInvoicesPage.jsx";
 
 const MainRoutedApp = ({ mode, setMode, isMobile }) => {
    const [isLoggedIn, setLogIn] = useState(false);
@@ -63,10 +64,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
       } else fetchUserProgress();
    }, [isLoggedIn]);
 
-   // TODO: Implement a loading component
-   if (isLoading) {
-      return <div>Loading...</div>;
-   }
+   if (isLoading) return <Loading />;
 
    return (
       <Flex
@@ -79,7 +77,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                path="/"
                element={
                   userProgress === null ? (
-                     <div>Loading...</div>
+                     <Loading />
                   ) : (
                      <RootRoutes
                         isLoggedIn={isLoggedIn}
@@ -141,7 +139,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                   path={ROUTES.CONFIG}
                   element={
                      userProgress === null ? (
-                        <div>Loading...</div>
+                        <Loading />
                      ) : (
                         <StepperWrapperPage
                            currentStep={userProgress}
