@@ -5,6 +5,8 @@ using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Extensions;
 using RestSharp;
+using ETA.Integrator.Server.Dtos.InvoiceSubmission;
+using System.Text.Json;
 
 namespace ETA.Integrator.Server.Services
 {
@@ -13,6 +15,7 @@ namespace ETA.Integrator.Server.Services
         private readonly ILogger<ConsumerService> _logger;
         private readonly ISettingsStepService _settingsStepService;
         private readonly ISignatureService _signatureService;
+        private readonly IRequestHandlerService _requestHandlerService;
         public ConsumerService(ILogger<ConsumerService> logger, ISettingsStepService settingsStepService, ISignatureService signatureService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -21,7 +24,60 @@ namespace ETA.Integrator.Server.Services
         }
 
         #region SUBMIT INVOICE
-        public async Task<RestRequest> SubmitInvoiceRequest(List<ProviderInvoiceViewModel> invoicesList)
+        public async Task<InvoiceSubmissionDTO> SubmitInvoice(List<ProviderInvoiceViewModel> invoices)
+        {
+            var request = await PrepareInvoiceRequest(invoices);
+
+            var response = await _requestHandlerService.ExecuteWithAuthRetryAsync(request);
+
+            if (response is null || response.Content is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SUBMISSION_FAILED",
+                    detail: "ConsumerService/SubmitInvoice: Submission failed."
+                    );
+
+            if ((int)response.StatusCode is StatusCodes.Status202Accepted) // Accepted
+            {
+                var submissionResponse = JsonSerializer.Deserialize<InvoiceSubmissionDTO>(response.Content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                });
+
+                //TODO: Handle submission response
+                if (submissionResponse is null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SERIALIZATION_FAILED",
+                        detail: "ConsumerService/SubmitInvoice: Serialization failed."
+                        );
+
+                if (submissionResponse.RejectedDocuments.Count == 0)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SERIALIZATION_FAILED",
+                        detail: "ConsumerService/SubmitInvoice: Serialization failed."
+                        );
+
+            }
+            else // Not Accepted
+            {
+                var errorResponse = JsonSerializer.Deserialize<SubmissionErrorDTO>(response.Content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                throw new ProblemDetailsException(
+                    statusCode: (int)response.StatusCode,
+                    message: "SUBMISSION_FAILED",
+                    detail: $"ConsumerService/SubmitInvoice: Submission failed. {errorResponse}"
+                    );
+            }
+
+
+        }
+
+        private async Task<RestRequest> PrepareInvoiceRequest(List<ProviderInvoiceViewModel> invoicesList)
         {
             List<InvoiceModel> documents = new List<InvoiceModel>();
 
@@ -74,7 +130,7 @@ namespace ETA.Integrator.Server.Services
             return submitRequest;
         }
 
-        public InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin)
+        private InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin)
         {
             InvoiceModel document = new InvoiceModel();
 
@@ -160,20 +216,20 @@ namespace ETA.Integrator.Server.Services
             document.TotalDiscountAmount = invoiceViewModel.InvoiceItems.Sum(i => i.Discount.Amount); // SUM INVOICE LINES DISCOUNTS
             document.TotalItemsDiscountAmount = document.TotalDiscountAmount + document.ExtraDiscountAmount; // ? SAME AS TOTAL DISCOUNT AMOUNT ????
             document.ExtraDiscountAmount = 0; // DISCOUNT OVERALL DOCUMENT
-            //document.purchaseOrderReference = ; // OPTIONAL
-            //document.purchaseOrderDescription = ; // OPTIONAL
-            //document.salesOrderReference = ; // OPTIONAL
-            //document.salesOrderDescription = ; // OPTIONAL
-            //document.proformaInvoiceNumber = ; // OPTIONAL
-            //document.payment = ; // OPTIONAL
-            //document.delivery = ; // OPTIONAL
-            //document.ServiceDeliveryDate = ; //OPTIONAL
+                                              //document.purchaseOrderReference = ; // OPTIONAL
+                                              //document.purchaseOrderDescription = ; // OPTIONAL
+                                              //document.salesOrderReference = ; // OPTIONAL
+                                              //document.salesOrderDescription = ; // OPTIONAL
+                                              //document.proformaInvoiceNumber = ; // OPTIONAL
+                                              //document.payment = ; // OPTIONAL
+                                              //document.delivery = ; // OPTIONAL
+                                              //document.ServiceDeliveryDate = ; //OPTIONAL
 
             #region SIGNATURES_PREP
-            
-            
 
-            _signatureService.SignDocument(document, tokenPin);
+
+
+            // _signatureService.SignDocument(document, tokenPin);
 
             #endregion
 
