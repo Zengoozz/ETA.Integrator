@@ -110,7 +110,7 @@ namespace ETA.Integrator.Server.Controllers
         public async Task<IActionResult> GetSignature([FromBody] RootDocumentModel model)
         {
             var connectionSettings = await _settingsStepService.GetConnectionData();
-var signature = "";
+            var signature = "";
             foreach (var invoice in model.Documents)
             {
                 _signatureService.SignDocument(invoice, connectionSettings.TokenPin);
