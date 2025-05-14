@@ -63,8 +63,12 @@ namespace ETA.Integrator.Server.Controllers
                     request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
                         .AddParameter("toDate", toDate, ParameterType.QueryString);
                 }
-                request.AddParameter("fromDate", ParameterType.QueryString)
-                    .AddParameter("toDate", ParameterType.QueryString);
+                else
+                {
+                    return BadRequest("Please provide both fromDate and toDate parameters.");
+                    // request.AddParameter("fromDate", ParameterType.QueryString)
+                    //     .AddParameter("toDate", ParameterType.QueryString);
+                }
 
                 var response = await client.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
 
@@ -101,18 +105,19 @@ namespace ETA.Integrator.Server.Controllers
 
             return Ok(response.Content);
         }
-        
+
         [HttpPost("GetSignature")]
         public async Task<IActionResult> GetSignature([FromBody] RootDocumentModel model)
         {
             var connectionSettings = await _settingsStepService.GetConnectionData();
-
+var signature = "";
             foreach (var invoice in model.Documents)
             {
                 _signatureService.SignDocument(invoice, connectionSettings.TokenPin);
+                signature = invoice.Signatures.FirstOrDefault()?.Value ?? "";
             }
 
-            return Ok();
+            return Ok(signature);
         }
     }
     public class RootDocumentModel

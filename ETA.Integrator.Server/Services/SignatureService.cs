@@ -143,8 +143,12 @@ namespace ETA.Integrator.Server.Services
         {
             try
             {
+                // var path = @"C:\Program Files (x86)\EnterSafe\ePass2003\eTPKCS11.dll";
+                // var path = @"C:\Windows\System32\eps2003csp11.dll";
+                var path = @"C:\Windows\System32\eps2003csp11.dll";
+                // var path = @"C:\Windows\System32\eTPKCS11.dll";
                 Pkcs11InteropFactories factories = new Pkcs11InteropFactories();
-                IPkcs11Library pkcs11Library = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, @"C:\Windows\System32\eTPKCS11.dll", AppType.MultiThreaded);
+                IPkcs11Library pkcs11Library = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, path, AppType.MultiThreaded);
                 return pkcs11Library;
             }
             catch (Exception ex)
@@ -253,6 +257,7 @@ namespace ETA.Integrator.Server.Services
 
         public void SignDocument(InvoiceModel model, string tokenPin)
         {
+            model.Signatures = new List<SignatureModel>();
             SignatureModel signature = new SignatureModel();
             signature.SignatureType = "I";
 
@@ -288,8 +293,7 @@ namespace ETA.Integrator.Server.Services
                    detail: "SignatureService/FindCertificate: No certificate found."
                    );
 
-            //TODO: Check Signature Certificate Issuer Name
-            X509Certificate2? certificateForSigning = FindCertificateInStore("MCDR CA 2018");
+            X509Certificate2? certificateForSigning = FindCertificateInStore("Egypt Trust CA G6");
             if (certificateForSigning is null)
                 throw new ProblemDetailsException(
                   statusCode: StatusCodes.Status500InternalServerError,
