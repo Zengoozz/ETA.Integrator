@@ -144,6 +144,8 @@ namespace ETA.Integrator.Server.Services
                 DateTimeKind.Utc
             );
 
+            _logger.LogInformation("INFO: Invoice DateTime: {DateTime}", trimmedUtcNow);
+        
             document.Issuer = issuer;
             document.Receiver = receiver;
             document.TaxTotals = taxTotalList;
