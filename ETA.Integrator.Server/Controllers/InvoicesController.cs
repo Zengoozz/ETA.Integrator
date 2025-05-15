@@ -35,7 +35,7 @@ namespace ETA.Integrator.Server.Controllers
             _signatureService = signatureService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate)
+        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType = "")
         {
             try
             {
@@ -53,16 +53,15 @@ namespace ETA.Integrator.Server.Controllers
 
                 var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
 
-                if (fromDate != null && toDate != null)
+                if (fromDate != null && toDate != null && !string.IsNullOrWhiteSpace(invoiceType))
                 {
                     request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
-                        .AddParameter("toDate", toDate, ParameterType.QueryString);
+                        .AddParameter("toDate", toDate, ParameterType.QueryString)
+                        .AddParameter("invoiceType", invoiceType, ParameterType.QueryString);
                 }
                 else
                 {
-                    return BadRequest("Please provide both fromDate and toDate parameters.");
-                    // request.AddParameter("fromDate", ParameterType.QueryString)
-                    //     .AddParameter("toDate", ParameterType.QueryString);
+                    return BadRequest("Please provide fromDate, toDate and invoiceType parameters.");
                 }
 
                 var response = await client.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
