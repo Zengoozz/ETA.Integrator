@@ -152,7 +152,7 @@ namespace ETA.Integrator.Server.Services
             document.Signatures = new List<SignatureModel>();
             document.DocumentType = "i";
             document.DocumentTypeVersion = "0.9";
-            document.DateTimeIssued = trimmedUtcNow;
+            document.DateTimeIssued = trimmedUtcNow.AddMinutes(1);
             document.TaxpayerActivityCode = "8610"; // HOSPITAL ACTIVITIES CODE
             document.InternalID = invoiceViewModel.InvoiceId.ToString();
             document.InvoiceLines = invoiceViewModel.InvoiceItems;
