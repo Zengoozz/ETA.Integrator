@@ -63,19 +63,21 @@ const InvoicesTableColumns = [
 const SubmittedInvoiceColumns = [
    {
       title: "Id / InternalId",
-      // dataIndex: "internalId",
       render: (_, record) => (
          <>
-            <a>
-               <span>{record.uuid}</span> / <span>{record.internalId}</span>
-            </a>
+            <p style={{ margin: 0, display: "flex", flexDirection:"column", alignItems: "center" }}>
+               <a target="_blank" href={record.publicUrl}>{record.uuid} /</a>
+               <p style={{ margin: 0 }}>
+                  <strong>{record.internalId}</strong>
+               </p>
+            </p>
          </>
       ),
    },
    {
       title: "Date Time Received",
       dataIndex: "dateTimeReceived",
-      render: (text) => <>{text}</>,
+      render: (value) => <>{dayjs(value).format("DD/MM/YYYY HH:mm:ss")}</>,
    },
    {
       title: "Total Value",
@@ -85,7 +87,7 @@ const SubmittedInvoiceColumns = [
    {
       title: "Issuer",
       dataIndex: "issuerName",
-      render: (text) => <>{text}</>,
+      render: (text) => <>{text.trim()}</>,
    },
    {
       title: "Receiver",
