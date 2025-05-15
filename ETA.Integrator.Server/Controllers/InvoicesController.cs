@@ -1,14 +1,9 @@
-﻿using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Extensions;
-using ETA.Integrator.Server.Interface.Services;
+﻿using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.ETA;
-using ETA.Integrator.Server.Models.Consumer.Requests;
-using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using System.Text.Json;
 
 namespace ETA.Integrator.Server.Controllers
 {

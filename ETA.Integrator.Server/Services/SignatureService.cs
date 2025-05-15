@@ -1,5 +1,4 @@
 ﻿using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Extensions;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Core;
@@ -368,7 +367,7 @@ namespace ETA.Integrator.Server.Services
             SignatureModel signature = new SignatureModel();
             signature.SignatureType = "I";
 
-            var serializedJson = SerializeToJson(model.ToDTO());
+            var serializedJson = SerializeToJson(model.FromInvoiceModel());
 
             var canonicalString = GenerateCanonicalString(serializedJson);
 
