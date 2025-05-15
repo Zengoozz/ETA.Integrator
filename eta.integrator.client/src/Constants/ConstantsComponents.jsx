@@ -28,16 +28,6 @@ const InvoicesTableColumns = [
       render: (value) => value.toFixed(2),
    },
    {
-      title: "Patient Share",
-      dataIndex: "patShare",
-      render: (value) => value.toFixed(2),
-   },
-   {
-      title: "Financial Share",
-      dataIndex: "finShare",
-      render: (value) => value.toFixed(2),
-   },
-   {
       title: "Vat Net",
       dataIndex: "vatNet",
       render: (value) => value.toFixed(2),
