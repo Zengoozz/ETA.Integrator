@@ -10,7 +10,7 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
    const [loading, setLoading] = useState(false);
 
    const disabledDate = (current) => {
-      // Disable dates before today
+      // Disable dates after today
       return current && current > new Date().setHours(0, 0, 0, 0);
    };
 
@@ -28,8 +28,9 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
          .then((values) => {
             const [dateFrom, dateTo] = values.dateRange || [];
             const invoiceTypeValue = values.InvoiceType;
-            const invoiceTypeLabel = InvoiceTypes.find(i => i.value === invoiceTypeValue)?.label ?? "";
-            
+            const invoiceTypeLabel =
+               InvoiceTypes.find((i) => i.value === invoiceTypeValue)?.label ?? "";
+
             if (dateFrom && dateTo && dateFrom.isAfter(dateTo)) {
                throw {
                   type: "validation",
@@ -40,7 +41,7 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
             const formattedValues = {
                dateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
                dateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
-               invoiceType: invoiceTypeValue
+               invoiceType: invoiceTypeValue,
             };
 
             return handleSearch(formattedValues).then(() => {
@@ -67,10 +68,14 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
 
    return (
       <Form
+         initialValues={{
+            InvoiceType: "I",
+         }}
          form={form}
          layout={isMobile ? "vertical" : "inline"}
       >
          <Flex
+            vertical={true}
             gap="small"
             wrap
          >
@@ -91,7 +96,7 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
                   autoComplete="off"
                />
             </Form.Item>
-            
+
             <Form.Item //TODO: Styling the dropdown
                // label="Invoice Type"
                name="InvoiceType"
