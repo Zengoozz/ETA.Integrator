@@ -1,9 +1,14 @@
-﻿using ETA.Integrator.Server.Interface.Services;
+﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Extensions;
+using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.ETA;
+using ETA.Integrator.Server.Models.Consumer.Requests;
+using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System.Text.Json;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -83,21 +88,10 @@ namespace ETA.Integrator.Server.Controllers
         [HttpPost("SubmitInvoice")]
         public async Task<IActionResult> SubmitInvoice(List<ProviderInvoiceViewModel> invoicesList)
         {
-            //TODO: Still working on this
-            var response = await _consumerService.SubmitInvoice(invoicesList);
 
-            // var response = await _requestHandlerService.ExecuteWithAuthRetryAsync(request);
-            // if (response is null || response.Content is null)
-            //     return StatusCode(StatusCodes.Status500InternalServerError, "Error: No response from the consumer API");
+            var request = await _consumerService.SubmitInvoiceRequest(invoicesList);
 
-            // var content = JsonSerializer.Deserialize<InvoiceSubmissionDTO>(response.Content);
-            // if (content is null)
-            //     return StatusCode(StatusCodes.Status500InternalServerError, "Error: Unable to deserialize the response content");
-
-            // if(content.AcceptedDocuments.Count() == invoicesList.Count())
-            // {
-            //     return Ok(content.SubmissionUUID);
-            // }
+            var response = await _requestHandlerService.ExecuteWithAuthRetryAsync(request);
 
             return Ok(response);
         }

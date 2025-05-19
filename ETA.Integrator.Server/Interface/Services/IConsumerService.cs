@@ -1,4 +1,4 @@
-﻿using ETA.Integrator.Server.Dtos.InvoiceSubmission;
+﻿using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Provider;
 using RestSharp;
 
@@ -6,7 +6,8 @@ namespace ETA.Integrator.Server.Interface.Services
 {
     public interface IConsumerService
     {
-        Task<InvoiceSubmissionDTO> SubmitInvoice(List<ProviderInvoiceViewModel> invoices);
+        Task<RestRequest> SubmitInvoiceRequest(List<ProviderInvoiceViewModel> invoicesList);
+        InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin);
         RestRequest GetRecentDocumentsRequest();
     }
 }
