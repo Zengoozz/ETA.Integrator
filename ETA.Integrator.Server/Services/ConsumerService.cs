@@ -16,11 +16,12 @@ namespace ETA.Integrator.Server.Services
         private readonly ISettingsStepService _settingsStepService;
         private readonly ISignatureService _signatureService;
         private readonly IRequestHandlerService _requestHandlerService;
-        public ConsumerService(ILogger<ConsumerService> logger, ISettingsStepService settingsStepService, ISignatureService signatureService)
+        public ConsumerService(ILogger<ConsumerService> logger, ISettingsStepService settingsStepService, ISignatureService signatureService, IRequestHandlerService requestHandlerService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settingsStepService = settingsStepService ?? throw new ArgumentNullException(nameof(_settingsStepService));
             _signatureService = signatureService;
+            _requestHandlerService = requestHandlerService ?? throw new ArgumentNullException(nameof(requestHandlerService));
         }
 
         #region SUBMIT INVOICE
@@ -46,19 +47,20 @@ namespace ETA.Integrator.Server.Services
 
                 //TODO: Handle submission response
                 if (submissionResponse is null)
+                {
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
                         message: "SERIALIZATION_FAILED",
-                        detail: "ConsumerService/SubmitInvoice: Serialization failed."
+                        detail: "ConsumerService/SubmitInvoice: Serialization failed (InvoiceSubmissionDTO)."
                         );
+                }
+                else
+                {
+                    //TODO: Logging to the transaction 
+                    if (submissionResponse.RejectedDocuments.Count == 0) { }
 
-                if (submissionResponse.RejectedDocuments.Count == 0)
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZATION_FAILED",
-                        detail: "ConsumerService/SubmitInvoice: Serialization failed."
-                        );
-
+                    return submissionResponse;
+                }
             }
             else // Not Accepted
             {
@@ -67,11 +69,22 @@ namespace ETA.Integrator.Server.Services
                     PropertyNameCaseInsensitive = true
                 });
 
-                throw new ProblemDetailsException(
-                    statusCode: (int)response.StatusCode,
-                    message: "SUBMISSION_FAILED",
-                    detail: $"ConsumerService/SubmitInvoice: Submission failed. {errorResponse}"
-                    );
+                if (errorResponse is null)
+                {
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SERIALIZATION_FAILED",
+                        detail: "ConsumerService/SubmitInvoice: Serialization failed (SubmissionErrorDTO)."
+                        );
+                }
+                else
+                {
+                    throw new ProblemDetailsException(
+                        statusCode: (int)response.StatusCode,
+                        message: "SUBMISSION_FAILED",
+                        detail: $"ConsumerService/SubmitInvoice: Submission failed. {errorResponse}"
+                        );
+                }
             }
 
 
