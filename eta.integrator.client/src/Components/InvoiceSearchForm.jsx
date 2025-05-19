@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { DatePicker, Button, Form, Flex } from "antd";
+import { DatePicker, Button, Form, Flex, Select } from "antd";
+import { InvoiceSearchValidationRules, InvoiceTypes } from "../Constants/Constants";
 
 const { RangePicker } = DatePicker;
+const { Option } = Select;
 
-const DateRangeSearch = ({ isMobile, handleSearch, messageApi }) => {
+const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
    const [form] = Form.useForm();
    const [loading, setLoading] = useState(false);
 
    const disabledDate = (current) => {
-      // Disable dates before today
+      // Disable dates after today
       return current && current > new Date().setHours(0, 0, 0, 0);
    };
 
@@ -25,6 +27,9 @@ const DateRangeSearch = ({ isMobile, handleSearch, messageApi }) => {
          .validateFields()
          .then((values) => {
             const [dateFrom, dateTo] = values.dateRange || [];
+            const invoiceTypeValue = values.InvoiceType;
+            const invoiceTypeLabel =
+               InvoiceTypes.find((i) => i.value === invoiceTypeValue)?.label ?? "";
 
             if (dateFrom && dateTo && dateFrom.isAfter(dateTo)) {
                throw {
@@ -36,12 +41,13 @@ const DateRangeSearch = ({ isMobile, handleSearch, messageApi }) => {
             const formattedValues = {
                dateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
                dateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
+               invoiceType: invoiceTypeValue,
             };
 
             return handleSearch(formattedValues).then(() => {
                messageApi.open({
                   type: "success",
-                  content: `Showing from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+                  content: `Showing ${invoiceTypeLabel} from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
                   duration: 2,
                });
             });
@@ -62,10 +68,14 @@ const DateRangeSearch = ({ isMobile, handleSearch, messageApi }) => {
 
    return (
       <Form
+         initialValues={{
+            InvoiceType: "I",
+         }}
          form={form}
          layout={isMobile ? "vertical" : "inline"}
       >
          <Flex
+            vertical={true}
             gap="small"
             wrap
          >
@@ -87,6 +97,23 @@ const DateRangeSearch = ({ isMobile, handleSearch, messageApi }) => {
                />
             </Form.Item>
 
+            <Form.Item //TODO: Styling the dropdown
+               // label="Invoice Type"
+               name="InvoiceType"
+               rules={InvoiceSearchValidationRules.invoiceType}
+            >
+               <Select placeholder="Please select invoice type">
+                  {InvoiceTypes.map((type) => (
+                     <Option
+                        key={type.value}
+                        value={type.value}
+                     >
+                        {type.label}
+                     </Option>
+                  ))}
+               </Select>
+            </Form.Item>
+
             <Form.Item>
                <Button
                   type="primary"
@@ -103,4 +130,4 @@ const DateRangeSearch = ({ isMobile, handleSearch, messageApi }) => {
    );
 };
 
-export default DateRangeSearch;
+export default InvoiceSearchForm;

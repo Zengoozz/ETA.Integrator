@@ -195,3 +195,191 @@ Total = NetTotal + Sum(taxableItems.amount) + totalTaxableFees - valueDifference
     ]
 }
 
+
+{
+    "documents": [
+        {
+            "issuer": {
+                "address": {
+                    "branchID": "0",
+                    "country": "EG",
+                    "governate": "القاهرة",
+                    "regionCity": "قسم مصر الجديدة",
+                    "street": "ش الهرام الدور 5 شقه 34 روكسي",
+                    "buildingNumber": "24",
+                    "postalCode": "00000",
+                    "floor": null,
+                    "room": null,
+                    "landmark": null,
+                    "additionalInformation": ""
+                },
+                "type": "B",
+                "id": "530813904",
+                "name": "هشام لاشين وشركاه"
+            },
+            "receiver": {
+                "address": {
+                    "country": "EG",
+                    "governate": "القاهرة",
+                    "regionCity": "قسم المعادى",
+                    "street": "0/1115 كورنيش النيل المعادى القاهرة",
+                    "buildingNumber": "0",
+                    "postalCode": "",
+                    "floor": "",
+                    "room": "",
+                    "landmark": "",
+                    "additionalInformation": ""
+                },
+                "type": "B",
+                "id": "204897025",
+                "name": "مستشفى النيل بدراوى"
+            },
+            "documentType": "i",
+            "documentTypeVersion": "1.0",
+            "dateTimeIssued": "2025-05-07T11:34:20Z",
+            "taxpayerActivityCode": "8610",
+            "internalID": "2025003000",
+            "references": [],
+            "payment": {},
+            "delivery": {},
+            "invoiceLines": [
+                {
+                    "description": "كشف (خارجي) مطالبة شهر 3/2025 عيادات",
+                    "itemType": "EGS",
+                    "itemCode": "EG-530813904-B0001",
+                    "unitType": "JOB",
+                    "quantity": 1,
+                    "internalCode": "",
+                    "salesTotal": 204456.384,
+                    "total": 204456.384,
+                    "valueDifference": 0,
+                    "totalTaxableFees": 0,
+                    "netTotal": 204456.384,
+                    "itemsDiscount": 0,
+                    "unitValue": {
+                        "currencySold": "EGP",
+                        "amountEGP": 204456.384,
+                        "amountSold": 0
+                    },
+                    "discount": {},
+                    "taxableItems": []
+                },
+                {
+                    "description": "عمليات (داخلي) مطالبة 3/2025 عمليات",
+                    "itemType": "EGS",
+                    "itemCode": "EG-530813904-A0001",
+                    "unitType": "JOB",
+                    "quantity": 1,
+                    "internalCode": "",
+                    "salesTotal": 124344.48,
+                    "total": 124344.48,
+                    "valueDifference": 0,
+                    "totalTaxableFees": 0,
+                    "netTotal": 124344.48,
+                    "itemsDiscount": 0,
+                    "unitValue": {
+                        "currencySold": "EGP",
+                        "amountEGP": 124344.48,
+                        "amountSold": 0
+                    },
+                    "discount": {},
+                    "taxableItems": []
+                }
+            ],
+            "totalSalesAmount": 328800.864,
+            "totalDiscountAmount": 0,
+            "netAmount": 328800.864,
+            "taxTotals": [],
+            "totalAmount": 328800.864,
+            "totalItemsDiscountAmount": 0,
+            "extraDiscountAmount": 0,
+            "signatures": [
+                {
+                    "signatureType": "I",
+                    "value": "SignatureValue"
+                }
+            ]
+        },
+        {
+            "issuer": {
+                "address": {
+                    "branchID": "0",
+                    "country": "EG",
+                    "governate": "القاهرة",
+                    "regionCity": "قسم مصر الجديدة",
+                    "street": "ش الهرام الدور 5 شقه 34 روكسي",
+                    "buildingNumber": "24",
+                    "postalCode": "00000",
+                    "floor": null,
+                    "room": null,
+                    "landmark": null,
+                    "additionalInformation": ""
+                },
+                "type": "B",
+                "id": "530813904",
+                "name": "هشام لاشين وشركاه"
+            },
+            "receiver": {
+                "address": {
+                    "country": "EG",
+                    "governate": "القاهرة",
+                    "regionCity": "قسم المعادى",
+                    "street": "0/1115 كورنيش النيل المعادى القاهرة",
+                    "buildingNumber": "0",
+                    "postalCode": "",
+                    "floor": "",
+                    "room": "",
+                    "landmark": "",
+                    "additionalInformation": ""
+                },
+                "type": "B",
+                "id": "204897025",
+                "name": "مستشفى النيل بدراوى"
+            },
+            "documentType": "i",
+            "documentTypeVersion": "1.0",
+            "dateTimeIssued": "2025-05-07T11:34:20Z",
+            "taxpayerActivityCode": "8610",
+            "internalID": "2025003001",
+            "references": [],
+            "payment": {},
+            "delivery": {},
+            "invoiceLines": [
+                {
+                    "description": "كشف (خارجي) مطالبة شهر 3/2025 عيادات",
+                    "itemType": "EGS",
+                    "itemCode": "EG-530813904-B0001",
+                    "unitType": "JOB",
+                    "quantity": 1,
+                    "internalCode": "",
+                    "salesTotal": 204456,
+                    "total": 204456,
+                    "valueDifference": 0,
+                    "totalTaxableFees": 0,
+                    "netTotal": 204456,
+                    "itemsDiscount": 0,
+                    "unitValue": {
+                        "currencySold": "EGP",
+                        "amountEGP": 204456,
+                        "amountSold": 0
+                    },
+                    "discount": {},
+                    "taxableItems": []
+                }
+            ],
+            "totalSalesAmount": 204456,
+            "totalDiscountAmount": 0,
+            "netAmount": 204456,
+            "taxTotals": [],
+            "totalAmount": 204456,
+            "totalItemsDiscountAmount": 0,
+            "extraDiscountAmount": 0,
+            "signatures": [
+                {
+                    "signatureType": "I",
+                    "value": "SignatureValue"
+                }
+            ]
+        }
+    ]
+}

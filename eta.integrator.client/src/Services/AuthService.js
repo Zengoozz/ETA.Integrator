@@ -54,6 +54,7 @@ const getConnectionSettings = async () => {
       const myResponse = {
          ClientId: response.clientId,
          ClientSecret: response.clientSecret,
+         TokenPin: response.TokenPin
       };
 
       return myResponse;

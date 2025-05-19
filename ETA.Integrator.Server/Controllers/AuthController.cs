@@ -44,13 +44,36 @@ namespace ETA.Integrator.Server.Controllers
 
                     var response = await connectionClient.ExecuteAsync<ProviderLoginResponseModel>(request);
 
-                    return StatusCode((int)response.StatusCode, response.Data);
+                    _customConfig.Provider_Token = response.Data?.Token ?? "";
 
+                    return StatusCode((int)response.StatusCode, response.Data);
                 }
                 else
                 {
                     _logger.LogError("Error: Getting provider api url");
                     return StatusCode(StatusCodes.Status500InternalServerError, "Error: Getting provider api url");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occured getting connection settings");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred getting connection settings");
+            }
+        }
+
+        [HttpGet("ValidateProviderToken")]
+        public IActionResult ValidateProviderToken()
+        {
+            try
+            {
+                var token = _customConfig.Provider_Token;
+                if (String.IsNullOrWhiteSpace(token))
+                {
+                    return Unauthorized();
+                }
+                else
+                {
+                    return Ok(token);
                 }
             }
             catch (Exception ex)

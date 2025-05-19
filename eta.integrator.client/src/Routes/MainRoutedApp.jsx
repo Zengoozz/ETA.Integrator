@@ -19,7 +19,7 @@ import useAuthPresistence from "../Hooks/useAuthPresistence.jsx";
 import RootRoutes from "./RootRoutes.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import SubmittedInvoicesPage from "../Pages/SubmittedInvoicesPage.jsx";
-
+//FIXME: Routing unNecessary between Stepper components like just need a main page for the stepper and the steps will be inside as they gonna just switch between as components no pages
 const MainRoutedApp = ({ mode, setMode, isMobile }) => {
    const [isLoggedIn, setLogIn] = useState(false);
    const [userProgress, setUserProgress] = useState(null);

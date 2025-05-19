@@ -4,7 +4,7 @@ namespace ETA.Integrator.Server.Interface.Services
 {
     public interface ISettingsStepService
     {
-        Task<IssuerDTO?> GetIssuerData();
-        Task<ConnectionDTO?> GetConnectionData();
+        Task<IssuerDTO> GetIssuerData();
+        Task<ConnectionDTO> GetConnectionData();
     }
 }

@@ -1,8 +1,5 @@
-﻿using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Extensions;
-using ETA.Integrator.Server.Interface.Services;
+﻿using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.ETA;
-using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -17,25 +14,28 @@ namespace ETA.Integrator.Server.Controllers
         private readonly CustomConfigurations _customConfig;
         private readonly ILogger<InvoicesController> _logger;
         private readonly ISettingsStepService _settingsStepService;
-        private readonly IInvoiceService _invoiceService;
-        private readonly IConsumerRequestsHandlerService _consumerRequestHandlerService;
+        private readonly IConsumerService _consumerService;
+        private readonly IRequestHandlerService _requestHandlerService;
+        private readonly ISignatureService _signatureService;
 
         public InvoicesController(
             IOptions<CustomConfigurations> customConfigurations,
             ILogger<InvoicesController> logger,
             ISettingsStepService settingsStepService,
-            IInvoiceService invoiceService,
-            IConsumerRequestsHandlerService consumerRequestHandlerService
+            IConsumerService consumerService,
+            IRequestHandlerService requestHandlerService,
+            ISignatureService signatureService
             )
         {
             _logger = logger;
             _customConfig = customConfigurations.Value;
             _settingsStepService = settingsStepService;
-            _invoiceService = invoiceService;
-            _consumerRequestHandlerService = consumerRequestHandlerService;
+            _consumerService = consumerService;
+            _requestHandlerService = requestHandlerService;
+            _signatureService = signatureService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate)
+        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType = "")
         {
             try
             {
@@ -53,13 +53,16 @@ namespace ETA.Integrator.Server.Controllers
 
                 var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
 
-                if (fromDate != null && toDate != null)
+                if (fromDate != null && toDate != null && !string.IsNullOrWhiteSpace(invoiceType))
                 {
                     request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
-                        .AddParameter("toDate", toDate, ParameterType.QueryString);
+                        .AddParameter("toDate", toDate, ParameterType.QueryString)
+                        .AddParameter("invoiceType", invoiceType, ParameterType.QueryString);
                 }
-                request.AddParameter("fromDate", ParameterType.QueryString)
-                    .AddParameter("toDate", ParameterType.QueryString);
+                else
+                {
+                    return BadRequest("Please provide fromDate, toDate and invoiceType parameters.");
+                }
 
                 var response = await client.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
 
@@ -77,94 +80,42 @@ namespace ETA.Integrator.Server.Controllers
         }
 
         [HttpPost("SubmitInvoice")]
-        public async Task<IActionResult> SubmitInvoice(List<ProviderInvoiceViewModel> ivoiceViewModelList)
+        public async Task<IActionResult> SubmitInvoice(List<ProviderInvoiceViewModel> invoicesList)
         {
-            List<InvoiceModel> documents = new List<InvoiceModel>();
 
-            #region ISSUER_PREP
+            var request = await _consumerService.SubmitInvoiceRequest(invoicesList);
 
-            IssuerDTO? issuerData = await _settingsStepService.GetIssuerData();
+            var response = await _requestHandlerService.ExecuteWithAuthRetryAsync(request);
 
-            if (issuerData == null)
-            {
-                return BadRequest(new GenericResponse<string>
-                {
-                    Success = false,
-                    Code = "ISSUER_NOT_FOUND",
-                    Message = "Issuer data not found!",
-                    Data = null
-                });
-            }
-
-            IssuerModel? issuer = issuerData.ToIssuerModel();
-
-            if (issuer == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new GenericResponse<IssuerDTO>
-                {
-                    Success = false,
-                    Code = "ISSUER_MAPPING_FAILED",
-                    Message = "Failed to map Issuer Data!",
-                    Data = issuerData
-                });
-            }
-            #endregion
-
-            #region INVOICE_PREP
-            foreach (var invoice in ivoiceViewModelList)
-            {
-                var doc = _invoiceService.PrepareInvoiceData(invoice, issuer);
-
-                documents.Add(doc);
-            }
-            #endregion
-
-            var submitRequestBody = new
-            {
-                documents = documents
-            };
-
-            var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
-                .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
-
-            var submitResponse = await _consumerRequestHandlerService.ExecuteWithAuthRetryAsync(submitRequest);
-
-            return Ok(documents);
+            return Ok(response);
         }
 
         [HttpGet("GetRecent")]
         public async Task<IActionResult> GetRecentDocuments()
         {
-            DateTime utcNow = DateTime.UtcNow;
+            var request = _consumerService.GetRecentDocumentsRequest();
 
-            // Create a new DateTime without milliseconds
-            DateTime trimmedUtcNow = new DateTime(
-                utcNow.Year,
-                utcNow.Month,
-                utcNow.Day,
-                utcNow.Hour,
-                utcNow.Minute,
-                utcNow.Second,
-                DateTimeKind.Utc
-            );
+            var response = await _requestHandlerService.ExecuteWithAuthRetryAsync(request);
 
-            var request = new RestRequest("/api/v1/documents/recent", Method.Get)
-                .AddHeader("Content-Type", "application/json")
-                .AddQueryParameter("pageNo", 1)
-                .AddQueryParameter("pageSize", 100)
-                .AddQueryParameter("submissionDateFrom", trimmedUtcNow.AddMonths(-1).ToString())
-                .AddQueryParameter("submissionDateTo", trimmedUtcNow.ToString())
-                .AddQueryParameter("documentType", "i");
-
-            var response = await _consumerRequestHandlerService.ExecuteWithAuthRetryAsync(request);
-
-            return Ok(response.Data.Content);
+            return Ok(response.Content);
         }
-        [HttpGet("GetSignature")]
-        public async Task<IActionResult> GetSignature()
+
+        [HttpPost("GetSignature")]
+        public async Task<IActionResult> GetSignature([FromBody] RootDocumentModel model)
         {
+            var connectionSettings = await _settingsStepService.GetConnectionData();
+            var signature = "";
+            foreach (var invoice in model.Documents)
+            {
+                _signatureService.SignDocument(invoice, connectionSettings.TokenPin);
+                signature = invoice.Signatures.FirstOrDefault()?.Value ?? "";
+            }
 
-            return Ok();
+            return Ok(signature);
         }
+    }
+    public class RootDocumentModel
+    {
+        public List<InvoiceModel> Documents { get; set; } = new List<InvoiceModel>();
     }
 }

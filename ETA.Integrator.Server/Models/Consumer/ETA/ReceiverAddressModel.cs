@@ -13,4 +13,22 @@
         public string Landmark { get; set; } = string.Empty;
         public string AdditionalInformation { get; set; } = string.Empty;
     }
+    public static class ReceiverAddressMapper
+    {
+        public static ReceiverAddressModel FromString(this string address)
+        {
+            if (string.IsNullOrWhiteSpace(address))
+                return new ReceiverAddressModel();
+
+            var addressParts = address.Split('|');
+            return new ReceiverAddressModel
+            {
+                BuildingNumber = addressParts[0],
+                Street = addressParts[1],
+                RegionCity = addressParts[2],
+                Governate = addressParts[3],
+                Country = addressParts[4].Trim()
+            };
+        }
+    }
 }

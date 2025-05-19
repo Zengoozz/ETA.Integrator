@@ -32,13 +32,9 @@ namespace ETA.Integrator.Server.Controllers
         {
             try
             {
-                SettingsStep step = await _settingsStepRepository.GetByStepNumber(1);
+                ConnectionDTO connection = await _settingsStepService.GetConnectionData();
 
-                ConnectionDTO connectionDto = !String.IsNullOrWhiteSpace(step.Data) ?
-                    JsonSerializer.Deserialize<ConnectionDTO>(step.Data) ?? new ConnectionDTO() :
-                    new ConnectionDTO();
-
-                return Ok(connectionDto);
+                return Ok(connection);
             }
             catch (Exception ex)
             {

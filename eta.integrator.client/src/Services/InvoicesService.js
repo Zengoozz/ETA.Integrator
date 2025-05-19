@@ -4,7 +4,7 @@ const getInvoicesAccordingToDateAsQueryParams = async (values) => {
    try {
       const response = await GenericService.makeRequestFactory(
          "GET",
-         `/Invoices?fromDate=${values.dateFrom}&toDate=${values.dateTo}`
+         `/Invoices?fromDate=${values.dateFrom}&toDate=${values.dateTo}&invoiceType=${values.invoiceType}`
       );
       console.log(response);
       return response;

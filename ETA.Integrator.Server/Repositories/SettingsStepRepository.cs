@@ -2,7 +2,6 @@
 using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Interface.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace ETA.Integrator.Server.Repositories
 {
@@ -47,9 +46,9 @@ namespace ETA.Integrator.Server.Repositories
                 return settingStep.Order;
         }
 
-        public async Task<SettingsStep> GetByStepNumber(int stepNumber)
+        public async Task<SettingsStep?> GetByStepNumber(int stepNumber)
         {
-            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(t => t.Order == stepNumber) ?? new SettingsStep();
+            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(t => t.Order == stepNumber);
         }
 
 
