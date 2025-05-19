@@ -19,6 +19,7 @@ const makeRequestFactory = async (method, url, data = null, headers = {}) => {
 
       return response.data; // Return the parsed response data
    } catch (error) {
+      if (axios.isAxiosError(error)) console.error("Axios Error:", error.message);
       if (error.response) {
          // Server responded with an error status (e.g., 400, 500)
          throw new Error(`Error: ${error.message}, Status: ${error.response.status}`);
@@ -36,16 +37,20 @@ const updateStepFactory = async (values, step) => {
    try {
       const updateStepDTO = {
          Order: step,
-         Data: JSON.stringify(values)
+         Data: JSON.stringify(values),
       };
       console.log("updateStep", updateStepDTO);
 
-      const response = await makeRequestFactory("POST", "/Config/UpdateStep", updateStepDTO);
+      const response = await makeRequestFactory(
+         "POST",
+         "/Config/UpdateStep",
+         updateStepDTO
+      );
 
       return response;
    } catch (error) {
       console.error(error.message);
       throw error;
    }
-}
+};
 export default { makeRequestFactory, updateStepFactory };
