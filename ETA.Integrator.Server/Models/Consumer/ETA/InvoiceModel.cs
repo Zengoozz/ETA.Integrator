@@ -46,7 +46,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                     Type = "B",
                     Id = viewModel.RegistrationNumber == "NOT_FOUND" ? "313717919" : viewModel.RegistrationNumber,
                     Name = viewModel.ReceiverName,
-                    Address = viewModel.ReceiverAddress.FromString()
+                    Address = viewModel.ReceiverAddress
                 },
                 TaxTotals = new List<TaxTotalModel>(),
                 Signatures = new List<SignatureModel>(),
