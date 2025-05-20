@@ -15,10 +15,6 @@ namespace ETA.Integrator.Server.Models.Provider
         public bool IsReviewed { set; get; } = false;
         public decimal VatNet { set; get; }
         public decimal NetPrice { set; get; }
-        public decimal PatShare { set; get; }
-        public decimal FinShare { set; get; }
-        public decimal VatFinShare { set; get; }
-        public decimal VatPatShare { set; get; }
         public List<InvoiceLineModel> InvoiceItems { set; get; } = new();
     }
 }

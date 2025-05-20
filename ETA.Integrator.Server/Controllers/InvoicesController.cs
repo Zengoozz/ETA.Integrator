@@ -35,7 +35,7 @@ namespace ETA.Integrator.Server.Controllers
             _signatureService = signatureService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate)
+        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType = "")
         {
             try
             {
@@ -53,16 +53,15 @@ namespace ETA.Integrator.Server.Controllers
 
                 var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
 
-                if (fromDate != null && toDate != null)
+                if (fromDate != null && toDate != null && !string.IsNullOrWhiteSpace(invoiceType))
                 {
                     request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
-                        .AddParameter("toDate", toDate, ParameterType.QueryString);
+                        .AddParameter("toDate", toDate, ParameterType.QueryString)
+                        .AddParameter("invoiceType", invoiceType, ParameterType.QueryString);
                 }
                 else
                 {
-                    return BadRequest("Please provide both fromDate and toDate parameters.");
-                    // request.AddParameter("fromDate", ParameterType.QueryString)
-                    //     .AddParameter("toDate", ParameterType.QueryString);
+                    return BadRequest("Please provide fromDate, toDate and invoiceType parameters.");
                 }
 
                 var response = await client.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
@@ -83,21 +82,10 @@ namespace ETA.Integrator.Server.Controllers
         [HttpPost("SubmitInvoice")]
         public async Task<IActionResult> SubmitInvoice(List<ProviderInvoiceViewModel> invoicesList)
         {
-            //TODO: Still working on this
-            var response = await _consumerService.SubmitInvoice(invoicesList);
 
-            // var response = await _requestHandlerService.ExecuteWithAuthRetryAsync(request);
-            // if (response is null || response.Content is null)
-            //     return StatusCode(StatusCodes.Status500InternalServerError, "Error: No response from the consumer API");
+            var request = await _consumerService.SubmitInvoiceRequest(invoicesList);
 
-            // var content = JsonSerializer.Deserialize<InvoiceSubmissionDTO>(response.Content);
-            // if (content is null)
-            //     return StatusCode(StatusCodes.Status500InternalServerError, "Error: Unable to deserialize the response content");
-
-            // if(content.AcceptedDocuments.Count() == invoicesList.Count())
-            // {
-            //     return Ok(content.SubmissionUUID);
-            // }
+            var response = await _requestHandlerService.ExecuteWithAuthRetryAsync(request);
 
             return Ok(response);
         }

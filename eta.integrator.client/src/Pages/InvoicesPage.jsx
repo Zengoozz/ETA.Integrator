@@ -4,7 +4,7 @@ import { Flex, Card, message } from "antd";
 import { RightCircleOutlined } from "@ant-design/icons";
 
 import InvoicesTable from "../Components/InvoicesTable";
-import DateRangeSearch from "../Components/DateRangeSearch";
+import InvoiceSearchForm from "../Components/InvoiceSearchForm";
 import CustomButton from "../Components/CustomButton";
 
 import { InvoicesTableColumns } from "../Constants/ConstantsComponents";
@@ -65,7 +65,7 @@ const InvoicesPage = ({ isMobile }) => {
                <Flex 
                justify="space-between"
                >
-                  <DateRangeSearch
+                  <InvoiceSearchForm
                      isMobile={isMobile}
                      handleSearch={handleSearch}
                      messageApi={messageApi}

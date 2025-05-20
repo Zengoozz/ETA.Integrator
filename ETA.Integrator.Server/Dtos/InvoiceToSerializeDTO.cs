@@ -27,4 +27,38 @@ namespace ETA.Integrator.Server.Dtos
         public decimal ExtraDiscountAmount { get; set; }
         public decimal TotalItemsDiscountAmount { get; set; }
     }
+    public static class InvoiceSerializedMapper
+    {
+        public static InvoiceToSerializeDTO FromInvoiceModel(this InvoiceModel dto)
+        {
+            if (dto == null)
+                return new InvoiceToSerializeDTO();
+
+            return new InvoiceToSerializeDTO
+            {
+                Issuer = dto.Issuer,
+                Receiver = dto.Receiver,
+                DocumentType = dto.DocumentType,
+                DocumentTypeVersion = dto.DocumentTypeVersion,
+                DateTimeIssued = dto.DateTimeIssued,
+                TaxpayerActivityCode = dto.TaxpayerActivityCode,
+                InternalID = dto.InternalID,
+                PurchaseOrderReference = dto.PurchaseOrderReference,
+                PurchaseOrderDescription = dto.PurchaseOrderDescription,
+                SalesOrderReference = dto.SalesOrderReference,
+                SalesOrderDescription = dto.SalesOrderDescription,
+                ProformaInvoiceNumber = dto.ProformaInvoiceNumber,
+                Payment = dto.Payment,
+                Delivery = dto.Delivery,
+                InvoiceLines = dto.InvoiceLines,
+                TotalDiscountAmount = dto.TotalDiscountAmount,
+                TotalSalesAmount = dto.TotalSalesAmount,
+                NetAmount = dto.NetAmount,
+                TaxTotals = dto.TaxTotals,
+                TotalAmount = dto.TotalAmount,
+                ExtraDiscountAmount = dto.ExtraDiscountAmount,
+                TotalItemsDiscountAmount = dto.TotalItemsDiscountAmount,
+            };
+        }
+    }
 }
