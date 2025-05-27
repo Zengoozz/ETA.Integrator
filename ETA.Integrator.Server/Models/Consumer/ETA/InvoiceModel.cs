@@ -57,21 +57,20 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 InternalID = viewModel.InvoiceId.ToString(),
                 InvoiceLines = viewModel.InvoiceItems.Select(item => new InvoiceLineModel
                 {
-                    // TaxableItems equals empty list
-                    TaxableItems = new List<TaxableItemModel>(),
-                    InternalCode = "",
-                    ItemsDiscount = 0,
-                    Discount = new DiscountModel
-                    {
-                        Rate = 0,
-                        Amount = 0
-                    },
-                    Total = item.NetTotal,
+                    Description = item.Description,
+                    ItemType = item.ItemType,
+                    ItemCode = item.ItemCode,
+                    UnitType = item.UnitType,
+                    Quantity = item.Quantity,
+                    UnitValue = item.UnitValue,
                     SalesTotal = item.NetTotal,
-                    UnitValue = new ValueModel
-                    {
-                        AmountEGP = item.NetTotal
-                    },
+                    NetTotal = item.NetTotal,
+                    Total = item.NetTotal,
+                    ItemsDiscount = item.ItemsDiscount,
+                    ValueDifference = item.ValueDifference,
+                    TotalTaxableFees = item.TotalTaxableFees,
+                    InternalCode = item.InternalCode,
+                    Discount = item.Discount,
                 }).ToList(),
                 NetAmount = viewModel.NetPrice,
                 TotalSalesAmount = viewModel.InvoiceItems.Sum(i => i.NetTotal),
