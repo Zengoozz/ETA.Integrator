@@ -1,8 +1,10 @@
 ﻿using ETA.Integrator.Server.Data;
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Interface.Services;
+using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Repositories;
 using ETA.Integrator.Server.Services;
+using ETA.Integrator.Server.Services.Consumer;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETA.Integrator.Server.Extensions
@@ -15,6 +17,7 @@ namespace ETA.Integrator.Server.Extensions
             services.AddTransient<IConsumerService, ConsumerService>();
             services.AddTransient<IRequestHandlerService, RequestHandlerService>();
             services.AddTransient<ISignatureService, SignatureService>();
+            services.AddTransient<IHttpRequestExecutor, HttpRequestExecutor>();
 
             return services;
         }
