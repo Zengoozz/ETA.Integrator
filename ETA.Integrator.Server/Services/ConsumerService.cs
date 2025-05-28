@@ -26,7 +26,7 @@ namespace ETA.Integrator.Server.Services
 
             var connectionSettings = await _settingsStepService.GetConnectionData();
 
-            if (String.IsNullOrWhiteSpace(connectionSettings.TokenPin))
+            if (connectionSettings is null || String.IsNullOrWhiteSpace(connectionSettings.TokenPin))
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
                     message: "TOKEN_PIN_NOT_FOUND",
@@ -37,7 +37,7 @@ namespace ETA.Integrator.Server.Services
 
             IssuerDTO? issuerData = await _settingsStepService.GetIssuerData();
 
-            if (issuerData == null)
+            if (issuerData is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
                     message: "ISSUER_NOT_FOUND",
@@ -46,9 +46,12 @@ namespace ETA.Integrator.Server.Services
 
             IssuerModel? issuer = issuerData.FromDTO();
 
-            if (issuer == null)
-                throw new Exception("Issuer mapping failed");
-
+            if (issuer is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "ISSUER_MAPPING_FAILED",
+                    detail: "Issuer mapping failed"
+                    );
             #endregion
 
             #region INVOICE_PREP
@@ -75,6 +78,9 @@ namespace ETA.Integrator.Server.Services
 
         private InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin)
         {
+
+            //TODO: Validate the invoices data integrity
+
             InvoiceModel document = invoiceViewModel.FromViewModel(issuer);
 
             _signatureService.SignDocument(document, tokenPin);
