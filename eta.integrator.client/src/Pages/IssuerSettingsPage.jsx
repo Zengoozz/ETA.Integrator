@@ -7,7 +7,7 @@ import AuthService from "../Services/AuthService";
 import { IssuerTypes, SettingsValidationRules } from "../Constants/Constants";
 
 const { Option } = Select;
-
+//TODO: Add Get Button for all the info from the provider
 const IssuerSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    const [form] = Form.useForm();
    const [isBusinessType, setIsBusinessType] = React.useState(false);
