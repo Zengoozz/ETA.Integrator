@@ -1,4 +1,7 @@
-﻿namespace ETA.Integrator.Server.Models.Consumer.ETA
+﻿using ETA.Integrator.Server.Helpers;
+using ETA.Integrator.Server.Models.Provider;
+
+namespace ETA.Integrator.Server.Models.Consumer.ETA
 {
     public class InvoiceModel
     {
@@ -27,4 +30,65 @@
         public List<SignatureModel> Signatures { get; set; } = new List<SignatureModel>();
         public DateTime? ServiceDeliveryDate { get; set; }
     }
+
+    public static class InvoiceModelMapper
+    {
+        public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer)
+        {
+            if (viewModel == null)
+                return new InvoiceModel();
+
+            return new InvoiceModel
+            {
+                Issuer = issuer,
+                Receiver = new ReceiverModel
+                {
+                    Type = "B",
+                    Id = viewModel.RegistrationNumber == "NOT_FOUND" ? "313717919" : viewModel.RegistrationNumber,
+                    Name = viewModel.ReceiverName,
+                    Address = viewModel.ReceiverAddress
+                },
+                TaxTotals = new List<TaxTotalModel>(),
+                Signatures = new List<SignatureModel>(),
+                DocumentType = "i",
+                DocumentTypeVersion = "0.9",
+                DateTimeIssued = GenericHelpers.GetCurrentUTCTime(-1),
+                TaxpayerActivityCode = "8610",
+                InternalID = viewModel.InvoiceId.ToString(),
+                InvoiceLines = viewModel.InvoiceItems.Select(item => new InvoiceLineModel
+                {
+                    Description = item.Description,
+                    ItemType = item.ItemType,
+                    ItemCode = item.ItemCode,
+                    UnitType = item.UnitType,
+                    Quantity = item.Quantity,
+                    UnitValue = item.UnitValue,
+                    SalesTotal = item.NetTotal,
+                    NetTotal = item.NetTotal,
+                    Total = item.NetTotal,
+                    ItemsDiscount = item.ItemsDiscount,
+                    ValueDifference = item.ValueDifference,
+                    TotalTaxableFees = item.TotalTaxableFees,
+                    InternalCode = item.InternalCode,
+                    Discount = item.Discount,
+                }).ToList(),
+                NetAmount = viewModel.NetPrice,
+                TotalSalesAmount = viewModel.InvoiceItems.Sum(i => i.NetTotal),
+                TotalAmount = viewModel.NetPrice + 0, // Based on the Sum of TaxTotals.Amount
+                TotalDiscountAmount = 0, // Based on the Sum of InvoiceLines Discount.Amount
+                ExtraDiscountAmount = 0,
+                TotalItemsDiscountAmount = 0, // Based on the Sum of TotalDiscountAmount and ExtraDiscountAmount
+                //document.purchaseOrderReference = ; // OPTIONAL
+                //document.purchaseOrderDescription = ; // OPTIONAL
+                //document.salesOrderReference = ; // OPTIONAL
+                //document.salesOrderDescription = ; // OPTIONAL
+                //document.proformaInvoiceNumber = ; // OPTIONAL
+                //document.payment = ; // OPTIONAL
+                //document.delivery = ; // OPTIONAL
+                //document.ServiceDeliveryDate = ; //OPTIONAL
+            };
+        }
+    }
+
+
 }

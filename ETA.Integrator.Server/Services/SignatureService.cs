@@ -1,5 +1,4 @@
 ﻿using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Extensions;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Core;
@@ -19,7 +18,6 @@ using ISession = Net.Pkcs11Interop.HighLevelAPI.ISession;
 
 namespace ETA.Integrator.Server.Services
 {
-    //TODO: Throw problemDetailsException rather than just exception
     public class SignatureService : ISignatureService
     {
         private readonly ILogger<SignatureService> _logger;
@@ -35,7 +33,7 @@ namespace ETA.Integrator.Server.Services
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
                         message: "SERIALIZE_TOKEN_INTERNAL_ERR",
-                        detail: "Serialize token failed."
+                        detail: "Signature/SerializeToken: Serialize token failed (request)."
                         );
 
                 if (request.Parent is null)
@@ -44,7 +42,7 @@ namespace ETA.Integrator.Server.Services
                         throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
                         message: "SERIALIZE_TOKEN_INTERNAL_ERR",
-                        detail: "Serialize token failed."
+                        detail: "Signature/SerializeToken: Serialize token failed (parent)."
                         );
 
                     SerializeToken(request.First, serialized);
@@ -117,6 +115,11 @@ namespace ETA.Integrator.Server.Services
             if (string.IsNullOrWhiteSpace(serializedJson))
             {
                 _logger.LogError("SignatureService/GenerateCanonicalString: Serialized JSON data is required.");
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "CANONICAL_INTERNAL_ERR",
+                    detail: "SignatureService/GenerateCanonicalString: Serialized JSON data is required."
+                    );
             }
 
             else
@@ -130,7 +133,14 @@ namespace ETA.Integrator.Server.Services
                 });
 
                 if (request is null)
+                {
                     _logger.LogError("SignatureService/GenerateCanonicalString: Request object is null");
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "CANONICAL_INTERNAL_ERR",
+                        detail: "SignatureService/GenerateCanonicalString: Deserialized object is null (request)."
+                        );
+                }
                 else
                 {
                     SerializeToken(request, serialized);
@@ -143,18 +153,66 @@ namespace ETA.Integrator.Server.Services
         {
             try
             {
+                // var path = @"C:\Program Files (x86)\EnterSafe\ePass2003\eTPKCS11.dll";
+                // var path = @"C:\Windows\System32\eps2003csp11.dll";
+                var path = @"C:\Windows\System32\eps2003csp11.dll";
+                // var path = @"C:\Windows\System32\eTPKCS11.dll";
                 Pkcs11InteropFactories factories = new Pkcs11InteropFactories();
-                IPkcs11Library pkcs11Library = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, @"C:\Windows\System32\eTPKCS11.dll", AppType.MultiThreaded);
-                return pkcs11Library;
+                IPkcs11Library pkcs11Library = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, path, AppType.MultiThreaded);
+
+                if (pkcs11Library is null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "PKCS_LIB_INTERNAL_ERR",
+                        detail: "SignatureService/LoadPkcsLibrary: Library is null."
+                        );
+                else
+                    return pkcs11Library;
             }
             catch (Exception ex)
             {
                 _logger.LogError("SignatureService/LoadPkcsLibrary: " + ex.Message);
                 throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "PCKS_LOADING_ERR",
-                        detail: ex.Message
+                        message: "PKCS_LIB_LOADING_ERR",
+                        detail: "SignatureService/LoadPkcsLibrary:" + ex.Message
                         );
+            }
+        }
+        private ISession OpenSession(IPkcs11Library pkcsLibrary)
+        {
+            try
+            {
+                ISlot? slot = pkcsLibrary.GetSlotList(SlotsType.WithTokenPresent).FirstOrDefault();
+
+                if (slot is null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SLOTS_INTERNAL_ERR",
+                        detail: "SignatureService/OpenSession: No slots found."
+                        );
+                else
+                {
+                    ISession session = slot.OpenSession(SessionType.ReadWrite);
+
+                    if (session is null)
+                        throw new ProblemDetailsException(
+                            statusCode: StatusCodes.Status500InternalServerError,
+                            message: "SESSION_INTERNAL_ERR",
+                            detail: "SignatureService/OpenSession: Session is null."
+                            );
+                    else
+                        return session;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SignatureService/OpenSession: " + ex.Message);
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SLOTS_INTERNAL_ERR",
+                    detail: "SignatureService/OpenSession: " + ex.Message
+                    );
             }
         }
         private Unit TokenLogin(ISession session, string tokenPin)
@@ -173,31 +231,45 @@ namespace ETA.Integrator.Server.Services
             catch (Exception ex)
             {
                 _logger.LogError("SignatureService/TokenLogin: " + ex.Message);
-                throw;
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "TOKEN_LOGIN_ERR",
+                    detail: "SignatureService/TokenLogin: " + ex.Message
+                    );
             }
         }
-        private IObjectHandle? FindCertificate(ISession session)
+        private IObjectHandle FindCertificate(ISession session)
         {
             try
             {
-                var certificateSearchAttributes = new List<IObjectAttribute>()
-        {
-            session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_CERTIFICATE),
-            session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true),
-            session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CERTIFICATE_TYPE, CKC.CKC_X_509)
-        };
+                var certificateSearchAttributes = new List<IObjectAttribute>() {
+                    session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_CERTIFICATE),
+                    session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true),
+                    session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CERTIFICATE_TYPE, CKC.CKC_X_509)
+                };
 
                 IObjectHandle? certificate = session.FindAllObjects(certificateSearchAttributes).FirstOrDefault();
 
-                return certificate;
+                if (certificate is null)
+                    throw new ProblemDetailsException(
+                       statusCode: StatusCodes.Status500InternalServerError,
+                       message: "CERT_INTERNAL_ERR",
+                       detail: "SignatureService/FindCertificate: No certificate found."
+                       );
+                else
+                    return certificate;
             }
             catch (Exception ex)
             {
                 _logger.LogError("SignatureService/FindCertificate: " + ex.Message);
-                throw;
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "CERT_INTERNAL_ERR",
+                    detail: "SignatureService/FindCertificate: " + ex.Message
+                    );
             }
         }
-        private X509Certificate2? FindCertificateInStore(string tokenCertificate)
+        private X509Certificate2 FindCertificateInStore(string tokenCertificate)
         {
             try
             {
@@ -206,12 +278,23 @@ namespace ETA.Integrator.Server.Services
                 var foundCerts = store.Certificates.Find(X509FindType.FindByIssuerName, tokenCertificate, false);
                 store.Close();
 
-                return foundCerts[0];
+                if (foundCerts[0] is null)
+                    throw new ProblemDetailsException(
+                      statusCode: StatusCodes.Status500InternalServerError,
+                      message: "STORE_CERT_INTERNAL_ERR",
+                      detail: "SignatureService/FindCertificateInStore: No matching certificate found."
+                      );
+                else
+                    return foundCerts[0];
             }
             catch (Exception ex)
             {
                 _logger.LogError("SignatureService/FindCertificateInStore: " + ex.Message);
-                throw;
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "STORE_CERT_INTERNAL_ERR",
+                    detail: "SignatureService/FindCertificateInStore: " + ex.Message
+                    );
             }
         }
         private SignedCms CreateSignedCms(byte[] data, IObjectHandle certificateHandle, X509Certificate2 certificateForSigning)
@@ -235,67 +318,68 @@ namespace ETA.Integrator.Server.Services
             catch (Exception ex)
             {
                 _logger.LogError("SignatureService/CreateSignedCms: " + ex.Message);
-                throw;
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "CMS_INTERNAL_ERR",
+                    detail: "SignatureService/CreateSignedCms: " + ex.Message
+                    );
             }
         }
         private byte[] ComputeSignature(SignedCms cms)
         {
-            return cms.Encode();
+            try
+            {
+                return cms.Encode();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SignatureService/ComputeSignature: " + ex.Message);
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SIGNATURE_COMPUTE_ERR",
+                    detail: "SignatureService/ComputeSignature: " + ex.Message
+                    );
+            }
         }
         private byte[] HashBytes(byte[] input)
         {
-            using (SHA256 sha = SHA256.Create())
+            try
             {
-                return sha.ComputeHash(input);
+                using (SHA256 sha = SHA256.Create())
+                {
+                    return sha.ComputeHash(input);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SignatureService/HashBytes: " + ex.Message);
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "HASH_BYTES_ERR",
+                    detail: "SignatureService/HashBytes: " + ex.Message
+                    );
             }
         }
 
-
         public void SignDocument(InvoiceModel model, string tokenPin)
         {
+            model.Signatures = new List<SignatureModel>();
             SignatureModel signature = new SignatureModel();
             signature.SignatureType = "I";
 
-            var serializedJson = SerializeToJson(model.ToDTO());
+            var serializedJson = SerializeToJson(model.FromInvoiceModel());
 
             var canonicalString = GenerateCanonicalString(serializedJson);
 
             IPkcs11Library pkcsLibrary = LoadPkcsLibrary();
-            if (pkcsLibrary is null)
-                throw new ProblemDetailsException(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    message: "PKCS_LIB_INTERNAL_ERR",
-                    detail: "SignatureService/LoadPkcsLibrary: Library is null."
-                    );
 
-            ISlot? slot = pkcsLibrary?.GetSlotList(SlotsType.WithTokenPresent).FirstOrDefault() ?? null;
-            if (slot is null)
-                throw new ProblemDetailsException(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SLOTS_INTERNAL_ERR",
-                    detail: "SignatureService/GetFirstAvailableSlot: No slots found."
-                    );
+            ISession session = OpenSession(pkcsLibrary);
 
-            ISession session = slot.OpenSession(SessionType.ReadWrite);
+            TokenLogin(session, tokenPin);
 
-            Unit loginResult = TokenLogin(session, tokenPin);
+            IObjectHandle certificate = FindCertificate(session);
 
-            IObjectHandle? certificate = FindCertificate(session);
-            if (certificate is null)
-                throw new ProblemDetailsException(
-                   statusCode: StatusCodes.Status500InternalServerError,
-                   message: "CERT_INTERNAL_ERR",
-                   detail: "SignatureService/FindCertificate: No certificate found."
-                   );
-
-            //TODO: Check Signature Certificate Issuer Name
-            X509Certificate2? certificateForSigning = FindCertificateInStore("MCDR CA 2018");
-            if (certificateForSigning is null)
-                throw new ProblemDetailsException(
-                  statusCode: StatusCodes.Status500InternalServerError,
-                  message: "STORE_CERT_INTERNAL_ERR",
-                  detail: "SignatureService/FindCertificateInStore: No matching certificate found."
-                  );
+            X509Certificate2 certificateForSigning = FindCertificateInStore("Egypt Trust CA G6");
 
             SignedCms signedCms = CreateSignedCms(Encoding.UTF8.GetBytes(canonicalString), certificate, certificateForSigning);
 

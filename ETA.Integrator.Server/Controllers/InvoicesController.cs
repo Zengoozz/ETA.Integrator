@@ -1,14 +1,9 @@
-﻿using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Extensions;
-using ETA.Integrator.Server.Interface.Services;
+﻿using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Consumer.ETA;
-using ETA.Integrator.Server.Models.Consumer.Requests;
-using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using System.Text.Json;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -40,7 +35,7 @@ namespace ETA.Integrator.Server.Controllers
             _signatureService = signatureService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate)
+        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType = "")
         {
             try
             {
@@ -58,13 +53,16 @@ namespace ETA.Integrator.Server.Controllers
 
                 var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
 
-                if (fromDate != null && toDate != null)
+                if (fromDate != null && toDate != null && !string.IsNullOrWhiteSpace(invoiceType))
                 {
                     request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
-                        .AddParameter("toDate", toDate, ParameterType.QueryString);
+                        .AddParameter("toDate", toDate, ParameterType.QueryString)
+                        .AddParameter("invoiceType", invoiceType, ParameterType.QueryString);
                 }
-                request.AddParameter("fromDate", ParameterType.QueryString)
-                    .AddParameter("toDate", ParameterType.QueryString);
+                else
+                {
+                    return BadRequest("Please provide fromDate, toDate and invoiceType parameters.");
+                }
 
                 var response = await client.ExecuteAsync<List<ProviderInvoiceViewModel>>(request);
 
@@ -101,18 +99,19 @@ namespace ETA.Integrator.Server.Controllers
 
             return Ok(response.Content);
         }
-        
+
         [HttpPost("GetSignature")]
         public async Task<IActionResult> GetSignature([FromBody] RootDocumentModel model)
         {
             var connectionSettings = await _settingsStepService.GetConnectionData();
-
+            var signature = "";
             foreach (var invoice in model.Documents)
             {
                 _signatureService.SignDocument(invoice, connectionSettings.TokenPin);
+                signature = invoice.Signatures.FirstOrDefault()?.Value ?? "";
             }
 
-            return Ok();
+            return Ok(signature);
         }
     }
     public class RootDocumentModel

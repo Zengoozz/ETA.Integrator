@@ -1307,6 +1307,10 @@ const SettingsValidationRules = {
    ],
 };
 
+const InvoiceSearchValidationRules = {
+   invoiceType: [{ required: true, message: "Please select the invoice type!" }],
+};
+
 const IssuerTypes = [
    {
       value: "B",
@@ -1319,6 +1323,17 @@ const IssuerTypes = [
    {
       value: "F",
       label: "Foreigner",
+   },
+];
+
+const InvoiceTypes = [
+   {
+      value: "C",
+      label: "Claim",
+   },
+   {
+      value: "I",
+      label: "Invoice",
    },
 ];
 
@@ -1336,6 +1351,8 @@ export {
    CountriesCodes,
    LoginFormValidationRules,
    SettingsValidationRules,
+   InvoiceSearchValidationRules,
    IssuerTypes,
+   InvoiceTypes,
    ROUTES,
 };
