@@ -1,5 +1,5 @@
 ﻿using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Interface.Services;
+using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Core;
 using MediatR;
@@ -16,12 +16,12 @@ using System.Text;
 using System.Text.Json;
 using ISession = Net.Pkcs11Interop.HighLevelAPI.ISession;
 
-namespace ETA.Integrator.Server.Services
+namespace ETA.Integrator.Server.Services.Consumer
 {
-    public class SignatureService : ISignatureService
+    public class SignatureConsumerService : ISignatureConsumerService
     {
-        private readonly ILogger<SignatureService> _logger;
-        public SignatureService(ILogger<SignatureService> logger)
+        private readonly ILogger<SignatureConsumerService> _logger;
+        public SignatureConsumerService(ILogger<SignatureConsumerService> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -303,7 +303,7 @@ namespace ETA.Integrator.Server.Services
             {
                 ContentInfo content = new ContentInfo(new Oid("1.2.840.113549.1.7.5"), data);
 
-                EssCertIDv2 bouncyCertificate = new EssCertIDv2(new Org.BouncyCastle.Asn1.X509.AlgorithmIdentifier(new DerObjectIdentifier("1.2.840.113549.1.9.16.2.47")), this.HashBytes(certificateForSigning.RawData));
+                EssCertIDv2 bouncyCertificate = new EssCertIDv2(new Org.BouncyCastle.Asn1.X509.AlgorithmIdentifier(new DerObjectIdentifier("1.2.840.113549.1.9.16.2.47")), HashBytes(certificateForSigning.RawData));
                 SigningCertificateV2 signerCertificateV2 = new SigningCertificateV2(new EssCertIDv2[] { bouncyCertificate });
 
                 CmsSigner signer = new CmsSigner(certificateForSigning);

@@ -4,29 +4,34 @@ using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Models.Core;
 using RestSharp;
+using ETA.Integrator.Server.Interface.Services.Consumer;
 
-namespace ETA.Integrator.Server.Services
+namespace ETA.Integrator.Server.Services.Consumer
 {
-    public class ConsumerService : IConsumerService
+    public class RequestFactoryConsumerService : IRequestFactoryConsumerService
     {
-        private readonly ILogger<ConsumerService> _logger;
+        private readonly ILogger<RequestFactoryConsumerService> _logger;
         private readonly ISettingsStepService _settingsStepService;
-        private readonly ISignatureService _signatureService;
-        public ConsumerService(ILogger<ConsumerService> logger, ISettingsStepService settingsStepService, ISignatureService signatureService)
+        private readonly ISignatureConsumerService _signatureConsumerService;
+        public RequestFactoryConsumerService(
+            ILogger<RequestFactoryConsumerService> logger,
+            ISettingsStepService settingsStepService,
+            ISignatureConsumerService signatureConsumerService
+            )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settingsStepService = settingsStepService ?? throw new ArgumentNullException(nameof(_settingsStepService));
-            _signatureService = signatureService;
+            _signatureConsumerService = signatureConsumerService;
         }
 
         #region SUBMIT INVOICE
-        public async Task<RestRequest> SubmitInvoiceRequest(List<ProviderInvoiceViewModel> invoicesList)
+        public async Task<RestRequest> SubmitInvoices(List<ProviderInvoiceViewModel> invoicesList)
         {
             List<InvoiceModel> documents = new List<InvoiceModel>();
 
             var connectionSettings = await _settingsStepService.GetConnectionData();
 
-            if (connectionSettings is null || String.IsNullOrWhiteSpace(connectionSettings.TokenPin))
+            if (connectionSettings is null || string.IsNullOrWhiteSpace(connectionSettings.TokenPin))
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
                     message: "TOKEN_PIN_NOT_FOUND",
@@ -83,14 +88,14 @@ namespace ETA.Integrator.Server.Services
 
             InvoiceModel document = invoiceViewModel.FromViewModel(issuer);
 
-            _signatureService.SignDocument(document, tokenPin);
+            _signatureConsumerService.SignDocument(document, tokenPin);
 
             return document;
         }
 
         #endregion
 
-        public RestRequest GetRecentDocumentsRequest()
+        public RestRequest GetRecentDocuments()
         {
             DateTime utcNow = DateTime.UtcNow;
 

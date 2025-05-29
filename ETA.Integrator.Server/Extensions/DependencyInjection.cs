@@ -14,10 +14,14 @@ namespace ETA.Integrator.Server.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddTransient<ISettingsStepService, SettingsStepService>();
-            services.AddTransient<IConsumerService, ConsumerService>();
-            services.AddTransient<IRequestHandlerService, RequestHandlerService>();
-            services.AddTransient<ISignatureService, SignatureService>();
-            services.AddTransient<IHttpRequestExecutor, HttpRequestExecutor>();
+            
+            #region ConsumerServices
+            services.AddTransient<ISignatureConsumerService, SignatureConsumerService>();
+            services.AddTransient<IRequestFactoryConsumerService, RequestFactoryConsumerService>();
+            services.AddTransient<IHttpRequestSenderConsumerService, HttpRequestSenderConsumerService>();
+            services.AddTransient<IResponseProcessorConsumerService, ResponseProcessorConsumerService>();
+            services.AddTransient<IApiConsumerService, ApiConsumerService>();
+            #endregion
 
             return services;
         }

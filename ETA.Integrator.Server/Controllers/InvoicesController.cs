@@ -1,5 +1,4 @@
-﻿using ETA.Integrator.Server.Interface.Services;
-using ETA.Integrator.Server.Models.Consumer.ETA;
+﻿using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -13,26 +12,17 @@ namespace ETA.Integrator.Server.Controllers
     {
         private readonly CustomConfigurations _customConfig;
         private readonly ILogger<InvoicesController> _logger;
-        private readonly ISettingsStepService _settingsStepService;
-        private readonly IConsumerService _consumerService;
-        private readonly IRequestHandlerService _requestHandlerService;
-        private readonly ISignatureService _signatureService;
+        private readonly IApiConsumerService _apiConsumerService;
 
         public InvoicesController(
             IOptions<CustomConfigurations> customConfigurations,
             ILogger<InvoicesController> logger,
-            ISettingsStepService settingsStepService,
-            IConsumerService consumerService,
-            IRequestHandlerService requestHandlerService,
-            ISignatureService signatureService
+            IApiConsumerService apiConsumerService
             )
         {
             _logger = logger;
             _customConfig = customConfigurations.Value;
-            _settingsStepService = settingsStepService;
-            _consumerService = consumerService;
-            _requestHandlerService = requestHandlerService;
-            _signatureService = signatureService;
+            _apiConsumerService = apiConsumerService;
         }
         [HttpGet]
         public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType = "")
@@ -82,40 +72,18 @@ namespace ETA.Integrator.Server.Controllers
         [HttpPost("SubmitInvoice")]
         public async Task<IActionResult> SubmitInvoice(List<ProviderInvoiceViewModel> invoicesList)
         {
+            await _apiConsumerService.SubmitInvoices(invoicesList);
 
-            var request = await _consumerService.SubmitInvoiceRequest(invoicesList);
-
-            var response = await _requestHandlerService.ExecuteWithAuthRetryAsync(request);
-
-            return Ok(response);
+            return Ok();
         }
 
         [HttpGet("GetRecent")]
         public async Task<IActionResult> GetRecentDocuments()
         {
-            var request = _consumerService.GetRecentDocumentsRequest();
+            //TODO: Return appropriate response
+            await _apiConsumerService.GetRecentDocuments();
 
-            var response = await _requestHandlerService.ExecuteWithAuthRetryAsync(request);
-
-            return Ok(response.Content);
+            return Ok();
         }
-
-        [HttpPost("GetSignature")]
-        public async Task<IActionResult> GetSignature([FromBody] RootDocumentModel model)
-        {
-            var connectionSettings = await _settingsStepService.GetConnectionData();
-            var signature = "";
-            foreach (var invoice in model.Documents)
-            {
-                _signatureService.SignDocument(invoice, connectionSettings.TokenPin);
-                signature = invoice.Signatures.FirstOrDefault()?.Value ?? "";
-            }
-
-            return Ok(signature);
-        }
-    }
-    public class RootDocumentModel
-    {
-        public List<InvoiceModel> Documents { get; set; } = new List<InvoiceModel>();
     }
 }
