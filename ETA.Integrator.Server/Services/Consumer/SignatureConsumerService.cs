@@ -32,7 +32,7 @@ namespace ETA.Integrator.Server.Services.Consumer
                 if (request is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZATION_FAILED",
+                        message: "BAD_PARAMS",
                         detail: "Signature/SerializeToken: Serialize token failed (request)."
                         );
 
@@ -41,7 +41,7 @@ namespace ETA.Integrator.Server.Services.Consumer
                     if (request.First is null)
                         throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZATION_FAILED",
+                        message: "BAD_PARAMS",
                         detail: "Signature/SerializeToken: Serialize token failed (parent)."
                         );
 
@@ -117,7 +117,7 @@ namespace ETA.Integrator.Server.Services.Consumer
                 _logger.LogError("SignatureService/GenerateCanonicalString: Serialized JSON data is required.");
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "CANONICAL_INTERNAL_ERR",
+                    message: "BAD_PARAMS",
                     detail: "SignatureService/GenerateCanonicalString: Serialized JSON data is required."
                     );
             }
