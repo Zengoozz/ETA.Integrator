@@ -32,7 +32,7 @@ namespace ETA.Integrator.Server.Services.Consumer
                 if (request is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZE_TOKEN_INTERNAL_ERR",
+                        message: "SERIALIZATION_FAILED",
                         detail: "Signature/SerializeToken: Serialize token failed (request)."
                         );
 
@@ -41,7 +41,7 @@ namespace ETA.Integrator.Server.Services.Consumer
                     if (request.First is null)
                         throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZE_TOKEN_INTERNAL_ERR",
+                        message: "SERIALIZATION_FAILED",
                         detail: "Signature/SerializeToken: Serialize token failed (parent)."
                         );
 
@@ -137,7 +137,7 @@ namespace ETA.Integrator.Server.Services.Consumer
                     _logger.LogError("SignatureService/GenerateCanonicalString: Request object is null");
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "CANONICAL_INTERNAL_ERR",
+                        message: "SERIALIZATION_FAILED",
                         detail: "SignatureService/GenerateCanonicalString: Deserialized object is null (request)."
                         );
                 }
