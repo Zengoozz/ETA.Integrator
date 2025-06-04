@@ -8,7 +8,7 @@ namespace ETA.Integrator.Server.Services.Consumer
 {
     public class ResponseProcessorConsumerService : IResponseProcessorConsumerService
     {
-        public async Task<ResponseDTO> GetRecentDocuments(RestResponse response)
+        public Task<ResponseDTO> GetRecentDocuments(RestResponse response)
         {
             if (response is null || !response.IsSuccessful || (int)response.StatusCode != StatusCodes.Status200OK || response.Content is null)
             {
@@ -48,9 +48,7 @@ namespace ETA.Integrator.Server.Services.Consumer
                         detail: "ResponseProcessorConsumerService/GetRecentDocuments: Could not serialize the response."
                         );
 
-                //TODO: await the logger
-                return serializedResponse;
-
+                return Task.FromResult(serializedResponse);
             }
         }
 
