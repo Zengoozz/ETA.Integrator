@@ -80,10 +80,9 @@ namespace ETA.Integrator.Server.Controllers
         [HttpGet("GetRecent")]
         public async Task<IActionResult> GetRecentDocuments()
         {
-            //TODO: Return appropriate response
-            await _apiConsumerService.GetRecentDocuments();
+            var response = await _apiConsumerService.GetRecentDocuments();
 
-            return Ok();
+            return Ok(response);
         }
     }
 }

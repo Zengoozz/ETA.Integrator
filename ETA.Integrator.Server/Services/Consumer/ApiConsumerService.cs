@@ -1,4 +1,5 @@
-﻿using ETA.Integrator.Server.Interface.Services.Consumer;
+﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
+using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models.Provider;
 
 namespace ETA.Integrator.Server.Services.Consumer
@@ -18,11 +19,11 @@ namespace ETA.Integrator.Server.Services.Consumer
             _httpRequestSenderConsumerService = httpClientConsumerService;
             _responseProcessorConsumerService = responseHandlerConsumerService;
         }
-        public async Task GetRecentDocuments()
+        public async Task<ResponseDTO> GetRecentDocuments()
         {
             var request = _requestFactoryConsumerService.GetRecentDocuments();
             var response = await _httpRequestSenderConsumerService.ExecuteWithAuthRetryAsync(request);
-            await _responseProcessorConsumerService.GetRecentDocuments(response);
+            return await _responseProcessorConsumerService.GetRecentDocuments(response);
         }
 
         public async Task SubmitInvoices(List<ProviderInvoiceViewModel> providerInvoices)

@@ -1,4 +1,5 @@
-﻿using ETA.Integrator.Server.Models.Provider;
+﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
+using ETA.Integrator.Server.Models.Provider;
 using RestSharp;
 
 namespace ETA.Integrator.Server.Interface.Services.Consumer
@@ -6,6 +7,6 @@ namespace ETA.Integrator.Server.Interface.Services.Consumer
     public interface IApiConsumerService
     {
         Task SubmitInvoices(List<ProviderInvoiceViewModel> providerInvoices);
-        Task GetRecentDocuments();
+        Task<ResponseDTO> GetRecentDocuments();
     }
 }
