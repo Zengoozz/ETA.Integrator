@@ -15,19 +15,19 @@
         public string ReceiverId { get; set; } = string.Empty;
         public string ReceiverName { get; set; } = string.Empty;
         public string ReceiverType { get; set; } = string.Empty;
-        public DateTime DateTimeIssued { get; set; }
-        public DateTime DateTimeReceived { get; set; }
+        public DateTime? DateTimeIssued { get; set; }
+        public DateTime? DateTimeReceived { get; set; }
         public decimal TotalSales { get; set; }
         public decimal TotalDiscounts { get; set; }
         public decimal NetAmount { get; set; }
         public decimal Total { get; set; }
         public string Status { get; set; } = string.Empty;
-        public DateTime CancelRequestDate { get; set; }
-        public DateTime RejectRequestDate { get; set; }
-        public DateTime CancelRequestDelayedDate { get; set; }
-        public DateTime RejectRequestDelayedDate { get; set; }
-        public DateTime DeclineCancelRequestDate { get; set; }
-        public DateTime DeclineRejectRequestDate { get; set; }
+        public DateTime? CancelRequestDate { get; set; }
+        public DateTime? RejectRequestDate { get; set; }
+        public DateTime? CancelRequestDelayedDate { get; set; }
+        public DateTime? RejectRequestDelayedDate { get; set; }
+        public DateTime? DeclineCancelRequestDate { get; set; }
+        public DateTime? DeclineRejectRequestDate { get; set; }
         public string DocumentStatusReason { get; set; } = string.Empty;
         public string CreatedByUserId { get; set; } = string.Empty;
         public FreezeStatusDTO FreezeStatus { get; set; } = new();

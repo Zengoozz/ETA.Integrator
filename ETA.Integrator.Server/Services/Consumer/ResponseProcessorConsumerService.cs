@@ -3,6 +3,7 @@ using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models.Core;
 using RestSharp;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ETA.Integrator.Server.Services.Consumer
 {
@@ -39,7 +40,22 @@ namespace ETA.Integrator.Server.Services.Consumer
             {
                 ResponseDTO? serializedResponse = new ResponseDTO();
                 if (response != null && (int)response.StatusCode == StatusCodes.Status200OK && response.Content != null)
-                    serializedResponse = JsonSerializer.Deserialize<ResponseDTO>(response.Content);
+                {
+                    //TODO: Handle JSON Deserialize Exceptions
+                    try
+                    {
+                        var options = new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                            PropertyNameCaseInsensitive = true
+                        };
+                        serializedResponse = JsonSerializer.Deserialize<ResponseDTO>(response.Content, options);
+                    }
+                    catch (JsonException ex)
+                    {
+                        Console.WriteLine("JSON Error: " + ex.Message);
+                    }
+                }
 
                 if (serializedResponse is null)
                     throw new ProblemDetailsException(
