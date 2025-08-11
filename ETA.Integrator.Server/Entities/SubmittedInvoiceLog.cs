@@ -2,10 +2,11 @@
 
 namespace ETA.Integrator.Server.Entities
 {
-    public class SubmittedInvoiceLog
+    public class InvoiceSubmissionLog
     {
         public int Id { get; set; }
-        public int InvoiceId { get; set; }
+        public string InternalId { get; set; } = "";
+        public string SubmissionId { get; set; } = "";
         public DateTime? SubmissionDate { get; set; }
         public InvoiceStatus Status { get; set; }
     }

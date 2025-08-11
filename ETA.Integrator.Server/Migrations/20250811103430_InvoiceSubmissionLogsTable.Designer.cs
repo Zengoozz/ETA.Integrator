@@ -11,14 +11,39 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ETA.Integrator.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250811095947_submittedInvoiceLogTable")]
-    partial class submittedInvoiceLogTable
+    [Migration("20250811103430_InvoiceSubmissionLogsTable")]
+    partial class InvoiceSubmissionLogsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
+
+            modelBuilder.Entity("ETA.Integrator.Server.Entities.InvoiceSubmissionLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("InternalId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("SubmissionDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SubmissionId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InvoiceSubmissionLogs");
+                });
 
             modelBuilder.Entity("ETA.Integrator.Server.Entities.SettingsStep", b =>
                 {
@@ -47,26 +72,6 @@ namespace ETA.Integrator.Server.Migrations
                             Order = 2,
                             Name = "issuer-settings"
                         });
-                });
-
-            modelBuilder.Entity("ETA.Integrator.Server.Entities.SubmittedInvoiceLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("InvoiceId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("SubmissionDate")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SubmittedInvoiceLogs");
                 });
 #pragma warning restore 612, 618
         }
