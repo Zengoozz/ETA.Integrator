@@ -7,6 +7,6 @@ namespace ETA.Integrator.Server.Interface.Services.Consumer
     public interface IApiConsumerService
     {
         Task SubmitInvoices(List<ProviderInvoiceViewModel> providerInvoices);
-        Task<ResponseDTO> GetRecentDocuments();
+        Task<GetRecentDocumentsResponseDTO> GetRecentDocuments();
     }
 }

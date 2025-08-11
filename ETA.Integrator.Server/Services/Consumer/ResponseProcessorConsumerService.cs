@@ -1,15 +1,15 @@
 ﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
+using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models.Core;
 using RestSharp;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ETA.Integrator.Server.Services.Consumer
 {
     public class ResponseProcessorConsumerService : IResponseProcessorConsumerService
     {
-        public Task<ResponseDTO> GetRecentDocuments(RestResponse response)
+        public Task<GetRecentDocumentsResponseDTO> GetRecentDocuments(RestResponse response)
         {
             if (response is null || !response.IsSuccessful || (int)response.StatusCode != StatusCodes.Status200OK || response.Content is null)
             {
@@ -35,13 +35,11 @@ namespace ETA.Integrator.Server.Services.Consumer
                         );
 
             }
-
             else
             {
-                ResponseDTO? serializedResponse = new ResponseDTO();
+                GetRecentDocumentsResponseDTO? serializedResponse = new GetRecentDocumentsResponseDTO();
                 if (response != null && (int)response.StatusCode == StatusCodes.Status200OK && response.Content != null)
                 {
-                    //TODO: Handle JSON Deserialize Exceptions
                     try
                     {
                         var options = new JsonSerializerOptions
@@ -49,7 +47,8 @@ namespace ETA.Integrator.Server.Services.Consumer
                             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                             PropertyNameCaseInsensitive = true
                         };
-                        serializedResponse = JsonSerializer.Deserialize<ResponseDTO>(response.Content, options);
+
+                        serializedResponse = JsonSerializer.Deserialize<GetRecentDocumentsResponseDTO>(response.Content, options);
                     }
                     catch (JsonException ex)
                     {
@@ -68,9 +67,59 @@ namespace ETA.Integrator.Server.Services.Consumer
             }
         }
 
-        public Task SubmitInvoices(RestResponse response)
+        
+        public Task<SubmitDocumentsResponseDTO> SubmitDocuments(RestResponse response)
         {
-            throw new NotImplementedException();
+            if (response is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "BAD_PARAMS",
+                    detail: "ResponseProcessorConsumerService/SubmitDocuments: No response to process."
+                    );
+
+            SubmitDocumentsResponseDTO responseDTO = new SubmitDocumentsResponseDTO();
+
+            if ((int)response.StatusCode == StatusCodes.Status202Accepted && response.Content != null)
+            {
+                SuccessfulResponseDTO? serializedResponse = new();
+
+                try
+                {
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    serializedResponse = JsonSerializer.Deserialize<SuccessfulResponseDTO>(response.Content, options);
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine("JSON Error: " + ex.Message);
+                }
+
+                if (serializedResponse is null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SERIALIZATION_FAILED",
+                        detail: "ResponseProcessorConsumerService/SubmitDocuments: Could not serialize the response."
+                        );
+                else
+                {
+                    responseDTO.SuccessfulResponseDTO = serializedResponse;
+                    responseDTO.StatusCode = (int)response.StatusCode;
+                    responseDTO.IsSuccess = true;
+                }
+
+            }
+            else
+            {
+                responseDTO.IsSuccess = false;
+                responseDTO.StatusCode = (int)response.StatusCode;
+                responseDTO.Message = response.ErrorMessage ?? "";
+            }
+
+            return Task.FromResult(responseDTO);
         }
     }
 }

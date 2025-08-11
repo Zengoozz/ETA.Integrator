@@ -1,6 +1,7 @@
 ﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
 using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models.Provider;
+using System.Transactions;
 
 namespace ETA.Integrator.Server.Services.Consumer
 {
@@ -19,7 +20,7 @@ namespace ETA.Integrator.Server.Services.Consumer
             _httpRequestSenderConsumerService = httpClientConsumerService;
             _responseProcessorConsumerService = responseHandlerConsumerService;
         }
-        public async Task<ResponseDTO> GetRecentDocuments()
+        public async Task<GetRecentDocumentsResponseDTO> GetRecentDocuments()
         {
             var request = _requestFactoryConsumerService.GetRecentDocuments();
             var response = await _httpRequestSenderConsumerService.ExecuteWithAuthRetryAsync(request);
@@ -28,9 +29,21 @@ namespace ETA.Integrator.Server.Services.Consumer
 
         public async Task SubmitInvoices(List<ProviderInvoiceViewModel> providerInvoices)
         {
-            var request = await _requestFactoryConsumerService.SubmitInvoices(providerInvoices);
-            var response = await _httpRequestSenderConsumerService.ExecuteWithAuthRetryAsync(request);
-            await _responseProcessorConsumerService.SubmitInvoices(response);
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    var request = await _requestFactoryConsumerService.SubmitInvoices(providerInvoices);
+                    var response = await _httpRequestSenderConsumerService.ExecuteWithAuthRetryAsync(request);
+                    var processedResponse = await _responseProcessorConsumerService.SubmitDocuments(response);
+
+                    scope.Complete();
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
         }
     }
 }
