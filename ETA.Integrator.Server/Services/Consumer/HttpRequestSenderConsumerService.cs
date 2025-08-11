@@ -51,7 +51,7 @@ namespace ETA.Integrator.Server.Services.Consumer
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
                         message: "UNKNOWN_INTERNAL_ERROR",
-                        detail: "Unknown internal error"
+                        detail: "ExecuteWithAuthRetryAsync: Unknown internal error"
                         );
                 }
             }
@@ -73,8 +73,8 @@ namespace ETA.Integrator.Server.Services.Consumer
 
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status400BadRequest,
-                    message: "CONNECTION_CONFIG_NOT_FOUND",
-                    detail: "Connection configuration (Manual) not found"
+                    message: "NOT_FOUND",
+                    detail: "AuthorizeConsumer: Connection configuration (Manual) not found"
                     );
             }
 
@@ -106,9 +106,9 @@ namespace ETA.Integrator.Server.Services.Consumer
                 {
                     _logger.LogError("Failed to connect to the consumer API");
                     throw new ProblemDetailsException(
-                           statusCode: StatusCodes.Status500InternalServerError,
-                           message: "CONSUMER_CONNECTION_FAILED",
-                           detail: "Connecting to consumer failed"
+                           statusCode: StatusCodes.Status401Unauthorized,
+                           message: "UNAUTHORIZED",
+                           detail: "AuthorizeConsumer: failed to connect to consumer"
                         );
                 }
             }
@@ -116,9 +116,9 @@ namespace ETA.Integrator.Server.Services.Consumer
             {
                 _logger.LogError("Failed to get the consumer IdSrvURL");
                 throw new ProblemDetailsException(
-                           statusCode: StatusCodes.Status500InternalServerError,
-                           message: "CONNECTION_URL_NOT_FOUND",
-                           detail: "Connection configuration (IdSrvUrl) not found"
+                           statusCode: StatusCodes.Status400BadRequest,
+                           message: "NOT_FOUND",
+                           detail: "AuthorizeConsumer: Connection configuration (IdSrvUrl) not found"
                         );
             }
             #endregion

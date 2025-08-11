@@ -14,6 +14,7 @@ namespace ETA.Integrator.Server.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddTransient<ISettingsStepService, SettingsStepService>();
+            services.AddTransient<IInvoiceSubmissionLogService, InvoiceSubmissionLogService>();
             
             #region ConsumerServices
             services.AddTransient<ISignatureConsumerService, SignatureConsumerService>();
@@ -26,11 +27,12 @@ namespace ETA.Integrator.Server.Extensions
             return services;
         }
 
-        public static IServiceCollection AddRepositories(this IServiceCollection services)
+        public static IServiceCollection AddRepositories(this IServiceCollection repos)
         {
-            services.AddScoped<ISettingsStepRepository, SettingsStepRepository>();
+            repos.AddScoped<ISettingsStepRepository, SettingsStepRepository>();
+            repos.AddScoped<IInvoiceSubmissionLogRepository, InvoiceSubmissionLogRepository>();
 
-            return services;
+            return repos;
         }
 
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)

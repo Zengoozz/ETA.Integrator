@@ -1,4 +1,5 @@
 ﻿using ETA.Integrator.Server.Interface.Services.Consumer;
+using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -69,12 +70,21 @@ namespace ETA.Integrator.Server.Controllers
             }
         }
 
-        [HttpPost("SubmitInvoice")]
-        public async Task<IActionResult> SubmitInvoice(List<ProviderInvoiceViewModel> invoicesList)
+        [HttpPost("SubmitDocuments")]
+        public async Task<IActionResult> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
         {
-            await _apiConsumerService.SubmitInvoices(invoicesList);
+            try
+            {
+                var response = await _apiConsumerService.SubmitDocuments(invoicesList);
 
-            return Ok();
+                return StatusCode(response.StatusCode, response.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occured while submitting invoices");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+
         }
 
         [HttpGet("GetRecent")]

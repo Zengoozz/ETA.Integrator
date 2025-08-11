@@ -25,7 +25,7 @@ namespace ETA.Integrator.Server.Services.Consumer
         }
 
         #region SUBMIT INVOICE
-        public async Task<RestRequest> SubmitInvoices(List<ProviderInvoiceViewModel> invoicesList)
+        public async Task<RestRequest> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
         {
             List<InvoiceModel> documents = new List<InvoiceModel>();
 
@@ -73,9 +73,9 @@ namespace ETA.Integrator.Server.Services.Consumer
             {
                 documents
             };
-
+            
             var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
-                .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
+                            .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
             #endregion
 
             return submitRequest;
@@ -88,7 +88,7 @@ namespace ETA.Integrator.Server.Services.Consumer
 
             InvoiceModel document = invoiceViewModel.FromViewModel(issuer);
 
-            _signatureConsumerService.SignDocument(document, tokenPin);
+            //_signatureConsumerService.SignDocument(document, tokenPin);
 
             return document;
         }
