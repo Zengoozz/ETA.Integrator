@@ -73,18 +73,9 @@ namespace ETA.Integrator.Server.Controllers
         [HttpPost("SubmitDocuments")]
         public async Task<IActionResult> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
         {
-            try
-            {
-                var response = await _apiConsumerService.SubmitDocuments(invoicesList);
+            var response = await _apiConsumerService.SubmitDocuments(invoicesList);
 
-                return StatusCode(response.StatusCode, response.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occured while submitting invoices");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-
+            return StatusCode(response.StatusCode, response.Message);
         }
 
         [HttpGet("GetRecent")]
