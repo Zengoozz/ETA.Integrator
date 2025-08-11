@@ -11,8 +11,8 @@ namespace ETA.Integrator.Server.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "SubmittedInvoiceLogs");
+            //migrationBuilder.DropTable(
+            //    name: "SubmittedInvoiceLogs");
 
             migrationBuilder.CreateTable(
                 name: "InvoiceSubmissionLogs",
@@ -37,20 +37,20 @@ namespace ETA.Integrator.Server.Migrations
             migrationBuilder.DropTable(
                 name: "InvoiceSubmissionLogs");
 
-            migrationBuilder.CreateTable(
-                name: "SubmittedInvoiceLogs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    InvoiceId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    SubmissionDate = table.Column<DateTime>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SubmittedInvoiceLogs", x => x.Id);
-                });
+            //migrationBuilder.CreateTable(
+            //    name: "SubmittedInvoiceLogs",
+            //    columns: table => new
+            //    {
+            //        Id = table.Column<int>(type: "INTEGER", nullable: false)
+            //            .Annotation("Sqlite:Autoincrement", true),
+            //        InvoiceId = table.Column<int>(type: "INTEGER", nullable: false),
+            //        Status = table.Column<int>(type: "INTEGER", nullable: false),
+            //        SubmissionDate = table.Column<DateTime>(type: "TEXT", nullable: true)
+            //    },
+            //    constraints: table =>
+            //    {
+            //        table.PrimaryKey("PK_SubmittedInvoiceLogs", x => x.Id);
+            //    });
         }
     }
 }
