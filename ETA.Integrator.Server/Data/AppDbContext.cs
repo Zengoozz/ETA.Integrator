@@ -10,6 +10,7 @@ namespace ETA.Integrator.Server.Data
         {
         }
         public DbSet<SettingsStep> SettingsSteps { get; set; } = null!;
+        public DbSet<SubmittedInvoiceLog> SubmittedInvoiceLogs { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
         }
