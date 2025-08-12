@@ -1,14 +1,55 @@
 ﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
-using ETA.Integrator.Server.Interface.Services.Consumer;
+using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Models.Core;
+using ETA.Integrator.Server.Models.Provider;
 using RestSharp;
 using System.Text.Json;
 
-namespace ETA.Integrator.Server.Services.Consumer
+namespace ETA.Integrator.Server.Services.Common
 {
-    public class ResponseProcessorConsumerService : IResponseProcessorConsumerService
+    public class ResponseProcessorService : IResponseProcessorService
     {
+        public Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(RestResponse response)
+        {
+            List<ProviderInvoiceViewModel>? serializedResponse = new();
+            if (response != null && (int)response.StatusCode == StatusCodes.Status200OK && response.Content != null)
+            {
+                try
+                {
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    serializedResponse = JsonSerializer.Deserialize<List<ProviderInvoiceViewModel>>(response.Content, options);
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine("JSON Error: " + ex.Message);
+                }
+            }
+            else
+            {
+                throw new ProblemDetailsException(
+                   (int?)response?.StatusCode ?? StatusCodes.Status500InternalServerError,
+                   "PROVIDER_SERVER_ERR",
+                   response?.ErrorMessage ?? "Unexpected error"
+                   );
+            }
+
+            if (serializedResponse is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SERIALIZATION_FAILED",
+                    detail: "ResponseProcessorService/GetProviderInvoices: Could not serialize the response."
+                    );
+
+
+            return Task.FromResult(serializedResponse);
+        }
+
         public Task<GetRecentDocumentsResponseDTO> GetRecentDocuments(RestResponse response)
         {
             if (response is null || !response.IsSuccessful || (int)response.StatusCode != StatusCodes.Status200OK || response.Content is null)
@@ -60,14 +101,12 @@ namespace ETA.Integrator.Server.Services.Consumer
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
                         message: "SERIALIZATION_FAILED",
-                        detail: "ResponseProcessorConsumerService/GetRecentDocuments: Could not serialize the response."
+                        detail: "ResponseProcessorService/GetRecentDocuments: Could not serialize the response."
                         );
 
                 return Task.FromResult(serializedResponse);
             }
         }
-
-        
         public Task<SubmitDocumentsResponseDTO> SubmitDocuments(RestResponse response)
         {
             if (response is null)
@@ -102,7 +141,7 @@ namespace ETA.Integrator.Server.Services.Consumer
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
                         message: "SERIALIZATION_FAILED",
-                        detail: "ResponseProcessorConsumerService/SubmitDocuments: Could not serialize the response."
+                        detail: "ResponseProcessorService/SubmitDocuments: Could not serialize the response."
                         );
                 else
                 {

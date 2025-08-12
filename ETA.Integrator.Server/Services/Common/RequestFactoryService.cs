@@ -5,16 +5,17 @@ using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Models.Core;
 using RestSharp;
 using ETA.Integrator.Server.Interface.Services.Consumer;
+using ETA.Integrator.Server.Interface.Services.Common;
 
-namespace ETA.Integrator.Server.Services.Consumer
+namespace ETA.Integrator.Server.Services.Common
 {
-    public class RequestFactoryConsumerService : IRequestFactoryConsumerService
+    public class RequestFactoryService : IRequestFactoryService
     {
-        private readonly ILogger<RequestFactoryConsumerService> _logger;
+        private readonly ILogger<RequestFactoryService> _logger;
         private readonly ISettingsStepService _settingsStepService;
         private readonly ISignatureConsumerService _signatureConsumerService;
-        public RequestFactoryConsumerService(
-            ILogger<RequestFactoryConsumerService> logger,
+        public RequestFactoryService(
+            ILogger<RequestFactoryService> logger,
             ISettingsStepService settingsStepService,
             ISignatureConsumerService signatureConsumerService
             )
@@ -73,7 +74,7 @@ namespace ETA.Integrator.Server.Services.Consumer
             {
                 documents
             };
-            
+
             var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
                             .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
             #endregion
@@ -117,6 +118,26 @@ namespace ETA.Integrator.Server.Services.Consumer
                 .AddQueryParameter("submissionDateFrom", trimmedUtcNow.AddMonths(-1).ToString())
                 .AddQueryParameter("submissionDateTo", trimmedUtcNow.ToString())
                 .AddQueryParameter("documentType", "i");
+
+            return request;
+        }
+
+        public RestRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
+        {
+            var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
+
+            if (fromDate != null && toDate != null && !string.IsNullOrWhiteSpace(invoiceType))
+            {
+                request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
+                    .AddParameter("toDate", toDate, ParameterType.QueryString)
+                    .AddParameter("invoiceType", invoiceType, ParameterType.QueryString);
+            }
+            else
+                throw new ProblemDetailsException(
+                    StatusCodes.Status400BadRequest,
+                    "INVALID_PARAMS",
+                    "Please provide fromDate, toDate and invoiceType parameters."
+                    );
 
             return request;
         }
