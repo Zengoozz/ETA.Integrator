@@ -117,11 +117,30 @@ namespace ETA.Integrator.Server.Services.Common
                     );
 
             if ((int)response.StatusCode == StatusCodes.Status422UnprocessableEntity)
+            {
+                var errDetails = "Unexpected error";
+
+                if (response.Headers is not null && response.Headers.Count > 0)
+                {
+                    var retryAfterHeader = response.Headers
+                        .FirstOrDefault(h => h.Name.Equals("Retry-After", StringComparison.OrdinalIgnoreCase));
+
+                    if(retryAfterHeader is not null && retryAfterHeader.Value is not null)
+                    {
+                        var seconds = Int32.Parse(retryAfterHeader.Value);
+                        var minutes = seconds / 60;
+                        var durationPart = minutes == 0 ? $"{seconds} seconds." : $"{minutes} minutes.";
+                        errDetails = $"This invoice has been sent within the last 10 minutes. Try again in {durationPart}";
+                    }
+                }
+
                 throw new ProblemDetailsException(
                     StatusCodes.Status422UnprocessableEntity,
                     "ResponseProcessorConsumerService/SubmitDocuments: UNPROCESSABLE_CONTENT",
-                    response.Content ?? "Unexpected error"
+                    errDetails
                     );
+            }
+
 
             SubmitDocumentsResponseDTO responseDTO = new SubmitDocumentsResponseDTO();
 
