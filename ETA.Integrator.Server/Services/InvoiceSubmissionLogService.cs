@@ -4,6 +4,7 @@ using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Provider;
+using System.Text.Json;
 
 namespace ETA.Integrator.Server.Services
 {
@@ -33,7 +34,8 @@ namespace ETA.Integrator.Server.Services
             {
                 InternalId = x.InternalId,
                 Status = InvoiceStatus.Rejected,
-                SubmissionDate = DateTime.Now
+                SubmissionDate = DateTime.Now,
+                RejectionReasonJSON = x.Error is not null ? JsonSerializer.Serialize(x.Error) : ""
             });
 
             invoiceSubmissionLogs.AddRange(listOfRejected);
