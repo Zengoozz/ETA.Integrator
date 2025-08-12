@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Divider, Table, Flex } from "antd";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 
@@ -8,12 +8,13 @@ const InvoicesTable = ({
    isMobile,
    tableData,
    onSubmit = null,
-   loading,
    messageApi,
+   notificationApi,
    tableType,
-   tableColumns
+   tableColumns,
 }) => {
-   const [selectedRowToSubmit, setSelectedRowToSubmit] = React.useState([]);
+   const [selectedRowToSubmit, setSelectedRowToSubmit] = useState([]);
+   const [loading, setLoading] = useState(false);
    // rowSelection object indicates the need for row selection
    const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
@@ -36,7 +37,34 @@ const InvoicesTable = ({
          messageApi.warning("Please select at least one row to submit.");
          return;
       }
-      onSubmit(selectedRowToSubmit); // Pass the selected rows to the parent
+
+      const loadingMessage = messageApi.open({
+         type: "loading",
+         content: "Action in progress..",
+         duration: 0,
+      });
+
+      // Start loading
+      setLoading(true);
+      onSubmit(selectedRowToSubmit)
+         .then(() => {
+            messageApi.open({
+               type: "success",
+               content: "Selected rows saved successfully!",
+               duration: 2,
+            });
+         })
+         .catch((error) => {
+            notificationApi.error({
+               message: error.detail,
+               duration: 0,
+            });
+            console.error(error.message);
+         })
+         .finally(() => {
+            loadingMessage(); // Close the loading message
+            setLoading(false); // End loading
+         });
    };
 
    return (
@@ -55,7 +83,11 @@ const InvoicesTable = ({
 
          <Divider />
          <Table
-            rowSelection= {tableType == "W" ? Object.assign({ type: "checkbox" }, rowSelection) : undefined }
+            rowSelection={
+               tableType == "W"
+                  ? Object.assign({ type: "checkbox" }, rowSelection)
+                  : undefined
+            }
             dataSource={tableData}
             bordered
             scroll={{ x: isMobile ? "max-content" : "unset" }}

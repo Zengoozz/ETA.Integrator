@@ -25,7 +25,7 @@ const makeRequestFactory = async (method, url, data = null, headers = {}) => {
             message: `Error: ${
                error.response.data.title || "An unexpected error occurred."
             }`,
-            detail: `Details: ${
+            detail: `Error Details: ${
                error.response.data.detail || "No additional details available."
             }`,
          };
@@ -33,13 +33,13 @@ const makeRequestFactory = async (method, url, data = null, headers = {}) => {
          throw {
             status: 400,
             message: "Error: No response from server, please try again later.",
-            detail: "Details: No additional details available.",
+            detail: "Error Details: No additional details available.",
          };
       } else {
          throw {
             status: 500,
             message: `Error: ${error.message || "An unexpected error occurred."}`,
-            detail: "Details: No additional details available.",
+            detail: "Error Details: No additional details available.",
          };
       }
    }

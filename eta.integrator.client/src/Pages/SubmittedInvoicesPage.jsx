@@ -33,10 +33,10 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
             setTableData(response.result);
          } catch (error) {
             notificationApi.error({
-               message: error.message,
+               message: error.detail,
                duration: 0,
             });
-            console.error(error.detail);
+            console.error(error.message);
          } finally {
             loadingMessage(); // Close the loading message
             setLoading(false); // End loading

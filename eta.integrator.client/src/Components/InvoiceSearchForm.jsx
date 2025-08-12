@@ -55,17 +55,19 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi, notificationApi
                })
                .catch((error) => {
                   notificationApi.error({
-                     message: error.message,
+                     message: error.detail,
                      duration: 0,
                   });
+                  console.error(error.message);
                });
          })
          .catch((error) => {
             if (error.type === "validation") {
                messageApi.error(error.message);
+               console.error(error.detail);
             } else {
                messageApi.error("Failed to fetch data. Please try again.");
-               console.error("Error:", error);
+               console.error(error.detail);
             }
          })
          .finally(() => {

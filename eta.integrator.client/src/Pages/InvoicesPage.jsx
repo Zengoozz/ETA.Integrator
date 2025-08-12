@@ -12,38 +12,18 @@ import InvoicesService from "../Services/InvoicesService";
 import { ROUTES } from "../Constants/Constants";
 
 const InvoicesPage = ({ isMobile }) => {
-   const [loading, setLoading] = useState(false);
+   // const [loading, setLoading] = useState(false);
    const [tableData, setTableData] = useState([]); // State to hold table data
    const [messageApi, contextHolder] = message.useMessage();
    const [notificationApi, contextHolderNotification] = notification.useNotification();
    const navigate = useNavigate();
 
    const onSubmit = async (selectedRows) => {
-      const loadingMessage = messageApi.open({
-         type: "loading",
-         content: "Action in progress..",
-         duration: 0,
-      });
-
-      // Start loading
-      setLoading(true);
-
       try {
          await InvoicesService.submitInvoices(selectedRows);
-         messageApi.open({
-            type: "success",
-            content: "Selected rows saved successfully!",
-            duration: 2,
-         });
       } catch (error) {
-         notificationApi.error({
-            message: error.message,
-            duration: 0,
-         });
          console.error(error.detail);
-      } finally {
-         loadingMessage(); // Close the loading message
-         setLoading(false); // End loading
+         throw error;
       }
    };
 
@@ -68,9 +48,7 @@ const InvoicesPage = ({ isMobile }) => {
                vertical
                gap="middle"
             >
-               <Flex 
-               justify="space-between"
-               >
+               <Flex justify="space-between">
                   <InvoiceSearchForm
                      isMobile={isMobile}
                      handleSearch={handleSearch}
@@ -91,8 +69,9 @@ const InvoicesPage = ({ isMobile }) => {
                   isMobile={isMobile}
                   tableData={tableData}
                   onSubmit={onSubmit}
-                  loading={loading}
+                  // loading={loading}
                   messageApi={messageApi}
+                  notificationApi={notificationApi}
                   tableType="W"
                   tableColumns={InvoicesTableColumns}
                />
