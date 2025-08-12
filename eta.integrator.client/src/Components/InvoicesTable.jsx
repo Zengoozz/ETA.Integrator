@@ -26,8 +26,8 @@ const InvoicesTable = ({
          setSelectedRowToSubmit(selectedRows); // Update the selected rows state
       },
       getCheckboxProps: (record) => ({
-         disabled: record.status === true, // Column configuration not to be checked
-         name: record.receiptnumber,
+         disabled: record.isReviewed === true, // Column configuration not to be checked
+         name: record.invoiceNumber,
       }),
    };
 
@@ -82,6 +82,7 @@ const InvoicesTable = ({
          )}
 
          <Divider />
+         
          <Table
             rowSelection={
                tableType == "W"
