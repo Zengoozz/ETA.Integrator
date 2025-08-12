@@ -39,7 +39,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
             if (viewModel is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status400BadRequest,
-                    message: "PROVIDER_INVOICE_NULL",
+                    message: "InvoiceModelMapper/FromViewModel: PROVIDER_INVOICE_NULL",
                     detail: "Mapping provider invoice to the consumer invoice failed!"
                     );
 

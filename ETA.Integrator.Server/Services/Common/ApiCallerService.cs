@@ -48,8 +48,8 @@ namespace ETA.Integrator.Server.Services.Common
             else
                 throw new ProblemDetailsException(
                     StatusCodes.Status500InternalServerError,
-                    "CONFIG_NOT_FOUND",
-                    "Error: Getting provider API_URL"
+                    "ApiCallerService/GetProviderInvoices: CONFIG_NOT_FOUND",
+                    "Getting provider API_URL Error"
                     );
 
             var response = await client.ExecuteAsync(request);

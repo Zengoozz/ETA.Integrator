@@ -34,7 +34,7 @@ namespace ETA.Integrator.Server.Services.Common
             {
                 throw new ProblemDetailsException(
                    (int?)response?.StatusCode ?? StatusCodes.Status500InternalServerError,
-                   "PROVIDER_SERVER_ERR",
+                   "ResponseProcessorService/GetProviderInvoices: PROVIDER_SERVER_ERR",
                    response?.ErrorMessage ?? "Unexpected error"
                    );
             }
@@ -42,8 +42,8 @@ namespace ETA.Integrator.Server.Services.Common
             if (serializedResponse is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SERIALIZATION_FAILED",
-                    detail: "ResponseProcessorService/GetProviderInvoices: Could not serialize the response."
+                    message: "ResponseProcessorService/GetProviderInvoices: SERIALIZATION_FAILED",
+                    detail: "Could not serialize the response."
                     );
 
 
@@ -57,22 +57,22 @@ namespace ETA.Integrator.Server.Services.Common
                 if (response is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "BAD_PARAMS",
-                        detail: "ResponseProcessorConsumerService/GetRecentDocuments: No response to process."
+                        message: "ResponseProcessorConsumerService/GetRecentDocuments: BAD_PARAMS",
+                        detail: "No response to process."
                         );
 
                 else if ((int)response.StatusCode == StatusCodes.Status403Forbidden)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status403Forbidden,
-                        message: "CONSUMER_FAILURE",
-                        detail: response.ErrorMessage ?? response.Content ?? ""
+                        message: "ResponseProcessorConsumerService/GetRecentDocuments: CONSUMER_FAILURE",
+                        detail: response.ErrorMessage ?? response.Content ?? "Unexpected error"
                         );
 
                 else
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "UNKNOWN",
-                        detail: response.ErrorMessage ?? response.Content ?? ""
+                        message: "ResponseProcessorConsumerService/GetRecentDocuments: UNKNOWN",
+                        detail: response.ErrorMessage ?? response.Content ?? "Unexpected error"
                         );
 
             }
@@ -100,8 +100,8 @@ namespace ETA.Integrator.Server.Services.Common
                 if (serializedResponse is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZATION_FAILED",
-                        detail: "ResponseProcessorService/GetRecentDocuments: Could not serialize the response."
+                        message: "ResponseProcessorService/GetRecentDocuments: SERIALIZATION_FAILED",
+                        detail: "Could not serialize the response."
                         );
 
                 return Task.FromResult(serializedResponse);
@@ -112,8 +112,15 @@ namespace ETA.Integrator.Server.Services.Common
             if (response is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "BAD_PARAMS",
-                    detail: "ResponseProcessorConsumerService/SubmitDocuments: No response to process."
+                    message: "ResponseProcessorConsumerService/SubmitDocuments: BAD_PARAMS",
+                    detail: "No response to process."
+                    );
+
+            if ((int)response.StatusCode == StatusCodes.Status422UnprocessableEntity)
+                throw new ProblemDetailsException(
+                    StatusCodes.Status422UnprocessableEntity,
+                    "ResponseProcessorConsumerService/SubmitDocuments: UNPROCESSABLE_CONTENT",
+                    response.Content ?? "Unexpected error"
                     );
 
             SubmitDocumentsResponseDTO responseDTO = new SubmitDocumentsResponseDTO();
@@ -140,8 +147,8 @@ namespace ETA.Integrator.Server.Services.Common
                 if (serializedResponse is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZATION_FAILED",
-                        detail: "ResponseProcessorService/SubmitDocuments: Could not serialize the response."
+                        message: "ResponseProcessorService/SubmitDocuments: SERIALIZATION_FAILED",
+                        detail: "Could not serialize the response."
                         );
                 else
                 {

@@ -35,7 +35,7 @@ namespace ETA.Integrator.Server.Services.Common
             if (connectionSettings is null || string.IsNullOrWhiteSpace(connectionSettings.TokenPin))
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
-                    message: "TOKEN_PIN_NOT_FOUND",
+                    message: "RequestFactoryService/SubmitDocuments: TOKEN_PIN_NOT_FOUND",
                     detail: "Token pin not found."
                     );
 
@@ -46,7 +46,7 @@ namespace ETA.Integrator.Server.Services.Common
             if (issuerData is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
-                    message: "ISSUER_NOT_FOUND",
+                    message: "RequestFactoryService/SubmitDocuments: ISSUER_NOT_FOUND",
                     detail: "Issuer data not found."
                     );
 
@@ -55,7 +55,7 @@ namespace ETA.Integrator.Server.Services.Common
             if (issuer is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "ISSUER_MAPPING_FAILED",
+                    message: "RequestFactoryService/SubmitDocuments: ISSUER_MAPPING_FAILED",
                     detail: "Issuer mapping failed"
                     );
             #endregion
@@ -135,7 +135,7 @@ namespace ETA.Integrator.Server.Services.Common
             else
                 throw new ProblemDetailsException(
                     StatusCodes.Status400BadRequest,
-                    "INVALID_PARAMS",
+                    "RequestFactoryService/GetProviderInvoices: INVALID_PARAMS",
                     "Please provide fromDate, toDate and invoiceType parameters."
                     );
 
