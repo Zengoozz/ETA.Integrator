@@ -24,6 +24,7 @@ namespace ETA.Integrator.Server.Services
                 InternalId = x.InternalId,
                 SubmissionId = x.Uuid,
                 Status = InvoiceStatus.Submitted,
+                SubmissionDate = DateTime.Now,
             });
 
             invoiceSubmissionLogs.AddRange(listOfAccepted);
@@ -31,7 +32,8 @@ namespace ETA.Integrator.Server.Services
             var listOfRejected = responseDTO.RejectedDocuments.Select(x => new InvoiceSubmissionLog
             {
                 InternalId = x.InternalId,
-                Status = InvoiceStatus.Rejected
+                Status = InvoiceStatus.Rejected,
+                SubmissionDate = DateTime.Now
             });
 
             invoiceSubmissionLogs.AddRange(listOfRejected);
