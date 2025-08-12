@@ -3,6 +3,7 @@ using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Interface.Services;
+using ETA.Integrator.Server.Models.Provider;
 
 namespace ETA.Integrator.Server.Services
 {
@@ -13,6 +14,7 @@ namespace ETA.Integrator.Server.Services
         {
             _invoiceSubmissionLogRepository = invoiceSubmissionLogRepository;
         }
+
         public async Task LogInvoiceSubmission(SuccessfulResponseDTO responseDTO)
         {
             List<InvoiceSubmissionLog> invoiceSubmissionLogs = new List<InvoiceSubmissionLog>();
@@ -36,5 +38,19 @@ namespace ETA.Integrator.Server.Services
             
             await _invoiceSubmissionLogRepository.SaveList(invoiceSubmissionLogs);
         }
+        public async Task ValidateInvoiceStatus(List<ProviderInvoiceViewModel> invoices)
+        {
+            var listOfInvoiceIds = invoices.Select(x => x.InvoiceId.ToString()).ToList();
+            var invoiceLogs = await _invoiceSubmissionLogRepository.GetByListOfInternalIds(listOfInvoiceIds);
+            
+            if(invoiceLogs.Count > 0)
+            {
+                foreach (var invoice in invoices)
+                {
+                    invoice.IsReviewed = invoiceLogs.Any(x => x.InternalId == invoice.InvoiceId.ToString() && x.Status == InvoiceStatus.Submitted);
+                }
+            }
+        }
+
     }
 }

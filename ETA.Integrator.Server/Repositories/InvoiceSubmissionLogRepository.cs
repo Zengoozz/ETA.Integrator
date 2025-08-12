@@ -30,6 +30,12 @@ namespace ETA.Integrator.Server.Repositories
         {
             return await _dbSet.AsNoTracking().Where(x => x.InternalId == id.ToString()).ToListAsync();
         }
+
+        public async Task<List<InvoiceSubmissionLog>> GetByListOfInternalIds(List<string> ids)
+        {
+            return await _dbSet.AsNoTracking().Where(x => ids.Contains(x.InternalId)).ToListAsync();
+        }
+
         public async Task Save(InvoiceSubmissionLog entity)
         {
             try
