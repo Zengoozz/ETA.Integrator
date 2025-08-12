@@ -20,14 +20,27 @@ const makeRequestFactory = async (method, url, data = null, headers = {}) => {
       return response.data; // Return the parsed response data
    } catch (error) {
       if (error.response) {
-         // Server responded with an error status (e.g., 400, 500)
-         throw new Error(`Error: ${error.message}, Status: ${error.response.status}`);
+         throw {
+            status: error.response.status,
+            message: `Error: ${
+               error.response.data.title || "An unexpected error occurred."
+            }`,
+            detail: `Details: ${
+               error.response.data.detail || "No additional details available."
+            }`,
+         };
       } else if (error.request) {
-         // No response received from the server
-         throw new Error("No response from server, please try again later.");
+         throw {
+            status: 400,
+            message: "Error: No response from server, please try again later.",
+            detail: "Details: No additional details available.",
+         };
       } else {
-         // Something went wrong during request setup
-         throw new Error(`Error: ${error.message}`);
+         throw {
+            status: 500,
+            message: `Error: ${error.message || "An unexpected error occurred."}`,
+            detail: "Details: No additional details available.",
+         };
       }
    }
 };
@@ -36,16 +49,20 @@ const updateStepFactory = async (values, step) => {
    try {
       const updateStepDTO = {
          Order: step,
-         Data: JSON.stringify(values)
+         Data: JSON.stringify(values),
       };
       console.log("updateStep", updateStepDTO);
 
-      const response = await makeRequestFactory("POST", "/Config/UpdateStep", updateStepDTO);
+      const response = await makeRequestFactory(
+         "POST",
+         "/Config/UpdateStep",
+         updateStepDTO
+      );
 
       return response;
    } catch (error) {
       console.error(error.message);
       throw error;
    }
-}
+};
 export default { makeRequestFactory, updateStepFactory };

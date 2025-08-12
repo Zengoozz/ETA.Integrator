@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Flex, Card, message } from "antd";
+import { Flex, Card, message, notification } from "antd";
 import { RightCircleOutlined } from "@ant-design/icons";
 
 import InvoicesTable from "../Components/InvoicesTable";
@@ -15,6 +15,7 @@ const InvoicesPage = ({ isMobile }) => {
    const [loading, setLoading] = useState(false);
    const [tableData, setTableData] = useState([]); // State to hold table data
    const [messageApi, contextHolder] = message.useMessage();
+   const [notificationApi, contextHolderNotification] = notification.useNotification();
    const navigate = useNavigate();
 
    const onSubmit = async (selectedRows) => {
@@ -35,8 +36,11 @@ const InvoicesPage = ({ isMobile }) => {
             duration: 2,
          });
       } catch (error) {
-         messageApi.error("Failed to save selected rows.");
-         console.error("Error saving selected rows", error);
+         notificationApi.error({
+            message: error.message,
+            duration: 0,
+         });
+         console.error(error.detail);
       } finally {
          loadingMessage(); // Close the loading message
          setLoading(false); // End loading
@@ -57,6 +61,7 @@ const InvoicesPage = ({ isMobile }) => {
    return (
       <>
          {contextHolder}
+         {contextHolderNotification}
          <Card style={{ width: "100%" }}>
             <Flex
                vertical
@@ -69,6 +74,7 @@ const InvoicesPage = ({ isMobile }) => {
                      isMobile={isMobile}
                      handleSearch={handleSearch}
                      messageApi={messageApi}
+                     notificationApi={notificationApi}
                   />
 
                   <CustomButton

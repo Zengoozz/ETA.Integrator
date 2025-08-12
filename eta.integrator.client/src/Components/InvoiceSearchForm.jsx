@@ -5,7 +5,7 @@ import { InvoiceSearchValidationRules, InvoiceTypes } from "../Constants/Constan
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
+const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi, notificationApi }) => {
    const [form] = Form.useForm();
    const [loading, setLoading] = useState(false);
 
@@ -45,10 +45,11 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
             };
 
             return handleSearch(formattedValues).then(() => {
-               messageApi.open({
+               notificationApi.open({
                   type: "success",
-                  content: `Showing ${invoiceTypeLabel} from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
-                  duration: 2,
+                  message: `Showing ${invoiceTypeLabel}`,
+                  description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+                  duration: 3,
                });
             });
          })
