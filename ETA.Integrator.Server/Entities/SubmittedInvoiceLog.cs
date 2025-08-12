@@ -9,5 +9,6 @@ namespace ETA.Integrator.Server.Entities
         public string SubmissionId { get; set; } = "";
         public DateTime? SubmissionDate { get; set; }
         public InvoiceStatus Status { get; set; }
+        public string? RejectionReasonJSON { get; set; } = null;
     }
 }
