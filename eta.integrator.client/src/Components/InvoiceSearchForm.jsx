@@ -44,14 +44,21 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi, notificationApi
                invoiceType: invoiceTypeValue,
             };
 
-            return handleSearch(formattedValues).then(() => {
-               notificationApi.open({
-                  type: "success",
-                  message: `Showing ${invoiceTypeLabel}`,
-                  description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
-                  duration: 3,
+            return handleSearch(formattedValues)
+               .then(() => {
+                  notificationApi.open({
+                     type: "success",
+                     message: `Showing ${invoiceTypeLabel}`,
+                     description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+                     duration: 3,
+                  });
+               })
+               .catch((error) => {
+                  notificationApi.error({
+                     message: error.message,
+                     duration: 0,
+                  });
                });
-            });
          })
          .catch((error) => {
             if (error.type === "validation") {

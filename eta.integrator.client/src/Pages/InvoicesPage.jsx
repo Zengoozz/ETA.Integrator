@@ -55,6 +55,7 @@ const InvoicesPage = ({ isMobile }) => {
          setTableData(response); // Update table data with the response
       } catch (error) {
          console.error("Failed to fetch invoices", error);
+         throw error;
       }
    };
 
