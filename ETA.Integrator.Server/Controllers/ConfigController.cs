@@ -30,17 +30,9 @@ namespace ETA.Integrator.Server.Controllers
         [HttpGet("ConnectionSettings")]
         public async Task<IActionResult> GetConnectionSettings()
         {
-            try
-            {
-                ConnectionDTO connection = await _settingsStepService.GetConnectionData();
+            ConnectionDTO connection = await _settingsStepService.GetConnectionData();
 
-                return Ok(connection);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occured getting connection settings");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred getting connection settings");
-            }
+            return Ok(connection);
         }
 
         [HttpGet("IssuerSettings")]
