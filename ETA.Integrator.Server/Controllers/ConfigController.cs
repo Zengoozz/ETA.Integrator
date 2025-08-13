@@ -38,51 +38,28 @@ namespace ETA.Integrator.Server.Controllers
         [HttpGet("IssuerSettings")]
         public async Task<IActionResult> GetIssuerSettings()
         {
-            try
-            {
-                IssuerDTO? issuerDTO = await _settingsStepService.GetIssuerData();
+            IssuerDTO? issuerDTO = await _settingsStepService.GetIssuerData();
 
-                return Ok(issuerDTO);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occured getting issuer settings");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred getting issuer settings");
-            }
+            return Ok(issuerDTO);
         }
         [HttpGet("UserProgress")]
         public async Task<IActionResult> GetUserProgress()
         {
-            try
-            {
-                // -1 : specify that all steps are completed
-                // Number: specify the number of step the user need to complete
-                var step = await _settingsStepRepository.GetFirstUnCompletedStepOrder();
+            // -1 : specify that all steps are completed
+            // Number: specify the number of step the user need to complete
+            var step = await _settingsStepRepository.GetFirstUnCompletedStepOrder();
 
-                return Ok(step > 0 ? step : "completed");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occured getting user progress");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while getting user progress.");
-            }
-
+            return Ok(step > 0 ? step : "completed");
         }
         [HttpPost("UpdateStep")]
         public async Task<IActionResult> UpdateStep([FromBody] UpdateStepDTO updateStepDTO)
         {
             if (updateStepDTO == null)
                 return BadRequest("Step data is required");
-            try
-            {
-                await _settingsStepRepository.UpdateStepWithData(updateStepDTO.Order, updateStepDTO.Data);
-                return Ok("UPDATED");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occured updating the step with number: {Order}", updateStepDTO.Order);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while updating the step.");
-            }
+
+            await _settingsStepRepository.UpdateStepWithData(updateStepDTO.Order, updateStepDTO.Data);
+
+            return Ok("UPDATED");
         }
 
     }
