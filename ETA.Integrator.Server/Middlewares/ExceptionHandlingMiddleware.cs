@@ -27,8 +27,13 @@ namespace ETA.Integrator.Server.Middlewares
             }
             catch (Exception ex)
             {
+                var exMsg = "An unexpected error occurred";
+
+                if (ex.Source == "System.Text.Json")
+                    exMsg = "Serialization exception";
+
                 _logger.LogError(ex, ex.Message);
-                await HandleExceptionAsync(context, 500, "An unexpected error occurred", ex.Message);
+                await HandleExceptionAsync(context, 500, exMsg, ex.Message);
             }
         }
 
