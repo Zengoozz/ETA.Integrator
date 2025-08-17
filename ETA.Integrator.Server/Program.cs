@@ -3,11 +3,13 @@ using ETA.Integrator.Server.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var corsOrigins = builder.Configuration.GetSection("AllowedCorsOrigins").Get<string[]>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder.WithOrigins("https://localhost:5173")
+        builder.WithOrigins(corsOrigins ?? [])
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
@@ -31,14 +33,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
-
 app.Run();
 
 

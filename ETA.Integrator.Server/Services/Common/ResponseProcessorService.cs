@@ -28,6 +28,7 @@ namespace ETA.Integrator.Server.Services.Common
                 catch (JsonException ex)
                 {
                     Console.WriteLine("JSON Error: " + ex.Message);
+                    throw;
                 }
             }
             else
@@ -35,7 +36,7 @@ namespace ETA.Integrator.Server.Services.Common
                 throw new ProblemDetailsException(
                    (int?)response?.StatusCode ?? StatusCodes.Status500InternalServerError,
                    "ResponseProcessorService/GetProviderInvoices: PROVIDER_SERVER_ERR",
-                   response?.ErrorMessage ?? "Unexpected error"
+                    response?.Content ?? "response content is null"
                    );
             }
 
@@ -125,7 +126,7 @@ namespace ETA.Integrator.Server.Services.Common
                     var retryAfterHeader = response.Headers
                         .FirstOrDefault(h => h.Name.Equals("Retry-After", StringComparison.OrdinalIgnoreCase));
 
-                    if(retryAfterHeader is not null && retryAfterHeader.Value is not null)
+                    if (retryAfterHeader is not null && retryAfterHeader.Value is not null)
                     {
                         var seconds = Int32.Parse(retryAfterHeader.Value);
                         var minutes = seconds / 60;
