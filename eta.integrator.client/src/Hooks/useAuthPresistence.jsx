@@ -18,7 +18,7 @@ const useAuthPresistence = (setLogin) => {
          }
       } else {
          setLogin(true);
-         console.log("Valid token found. User is authenticated.");
+         console.info("Valid token found. User is authenticated.");
 
          if (currentPath === ROUTES.LOGIN) {
             navigate(ROUTES.DEFAULT, { replace: true });

@@ -11,16 +11,6 @@
     -->
   </PropertyGroup>
 
-  <Target Name="BuildClient" BeforeTargets="Publish">
-    <!-- Ensure Node.js + npm are installed on the build machine -->
-
-    <!-- Step 1: install client deps -->
-    <Exec Command="npm ci" WorkingDirectory="..\eta.integrator.client" />
-
-    <!-- Step 2: build client for production -->
-    <Exec Command="npm run build" WorkingDirectory="..\eta.integrator.client" />
-  </Target>
-
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.1" />
     <PackageReference Include="MediatR" Version="12.5.0" />

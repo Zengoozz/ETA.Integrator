@@ -5,8 +5,8 @@ import { ROUTES } from "../Constants/Constants";
 
 const EnforceStepperFlow = ({ userProgress, requiredStep, redirectTo, children }) => {
    // Redirect if the user is not on the correct step
-   console.log("ESF: User progress:", userProgress);
-   console.log("ESF: requiredStep:", requiredStep);
+   //console.log("ESF: User progress:", userProgress);
+   //console.log("ESF: requiredStep:", requiredStep);
    
    if (userProgress === "completed")
       return (

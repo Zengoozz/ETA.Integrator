@@ -35,8 +35,6 @@ const getUserProgress = async () => {
          "/Config/UserProgress"
       );
 
-      console.log("UserProgress:", stepResponse);
-
       return stepResponse;
    } catch (error) {
       console.error(error.message);
@@ -85,8 +83,6 @@ const getIssuerSettings = async () => {
          },
       };
 
-      console.log("IssuerSettings:", myResponse);
-
       return myResponse;
    } catch (error) {
       console.error(error.message);
@@ -96,8 +92,8 @@ const getIssuerSettings = async () => {
 
 const updateStep = async (values, step) => {
    try {
-      const response = await GenericService.updateStepFactory(values, step);
-      console.log(values, step);
+       const response = await GenericService.updateStepFactory(values, step);
+
       return response;
    } catch (error) {
       console.error(error.message);

@@ -18,7 +18,7 @@ const InvoicesTable = ({
    // rowSelection object indicates the need for row selection
    const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
-         console.log(
+         console.info(
             `selectedRowKeys: ${selectedRowKeys}`,
             "selectedRows: ",
             selectedRows
