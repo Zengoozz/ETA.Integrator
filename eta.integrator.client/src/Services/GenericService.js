@@ -51,7 +51,7 @@ const updateStepFactory = async (values, step) => {
          Order: step,
          Data: JSON.stringify(values),
       };
-      console.log("updateStep", updateStepDTO);
+      //console.log("updateStep", updateStepDTO);
 
       const response = await makeRequestFactory(
          "POST",

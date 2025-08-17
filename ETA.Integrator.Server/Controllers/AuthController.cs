@@ -41,7 +41,9 @@ namespace ETA.Integrator.Server.Controllers
 
                     var request = new RestRequest("/api/Auth/LogIn", Method.Post)
                     .AddJsonBody(model);
-
+                    var responseTemp = new ProviderLoginResponseModel();
+                    responseTemp.Token = "TEST"; // For testing purposes, remove this line in production
+                    return Ok(responseTemp);
                     var response = await connectionClient.ExecuteAsync<ProviderLoginResponseModel>(request);
 
                     _customConfig.Provider_Token = response.Data?.Token ?? "";

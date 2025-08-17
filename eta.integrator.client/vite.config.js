@@ -37,9 +37,16 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
 const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
     env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'http://localhost:5299';
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [plugin()],
+    build: {
+    outDir: path.resolve(__dirname, '../ETA.Integrator.Server/wwwroot'), // 👈 correct way
+    emptyOutDir: true
+  },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
