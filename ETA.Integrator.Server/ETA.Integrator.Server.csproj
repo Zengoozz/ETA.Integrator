@@ -43,7 +43,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Data\ETA_DB.db" CopyToOutputDirectory="PreserveNewest"/>
+    <None Include="Data\ETA_DB.db" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

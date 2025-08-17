@@ -42,7 +42,7 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                      prev !== userProgressResponse ? userProgressResponse : prev
                   );
 
-                  console.log("User progress:", userProgressResponse);
+                  //console.log("User progress:", userProgressResponse);
                } else {
                   setUserProgress(1);
                }
