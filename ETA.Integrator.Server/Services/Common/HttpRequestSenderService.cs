@@ -1,5 +1,5 @@
 ﻿using ETA.Integrator.Server.Interface.Services;
-using ETA.Integrator.Server.Interface.Services.Consumer;
+using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Core;
 using Microsoft.Extensions.Options;
@@ -7,17 +7,17 @@ using RestSharp;
 using RestSharp.Authenticators.OAuth2;
 using System.Net;
 
-namespace ETA.Integrator.Server.Services.Consumer
+namespace ETA.Integrator.Server.Services.Common
 {
-    public class HttpRequestSenderConsumerService : IHttpRequestSenderConsumerService
+    public class HttpRequestSenderService : IHttpRequestSenderService
     {
         private readonly CustomConfigurations _customConfig;
-        private readonly ILogger<HttpRequestSenderConsumerService> _logger;
+        private readonly ILogger<HttpRequestSenderService> _logger;
         private readonly ISettingsStepService _settingsStepService;
 
-        public HttpRequestSenderConsumerService(
+        public HttpRequestSenderService(
             IOptions<CustomConfigurations> customConfigurations,
-            ILogger<HttpRequestSenderConsumerService> logger,
+            ILogger<HttpRequestSenderService> logger,
             ISettingsStepService settingsStepService
             )
         {

@@ -23,7 +23,7 @@ namespace ETA.Integrator.Server.Extensions
             
             #region ConsumerServices
             services.AddTransient<ISignatureConsumerService, SignatureConsumerService>();
-            services.AddTransient<IHttpRequestSenderConsumerService, HttpRequestSenderConsumerService>();
+            services.AddTransient<IHttpRequestSenderService, HttpRequestSenderService>();
             #endregion
 
             return services;

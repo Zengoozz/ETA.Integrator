@@ -3,7 +3,6 @@ using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
-using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Provider.Requests;
@@ -19,20 +18,20 @@ namespace ETA.Integrator.Server.Services.Common
     {
         private readonly CustomConfigurations _customConfig;
         private readonly IRequestFactoryService _requestFactoryService;
-        private readonly IHttpRequestSenderConsumerService _httpRequestSenderConsumerService;
+        private readonly IHttpRequestSenderService _httpRequestSenderService;
         private readonly IResponseProcessorService _responseProcessorService;
         private readonly IInvoiceSubmissionLogService _invoiceSubmissionLogService;
         public ApiCallerService(
             IOptions<CustomConfigurations> customConfigurations,
             IRequestFactoryService requestFactoryService,
-            IHttpRequestSenderConsumerService httpClientConsumerService,
+            IHttpRequestSenderService httpRequestSenderService,
             IResponseProcessorService responseProcessorService,
             IInvoiceSubmissionLogService invoiceSubmissionLogService
             )
         {
             _customConfig = customConfigurations.Value;
             _requestFactoryService = requestFactoryService;
-            _httpRequestSenderConsumerService = httpClientConsumerService;
+            _httpRequestSenderService = httpRequestSenderService;
             _responseProcessorService = responseProcessorService;
             _invoiceSubmissionLogService = invoiceSubmissionLogService;
         }
@@ -88,14 +87,14 @@ namespace ETA.Integrator.Server.Services.Common
         public async Task<GetRecentDocumentsResponseDTO> GetRecentDocuments()
         {
             var request = _requestFactoryService.GetRecentDocuments();
-            var response = await _httpRequestSenderConsumerService.ExecuteWithAuthRetryAsync(request);
+            var response = await _httpRequestSenderService.ExecuteWithAuthRetryAsync(request);
             return await _responseProcessorService.GetRecentDocuments(response);
         }
 
         public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(List<ProviderInvoiceViewModel> providerInvoices)
         {
             var request = await _requestFactoryService.SubmitDocuments(providerInvoices);
-            var response = await _httpRequestSenderConsumerService.ExecuteWithAuthRetryAsync(request);
+            var response = await _httpRequestSenderService.ExecuteWithAuthRetryAsync(request);
             var processedResponse = await _responseProcessorService.SubmitDocuments(response);
 
             if (processedResponse.IsSuccess)
