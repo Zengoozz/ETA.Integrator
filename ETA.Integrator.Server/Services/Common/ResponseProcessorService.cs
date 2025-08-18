@@ -3,6 +3,7 @@ using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
+using ETA.Integrator.Server.Models.Provider.Response;
 using RestSharp;
 using System.Text.Json;
 
@@ -10,6 +11,53 @@ namespace ETA.Integrator.Server.Services.Common
 {
     public class ResponseProcessorService : IResponseProcessorService
     {
+        public Task<ProviderLoginResponseModel> ConnectToProvider(RestResponse response)
+        {
+            ProviderLoginResponseModel? serializedResponse = new();
+
+            if (response is not null && response.Content is not null && response.IsSuccessful)
+            {
+                try
+                {
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    serializedResponse = JsonSerializer.Deserialize<ProviderLoginResponseModel>(response.Content, options);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("JSON Error: " + ex.Message);
+                    throw;
+                }
+
+                if (serializedResponse is null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "ResponseProcessorService/ConnectToProvider: SERIALIZATION_FAILED",
+                        detail: "Could not serialize the response."
+                        );
+
+                if (serializedResponse.IsError)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status401Unauthorized,
+                        message: "UNAUTHORIZED",
+                        detail: String.IsNullOrEmpty(serializedResponse.Message) ? "No further details" : serializedResponse.Message
+                        );
+            }
+            else
+            {
+                throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "LOGIN_FAILED",
+                        detail: response?.ErrorMessage ?? serializedResponse.Message
+                        );
+            }
+
+            return Task.FromResult(serializedResponse);
+        }
         public Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(RestResponse response)
         {
             List<ProviderInvoiceViewModel>? serializedResponse = new();
@@ -50,7 +98,6 @@ namespace ETA.Integrator.Server.Services.Common
 
             return Task.FromResult(serializedResponse);
         }
-
         public Task<GetRecentDocumentsResponseDTO> GetRecentDocuments(RestResponse response)
         {
             if (response is null || !response.IsSuccessful || (int)response.StatusCode != StatusCodes.Status200OK || response.Content is null)

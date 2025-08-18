@@ -1,4 +1,5 @@
-﻿using ETA.Integrator.Server.Models;
+﻿using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Provider.Requests;
 using ETA.Integrator.Server.Models.Provider.Response;
@@ -15,74 +16,40 @@ namespace ETA.Integrator.Server.Controllers
     {
         private readonly CustomConfigurations _customConfig;
         private readonly ILogger<AuthController> _logger;
+        private readonly IApiCallerService _apiCallerService;
 
         public AuthController(
             IOptions<CustomConfigurations> customConfig,
-            ILogger<AuthController> logger
+            ILogger<AuthController> logger,
+            IApiCallerService apiCallerService
             )
         {
             _customConfig = customConfig.Value;
             _logger = logger;
-
-
+            _apiCallerService = apiCallerService;
         }
 
         [HttpPost("ProviderConnect")]
         public async Task<IActionResult> ConnectToProvider([FromBody] ProviderLoginRequestModel model)
         {
-            try
-            {
+            //var responseTemp = new ProviderLoginResponseModel();
+            //responseTemp.Token = "TEST"; // For testing purposes, remove this line in production
+            //return Ok(responseTemp);
 
-                if (_customConfig.Provider_APIURL != null)
-                {
-                    var opt = new RestClientOptions(_customConfig.Provider_APIURL);
+            var response = await _apiCallerService.ConnectToProvider(model);
 
-                    var connectionClient = new RestClient(opt);
-
-                    var request = new RestRequest("/api/Auth/LogIn", Method.Post)
-                    .AddJsonBody(model);
-                    //var responseTemp = new ProviderLoginResponseModel();
-                    //responseTemp.Token = "TEST"; // For testing purposes, remove this line in production
-                    //return Ok(responseTemp);
-                    var response = await connectionClient.ExecuteAsync<ProviderLoginResponseModel>(request);
-
-                    _customConfig.Provider_Token = response.Data?.Token ?? "";
-
-                    return StatusCode((int)response.StatusCode, response.Data);
-                }
-                else
-                {
-                    _logger.LogError("Error: Getting provider api url");
-                    return StatusCode(StatusCodes.Status500InternalServerError, "Error: Getting provider api url");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occured getting connection settings");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred getting connection settings");
-            }
+            return Ok(response);
         }
 
         [HttpGet("ValidateProviderToken")]
         public IActionResult ValidateProviderToken()
         {
-            try
-            {
-                var token = _customConfig.Provider_Token;
-                if (String.IsNullOrWhiteSpace(token))
-                {
-                    return Unauthorized();
-                }
-                else
-                {
-                    return Ok(token);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occured getting connection settings");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred getting connection settings");
-            }
+            var token = _customConfig.Provider_Token;
+
+            if (String.IsNullOrWhiteSpace(token))
+                return Unauthorized("Provider token is missing. Try to login again.");
+            else
+                return Ok(token);
         }
 
 

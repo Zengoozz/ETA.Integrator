@@ -6,6 +6,8 @@ using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
+using ETA.Integrator.Server.Models.Provider.Requests;
+using ETA.Integrator.Server.Models.Provider.Response;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using RestSharp;
@@ -35,6 +37,28 @@ namespace ETA.Integrator.Server.Services.Common
             _invoiceSubmissionLogService = invoiceSubmissionLogService;
         }
 
+        public async Task<ProviderLoginResponseModel> ConnectToProvider(ProviderLoginRequestModel model)
+        {
+
+            if (_customConfig.Provider_APIURL is null)
+                throw new ProblemDetailsException(
+                    StatusCodes.Status500InternalServerError,
+                    "ApiCallerService/ConnectToProvider: Provider_APIURL not found",
+                    "Getting provider api url failed"
+                    );
+
+            var opt = new RestClientOptions(_customConfig.Provider_APIURL);
+            var connectionClient = new RestClient(opt);
+
+            var request = _requestFactoryService.ConnectToProvider(model);
+            var response = await connectionClient.ExecuteAsync(request);
+            var processedResponse = await _responseProcessorService.ConnectToProvider(response);
+
+            _customConfig.Provider_Token = processedResponse.Token ?? "";
+            
+            return processedResponse;
+        }
+
         public async Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
         {
             var request = _requestFactoryService.GetProviderInvoices(fromDate, toDate, invoiceType);
@@ -55,7 +79,7 @@ namespace ETA.Integrator.Server.Services.Common
             var response = await client.ExecuteAsync(request);
             var processedResponse = await _responseProcessorService.GetProviderInvoices(response);
 
-            if(processedResponse.Count() > 0)
+            if (processedResponse.Count() > 0)
                 await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
 
             return processedResponse;

@@ -6,6 +6,7 @@ using ETA.Integrator.Server.Models.Core;
 using RestSharp;
 using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Models.Provider.Requests;
 
 namespace ETA.Integrator.Server.Services.Common
 {
@@ -23,6 +24,12 @@ namespace ETA.Integrator.Server.Services.Common
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settingsStepService = settingsStepService ?? throw new ArgumentNullException(nameof(_settingsStepService));
             _signatureConsumerService = signatureConsumerService;
+        }
+
+        public RestRequest ConnectToProvider(ProviderLoginRequestModel model)
+        {
+            var request = new RestRequest("/api/Auth/LogIn", Method.Post).AddJsonBody(model);
+            return request;
         }
 
         #region SUBMIT INVOICE
@@ -141,5 +148,6 @@ namespace ETA.Integrator.Server.Services.Common
 
             return request;
         }
+
     }
 }
