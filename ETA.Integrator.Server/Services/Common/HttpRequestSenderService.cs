@@ -1,4 +1,5 @@
-﻿using ETA.Integrator.Server.Interface.Services;
+﻿using ETA.Integrator.Server.Helpers.Enums;
+using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Core;
@@ -26,34 +27,37 @@ namespace ETA.Integrator.Server.Services.Common
             _settingsStepService = settingsStepService;
         }
 
-        public async Task<RestResponse> ExecuteWithAuthRetryAsync(RestRequest request)
+        public async Task<RestResponse> SendRequest(GenericRequest request)
         {
-            var client = CreateConsumerClient();
-            var response = await client.ExecuteAsync<RestResponse>(request);
+            RestClient client = request.ClientType switch
+            {
+                ClientType.Consumer => CreateConsumerClient(),
+                ClientType.ConsumerAuth => CreateConsumerAuthClient(),
+                ClientType.Provider => CreateProviderClient(),
+                _ => throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "UNKNOWN",
+                    detail: "Unknown client type detected"
+                    ),
+            };
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized) // Retry
+            var response = await client.ExecuteAsync<RestResponse>(request.Request);
+
+            if (request.DoRetry && response.StatusCode == HttpStatusCode.Unauthorized) // Retry
             {
                 var authToken = await AuthorizeConsumer();
 
                 if (string.IsNullOrWhiteSpace(authToken))
                     throw new ProblemDetailsException(
                             statusCode: StatusCodes.Status500InternalServerError,
-                            message: "HttpRequestSenderConsumerService/ExecuteWithAuthRetryAsync: UNKNOWN_INTERNAL_ERROR",
+                            message: "UNKNOWN_INTERNAL_ERROR",
                             detail: "Consumer auth token has no value"
                             );
 
-                var retryResponse = await client.ExecuteAsync<RestResponse>(request);
+                var retryResponse = await client.ExecuteAsync<RestResponse>(request.Request);
 
                 return retryResponse;
             }
-
-            return response;
-        }
-
-        public async Task<RestResponse> SendConsumerAuthRequest(RestRequest request)
-        {
-            var client = CreateConsumerAuthClient();
-            var response = await client.ExecuteAsync(request);
 
             return response;
         }
@@ -86,8 +90,7 @@ namespace ETA.Integrator.Server.Services.Common
             }
 
             // GENERATING CONSUMER TOKEN
-            var authOpt = new RestClientOptions(_customConfig.Consumer_IdSrvBaseUrl);
-            var authClient = new RestClient(authOpt);
+            var client = CreateConsumerAuthClient();
 
             var authRequest = new RestRequest("/connect/token", Method.Post)
                 .AddParameter("grant_type", "client_credentials")
@@ -95,7 +98,7 @@ namespace ETA.Integrator.Server.Services.Common
                 .AddParameter("client_secret", connectionConfig.ClientSecret)
                 .AddParameter("scope", "InvoicingAPI");
 
-            var response = await authClient.ExecuteAsync<ConsumerConnectionResponseModel>(authRequest);
+            var response = await client.ExecuteAsync<ConsumerConnectionResponseModel>(authRequest);
 
             if (response.Data is null || !response.IsSuccessStatusCode)
             {
@@ -112,13 +115,12 @@ namespace ETA.Integrator.Server.Services.Common
 
             return token;
         }
-
         private RestClient CreateConsumerClient()
         {
             if (_customConfig.Consumer_APIBaseUrl is null)
                 throw new ProblemDetailsException(
                     StatusCodes.Status500InternalServerError,
-                    "HttpRequestSenderService/CreateConsumerClient: Consumer_APIBaseUrl not found",
+                    "Consumer_APIBaseUrl not found",
                     "Consumer api base url not found"
                     );
 
