@@ -1,14 +1,18 @@
 ﻿using ETA.Integrator.Server.Data;
+using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Models;
+using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Provider.Requests;
 using ETA.Integrator.Server.Models.Provider.Response;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using System.Transactions;
 
@@ -58,6 +62,24 @@ namespace ETA.Integrator.Server.Services.Common
             return processedResponse;
         }
 
+        public async Task<ConsumerConnectionResponseModel> ConnectToConsumer(ConnectionDTO? model)
+        {
+            var request = await _requestFactoryService.ConnectToConsumer(model);
+            var response = await _httpRequestSenderService.SendConsumerAuthRequest(request);
+            var processedResponse = await _responseProcessorService.ConnectToConsumer(response);
+
+            if(string.IsNullOrEmpty(processedResponse.access_token))
+                throw new ProblemDetailsException(
+                    StatusCodes.Status401Unauthorized,
+                    "AUTH_FAILED",
+                    "ETA token did not get extracted correctly"
+                    );
+
+            _customConfig.Consumer_Token = processedResponse.access_token;
+
+            return processedResponse;
+        }
+
         public async Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
         {
             var request = _requestFactoryService.GetProviderInvoices(fromDate, toDate, invoiceType);
@@ -71,7 +93,7 @@ namespace ETA.Integrator.Server.Services.Common
             else
                 throw new ProblemDetailsException(
                     StatusCodes.Status500InternalServerError,
-                    "ApiCallerService/GetProviderInvoices: CONFIG_NOT_FOUND",
+                    "CONFIG_NOT_FOUND",
                     "Getting provider API_URL Error"
                     );
 

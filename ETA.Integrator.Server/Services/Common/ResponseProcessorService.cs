@@ -1,6 +1,7 @@
 ﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Provider.Response;
@@ -36,7 +37,7 @@ namespace ETA.Integrator.Server.Services.Common
                 if (serializedResponse is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "ResponseProcessorService/ConnectToProvider: SERIALIZATION_FAILED",
+                        message: "SERIALIZATION_FAILED",
                         detail: "Could not serialize the response."
                         );
 
@@ -58,6 +59,46 @@ namespace ETA.Integrator.Server.Services.Common
 
             return Task.FromResult(serializedResponse);
         }
+        public Task<ConsumerConnectionResponseModel> ConnectToConsumer(RestResponse response)
+        {
+            ConsumerConnectionResponseModel? serializedResponse = new();
+
+            if (response is null || response.Content is null || !response.IsSuccessful)
+            {
+                var detailMsg = response is null || response.Content is null ? "No response to process" : "API response failure";
+
+                throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "RESPONSE_ERR",
+                        detail: detailMsg
+                        );
+            }
+
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                };
+
+                serializedResponse = JsonSerializer.Deserialize<ConsumerConnectionResponseModel>(response.Content, options);
+            }
+            catch (JsonException)
+            {
+                throw;
+            }
+
+            if (serializedResponse is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SERIALIZATION_FAILED",
+                    detail: "Could not serialize the response."
+                    );
+
+            return Task.FromResult(serializedResponse);
+
+        }
         public Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(RestResponse response)
         {
             List<ProviderInvoiceViewModel>? serializedResponse = new();
@@ -73,9 +114,8 @@ namespace ETA.Integrator.Server.Services.Common
 
                     serializedResponse = JsonSerializer.Deserialize<List<ProviderInvoiceViewModel>>(response.Content, options);
                 }
-                catch (JsonException ex)
+                catch (JsonException)
                 {
-                    Console.WriteLine("JSON Error: " + ex.Message);
                     throw;
                 }
             }
@@ -83,7 +123,7 @@ namespace ETA.Integrator.Server.Services.Common
             {
                 throw new ProblemDetailsException(
                    (int?)response?.StatusCode ?? StatusCodes.Status500InternalServerError,
-                   "ResponseProcessorService/GetProviderInvoices: PROVIDER_SERVER_ERR",
+                   "PROVIDER_SERVER_ERR",
                     response?.Content ?? "response content is null"
                    );
             }
@@ -91,7 +131,7 @@ namespace ETA.Integrator.Server.Services.Common
             if (serializedResponse is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "ResponseProcessorService/GetProviderInvoices: SERIALIZATION_FAILED",
+                    message: "SERIALIZATION_FAILED",
                     detail: "Could not serialize the response."
                     );
 
@@ -100,67 +140,65 @@ namespace ETA.Integrator.Server.Services.Common
         }
         public Task<GetRecentDocumentsResponseDTO> GetRecentDocuments(RestResponse response)
         {
+            GetRecentDocumentsResponseDTO? serializedResponse = new();
+
             if (response is null || !response.IsSuccessful || (int)response.StatusCode != StatusCodes.Status200OK || response.Content is null)
             {
                 if (response is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "ResponseProcessorConsumerService/GetRecentDocuments: BAD_PARAMS",
+                        message: "BAD_PARAMS",
                         detail: "No response to process."
                         );
 
                 else if ((int)response.StatusCode == StatusCodes.Status403Forbidden)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status403Forbidden,
-                        message: "ResponseProcessorConsumerService/GetRecentDocuments: CONSUMER_FAILURE",
+                        message: "CONSUMER_FAILURE",
                         detail: response.ErrorMessage ?? response.Content ?? "Unexpected error"
                         );
 
                 else
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "ResponseProcessorConsumerService/GetRecentDocuments: UNKNOWN",
+                        message: "UNKNOWN",
                         detail: response.ErrorMessage ?? response.Content ?? "Unexpected error"
                         );
-
             }
-            else
+
+            if ((int)response.StatusCode == StatusCodes.Status200OK)
             {
-                GetRecentDocumentsResponseDTO? serializedResponse = new GetRecentDocumentsResponseDTO();
-                if (response != null && (int)response.StatusCode == StatusCodes.Status200OK && response.Content != null)
+                try
                 {
-                    try
+                    var options = new JsonSerializerOptions
                     {
-                        var options = new JsonSerializerOptions
-                        {
-                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                            PropertyNameCaseInsensitive = true
-                        };
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    };
 
-                        serializedResponse = JsonSerializer.Deserialize<GetRecentDocumentsResponseDTO>(response.Content, options);
-                    }
-                    catch (JsonException ex)
-                    {
-                        Console.WriteLine("JSON Error: " + ex.Message);
-                    }
+                    serializedResponse = JsonSerializer.Deserialize<GetRecentDocumentsResponseDTO>(response.Content, options);
                 }
-
-                if (serializedResponse is null)
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "ResponseProcessorService/GetRecentDocuments: SERIALIZATION_FAILED",
-                        detail: "Could not serialize the response."
-                        );
-
-                return Task.FromResult(serializedResponse);
+                catch (JsonException)
+                {
+                    throw;
+                }
             }
+
+            if (serializedResponse is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SERIALIZATION_FAILED",
+                    detail: "Could not serialize the response."
+                    );
+
+            return Task.FromResult(serializedResponse);
         }
         public Task<SubmitDocumentsResponseDTO> SubmitDocuments(RestResponse response)
         {
             if (response is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "ResponseProcessorConsumerService/SubmitDocuments: BAD_PARAMS",
+                    message: "BAD_PARAMS",
                     detail: "No response to process."
                     );
 
@@ -184,7 +222,7 @@ namespace ETA.Integrator.Server.Services.Common
 
                 throw new ProblemDetailsException(
                     StatusCodes.Status422UnprocessableEntity,
-                    "ResponseProcessorConsumerService/SubmitDocuments: UNPROCESSABLE_CONTENT",
+                    "UNPROCESSABLE_CONTENT",
                     errDetails
                     );
             }
@@ -206,15 +244,15 @@ namespace ETA.Integrator.Server.Services.Common
 
                     serializedResponse = JsonSerializer.Deserialize<SuccessfulResponseDTO>(response.Content, options);
                 }
-                catch (JsonException ex)
+                catch (JsonException)
                 {
-                    Console.WriteLine("JSON Error: " + ex.Message);
+                    throw;
                 }
 
                 if (serializedResponse is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "ResponseProcessorService/SubmitDocuments: SERIALIZATION_FAILED",
+                        message: "SERIALIZATION_FAILED",
                         detail: "Could not serialize the response."
                         );
                 else

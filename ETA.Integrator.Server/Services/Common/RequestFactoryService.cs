@@ -1,12 +1,14 @@
-﻿using ETA.Integrator.Server.Interface.Services;
-using ETA.Integrator.Server.Models.Consumer.ETA;
-using ETA.Integrator.Server.Models.Provider;
-using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Models.Core;
-using RestSharp;
-using ETA.Integrator.Server.Interface.Services.Consumer;
+﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Interface.Services.Consumer;
+using ETA.Integrator.Server.Models;
+using ETA.Integrator.Server.Models.Consumer.ETA;
+using ETA.Integrator.Server.Models.Core;
+using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Provider.Requests;
+using RestSharp;
+using System.Net;
 
 namespace ETA.Integrator.Server.Services.Common
 {
@@ -32,6 +34,35 @@ namespace ETA.Integrator.Server.Services.Common
             return request;
         }
 
+        public async Task<RestRequest> ConnectToConsumer(ConnectionDTO? model)
+        {
+            ConnectionDTO? connectionConfig = model;
+
+            if (connectionConfig is null)
+                connectionConfig = await _settingsStepService.GetConnectionData();
+
+            // CLIENT_ID | CLIENT_SECRET VALIDATION
+            if (connectionConfig is null || string.IsNullOrWhiteSpace(connectionConfig.ClientId) || string.IsNullOrWhiteSpace(connectionConfig.ClientSecret))
+            {
+                var errMsg = connectionConfig is null ? "whole" : (string.IsNullOrWhiteSpace(connectionConfig.ClientId) ? "(client_id)" : "(client_secret)");
+
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    message: "NOT_FOUND",
+                    detail: $"Connection configuration {errMsg} not found"
+                    );
+            }
+
+
+            var request = new RestRequest("/connect/token", Method.Post)
+                .AddParameter("grant_type", "client_credentials")
+                .AddParameter("client_id", connectionConfig.ClientId)
+                .AddParameter("client_secret", connectionConfig.ClientSecret)
+                .AddParameter("scope", "InvoicingAPI");
+
+            return request;
+        }
+
         #region SUBMIT INVOICE
         public async Task<RestRequest> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
         {
@@ -42,7 +73,7 @@ namespace ETA.Integrator.Server.Services.Common
             if (connectionSettings is null || string.IsNullOrWhiteSpace(connectionSettings.TokenPin))
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
-                    message: "RequestFactoryService/SubmitDocuments: TOKEN_PIN_NOT_FOUND",
+                    message: "TOKEN_PIN_NOT_FOUND",
                     detail: "Token pin not found."
                     );
 
@@ -53,7 +84,7 @@ namespace ETA.Integrator.Server.Services.Common
             if (issuerData is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
-                    message: "RequestFactoryService/SubmitDocuments: ISSUER_NOT_FOUND",
+                    message: "ISSUER_NOT_FOUND",
                     detail: "Issuer data not found."
                     );
 
@@ -62,7 +93,7 @@ namespace ETA.Integrator.Server.Services.Common
             if (issuer is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "RequestFactoryService/SubmitDocuments: ISSUER_MAPPING_FAILED",
+                    message: "ISSUER_MAPPING_FAILED",
                     detail: "Issuer mapping failed"
                     );
             #endregion
@@ -142,7 +173,7 @@ namespace ETA.Integrator.Server.Services.Common
             else
                 throw new ProblemDetailsException(
                     StatusCodes.Status400BadRequest,
-                    "RequestFactoryService/GetProviderInvoices: INVALID_PARAMS",
+                    "INVALID_PARAMS",
                     "Please provide fromDate, toDate and invoiceType parameters."
                     );
 
