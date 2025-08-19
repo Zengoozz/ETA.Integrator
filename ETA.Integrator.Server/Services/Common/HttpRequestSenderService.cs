@@ -13,15 +13,18 @@ namespace ETA.Integrator.Server.Services.Common
     public class HttpRequestSenderService : IHttpRequestSenderService
     {
         private readonly CustomConfigurations _customConfig;
-        private readonly IApiCallerService _apiCallerService;
+        private readonly ILogger<HttpRequestSenderService> _logger;
+        private readonly ISettingsStepService _settingsStepService;
 
         public HttpRequestSenderService(
             IOptions<CustomConfigurations> customConfigurations,
-            IApiCallerService apiCallerService
+            ILogger<HttpRequestSenderService> logger,
+            ISettingsStepService settingsStepService
             )
         {
             _customConfig = customConfigurations.Value;
-            _apiCallerService = apiCallerService;
+            _logger = logger;
+            _settingsStepService = settingsStepService;
         }
 
         public async Task<RestResponse> SendRequest(GenericRequest request)
@@ -61,9 +64,56 @@ namespace ETA.Integrator.Server.Services.Common
 
         private async Task<string> AuthorizeConsumer()
         {
-            var response = await _apiCallerService.ConnectToConsumer();
-            return response.access_token;
+            var connectionConfig = await _settingsStepService.GetConnectionData();
+            var token = "";
 
+            // CLIENT_ID | CLIENT_SECRET VALIDATION
+            if (connectionConfig == null || string.IsNullOrWhiteSpace(connectionConfig.ClientId) || string.IsNullOrWhiteSpace(connectionConfig.ClientSecret))
+            {
+                _logger.LogError("Failed to get the manual connection config");
+
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    message: "NOT_FOUND",
+                    detail: "Connection configuration (Manual) not found"
+                    );
+            }
+            // SERV API URL VALIDATION
+            if (string.IsNullOrWhiteSpace(_customConfig.Consumer_IdSrvBaseUrl))
+            {
+                _logger.LogError("Failed to get the consumer IdSrvURL");
+                throw new ProblemDetailsException(
+                           statusCode: StatusCodes.Status400BadRequest,
+                           message: "NOT_FOUND",
+                           detail: "Connection configuration (IdSrvUrl) not found"
+                        );
+            }
+
+            // GENERATING CONSUMER TOKEN
+            var client = CreateConsumerAuthClient();
+
+            var authRequest = new RestRequest("/connect/token", Method.Post)
+                .AddParameter("grant_type", "client_credentials")
+                .AddParameter("client_id", connectionConfig.ClientId)
+                .AddParameter("client_secret", connectionConfig.ClientSecret)
+                .AddParameter("scope", "InvoicingAPI");
+
+            var response = await client.ExecuteAsync<ConsumerConnectionResponseModel>(authRequest);
+
+            if (response.Data is null || !response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Failed to connect to the consumer API");
+                throw new ProblemDetailsException(
+                       statusCode: StatusCodes.Status401Unauthorized,
+                       message: "UNAUTHORIZED",
+                       detail: "failed to connect to consumer (not authorized)"
+                    );
+            }
+
+            token = response.Data.access_token;
+            _customConfig.Consumer_Token = token;
+
+            return token;
         }
         private RestClient CreateConsumerClient()
         {
