@@ -7,4 +7,11 @@
         Submitted = 1,
         Success = 2
     }
+
+    public enum ClientType
+    {
+        Consumer = 1,
+        ConsumerAuth = 2,
+        Provider = 3
+    }
 }

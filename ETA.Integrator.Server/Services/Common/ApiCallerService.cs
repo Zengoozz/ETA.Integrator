@@ -54,7 +54,7 @@ namespace ETA.Integrator.Server.Services.Common
             var connectionClient = new RestClient(opt);
 
             var request = _requestFactoryService.ConnectToProvider(model);
-            var response = await connectionClient.ExecuteAsync(request);
+            var response = await connectionClient.ExecuteAsync(request.Request);
             var processedResponse = await _responseProcessorService.ConnectToProvider(response);
 
             _customConfig.Provider_Token = processedResponse.Token ?? "";
@@ -65,7 +65,7 @@ namespace ETA.Integrator.Server.Services.Common
         public async Task<ConsumerConnectionResponseModel> ConnectToConsumer(ConnectionDTO? model)
         {
             var request = await _requestFactoryService.ConnectToConsumer(model);
-            var response = await _httpRequestSenderService.SendConsumerAuthRequest(request);
+            var response = await _httpRequestSenderService.SendConsumerAuthRequest(request.Request);
             var processedResponse = await _responseProcessorService.ConnectToConsumer(response);
 
             if(string.IsNullOrEmpty(processedResponse.access_token))
@@ -97,7 +97,7 @@ namespace ETA.Integrator.Server.Services.Common
                     "Getting provider API_URL Error"
                     );
 
-            var response = await client.ExecuteAsync(request);
+            var response = await client.ExecuteAsync(request.Request);
             var processedResponse = await _responseProcessorService.GetProviderInvoices(response);
 
             if (processedResponse.Count() > 0)
@@ -109,14 +109,14 @@ namespace ETA.Integrator.Server.Services.Common
         public async Task<GetRecentDocumentsResponseDTO> GetRecentDocuments()
         {
             var request = _requestFactoryService.GetRecentDocuments();
-            var response = await _httpRequestSenderService.ExecuteWithAuthRetryAsync(request);
+            var response = await _httpRequestSenderService.ExecuteWithAuthRetryAsync(request.Request);
             return await _responseProcessorService.GetRecentDocuments(response);
         }
 
         public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(List<ProviderInvoiceViewModel> providerInvoices)
         {
             var request = await _requestFactoryService.SubmitDocuments(providerInvoices);
-            var response = await _httpRequestSenderService.ExecuteWithAuthRetryAsync(request);
+            var response = await _httpRequestSenderService.ExecuteWithAuthRetryAsync(request.Request);
             var processedResponse = await _responseProcessorService.SubmitDocuments(response);
 
             if (processedResponse.IsSuccess)

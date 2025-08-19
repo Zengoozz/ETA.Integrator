@@ -1,4 +1,5 @@
 ﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Interface.Services.Consumer;
@@ -28,14 +29,19 @@ namespace ETA.Integrator.Server.Services.Common
             _signatureConsumerService = signatureConsumerService;
         }
 
-        public RestRequest ConnectToProvider(ProviderLoginRequestModel model)
+        public GenericRequest ConnectToProvider(ProviderLoginRequestModel model)
         {
-            var request = new RestRequest("/api/Auth/LogIn", Method.Post).AddJsonBody(model);
-            return request;
+            GenericRequest genericRequest = new();
+
+            genericRequest.Request = new RestRequest("/api/Auth/LogIn", Method.Post).AddJsonBody(model);
+            genericRequest.ClientType = ClientType.Provider;
+
+            return genericRequest;
         }
 
-        public async Task<RestRequest> ConnectToConsumer(ConnectionDTO? model)
+        public async Task<GenericRequest> ConnectToConsumer(ConnectionDTO? model)
         {
+            GenericRequest genericRequest = new();
             ConnectionDTO? connectionConfig = model;
 
             if (connectionConfig is null)
@@ -54,18 +60,20 @@ namespace ETA.Integrator.Server.Services.Common
             }
 
 
-            var request = new RestRequest("/connect/token", Method.Post)
+            genericRequest.Request = new RestRequest("/connect/token", Method.Post)
                 .AddParameter("grant_type", "client_credentials")
                 .AddParameter("client_id", connectionConfig.ClientId)
                 .AddParameter("client_secret", connectionConfig.ClientSecret)
                 .AddParameter("scope", "InvoicingAPI");
+            genericRequest.ClientType = ClientType.ConsumerAuth;
 
-            return request;
+            return genericRequest;
         }
 
         #region SUBMIT INVOICE
-        public async Task<RestRequest> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
+        public async Task<GenericRequest> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
         {
+            GenericRequest genericRequest = new();
             List<InvoiceModel> documents = new List<InvoiceModel>();
 
             var connectionSettings = await _settingsStepService.GetConnectionData();
@@ -76,8 +84,6 @@ namespace ETA.Integrator.Server.Services.Common
                     message: "TOKEN_PIN_NOT_FOUND",
                     detail: "Token pin not found."
                     );
-
-            #region ISSUER_PREP
 
             IssuerDTO? issuerData = await _settingsStepService.GetIssuerData();
 
@@ -96,28 +102,24 @@ namespace ETA.Integrator.Server.Services.Common
                     message: "ISSUER_MAPPING_FAILED",
                     detail: "Issuer mapping failed"
                     );
-            #endregion
 
-            #region INVOICE_PREP
             foreach (var invoice in invoicesList)
             {
                 var doc = PrepareInvoiceDetails(invoice, issuer, connectionSettings.TokenPin);
 
                 documents.Add(doc);
             }
-            #endregion
 
-            #region REQUEST_PREPARE
-            var submitRequestBody = new
+            var requestBody = new
             {
                 documents
             };
 
-            var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
-                            .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
-            #endregion
+            genericRequest.Request = new RestRequest("/api/v1/documentsubmissions", Method.Post)
+                            .AddHeader("Content-Type", "application/json").AddJsonBody(requestBody);
+            genericRequest.ClientType = ClientType.Consumer;
 
-            return submitRequest;
+            return genericRequest;
         }
 
         private InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin)
@@ -134,10 +136,11 @@ namespace ETA.Integrator.Server.Services.Common
 
         #endregion
 
-        public RestRequest GetRecentDocuments()
+        public GenericRequest GetRecentDocuments()
         {
-            DateTime utcNow = DateTime.UtcNow;
+            GenericRequest genericRequest = new();
 
+            DateTime utcNow = DateTime.UtcNow;
             // Create a new DateTime without milliseconds
             DateTime trimmedUtcNow = new DateTime(
                 utcNow.Year,
@@ -149,24 +152,27 @@ namespace ETA.Integrator.Server.Services.Common
                 DateTimeKind.Utc
             );
 
-            var request = new RestRequest("/api/v1/documents/recent", Method.Get)
+            genericRequest.Request = new RestRequest("/api/v1/documents/recent", Method.Get)
                 .AddHeader("Content-Type", "application/json")
                 .AddQueryParameter("pageNo", 1)
                 .AddQueryParameter("pageSize", 100)
                 .AddQueryParameter("submissionDateFrom", trimmedUtcNow.AddMonths(-1).ToString())
                 .AddQueryParameter("submissionDateTo", trimmedUtcNow.ToString())
                 .AddQueryParameter("documentType", "i");
+            genericRequest.ClientType = ClientType.Consumer;
 
-            return request;
+            return genericRequest;
         }
 
-        public RestRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
+        public GenericRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
         {
-            var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
+            GenericRequest genericRequest = new();
+
+            genericRequest.Request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
 
             if (fromDate != null && toDate != null && !string.IsNullOrWhiteSpace(invoiceType))
             {
-                request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
+                genericRequest.Request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
                     .AddParameter("toDate", toDate, ParameterType.QueryString)
                     .AddParameter("invoiceType", invoiceType, ParameterType.QueryString);
             }
@@ -177,7 +183,9 @@ namespace ETA.Integrator.Server.Services.Common
                     "Please provide fromDate, toDate and invoiceType parameters."
                     );
 
-            return request;
+            genericRequest.ClientType = ClientType.Provider;
+
+            return genericRequest;
         }
 
     }
