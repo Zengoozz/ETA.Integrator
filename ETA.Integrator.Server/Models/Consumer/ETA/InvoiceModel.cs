@@ -47,7 +47,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 throw new ProblemDetailsException(
                    statusCode: StatusCodes.Status400BadRequest,
                    message: "NOT_FOUND",
-                   detail: $"Invoice #{viewModel.InvoiceNumber}: Reciever (${viewModel.ReceiverName}) has no registeration number."
+                   detail: $"Invoice #{viewModel.InvoiceNumber}: Reciever ({viewModel.ReceiverName}) has no registeration number."
                    );
 
             var listOfNeededProps = new List<string> { "Country", "Governate", "RegionCity", "Street", "BuildingNumber" };

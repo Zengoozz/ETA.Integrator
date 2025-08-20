@@ -30,7 +30,7 @@ namespace ETA.Integrator.Server.Controllers
         {
             var response = await _apiCallerService.GetProviderInvoices(fromDate, toDate, invoiceType);
 
-            return Ok(response);
+            return Ok(response.OrderBy(r => r.InvoiceNumber));
         }
 
         [HttpPost("SubmitDocuments")]
