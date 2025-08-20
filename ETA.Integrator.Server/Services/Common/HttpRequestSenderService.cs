@@ -14,17 +14,14 @@ namespace ETA.Integrator.Server.Services.Common
     {
         private readonly CustomConfigurations _customConfig;
         private readonly ISettingsStepService _settingsStepService;
-        //private readonly IApiCallerService _apiCallerService;
 
         public HttpRequestSenderService(
             IOptions<CustomConfigurations> customConfigurations,
             ISettingsStepService settingsStepService
-            //IApiCallerService apiCallerService
             )
         {
             _customConfig = customConfigurations.Value;
             _settingsStepService = settingsStepService;
-            //_apiCallerService = apiCallerService;
         }
 
         public async Task<RestResponse> SendRequest(GenericRequest request)
@@ -53,7 +50,8 @@ namespace ETA.Integrator.Server.Services.Common
                             message: "UNKNOWN_INTERNAL_ERROR",
                             detail: "Consumer auth token has no value"
                             );
-
+                //TODO: Need to figure out better way to re-create dynamic clients as in the start of the function (maybe by recurssion but we need to modify the retry)
+                client = CreateConsumerClient();
                 var retryResponse = await client.ExecuteAsync<RestResponse>(request.Request);
 
                 return retryResponse;
