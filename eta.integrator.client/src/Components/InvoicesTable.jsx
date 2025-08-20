@@ -47,11 +47,11 @@ const InvoicesTable = ({
       // Start loading
       setLoading(true);
       onSubmit(selectedRowToSubmit)
-         .then(() => {
-            messageApi.open({
+         .then((response) => {
+            notificationApi.open({
                type: "success",
-               content: "Selected rows saved successfully!",
-               duration: 2,
+               content: response.responseMessage,
+               duration: 0,
             });
          })
          .catch((error) => {

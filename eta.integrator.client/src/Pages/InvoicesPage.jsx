@@ -20,7 +20,7 @@ const InvoicesPage = ({ isMobile }) => {
 
     const onSubmit = async (selectedRows) => {
         try {
-            await InvoicesService.submitInvoices(selectedRows);
+            return await InvoicesService.submitInvoices(selectedRows);
         } catch (error) {
             console.error(error.detail);
             throw error;

@@ -91,14 +91,28 @@ namespace ETA.Integrator.Server.Services.Common
             return await _responseProcessorService.ProcessResponse<GetRecentDocumentsResponseDTO>(response);
         }
 
-        public async Task<SuccessfulResponseDTO> SubmitDocuments(List<ProviderInvoiceViewModel> providerInvoices)
+        public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(List<ProviderInvoiceViewModel> providerInvoices)
         {
             var request = await _requestFactoryService.SubmitDocuments(providerInvoices);
             var response = await _httpRequestSenderService.SendRequest(request);
             var processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
             await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse);
 
-            return processedResponse;
+            var acceptedInvoicesIds = processedResponse.AcceptedDocuments.Select(a => a.InternalId).ToList();
+            var acceptedInvoicesNumbers = providerInvoices.Where(i => acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
+            var rejectedInvoicesNumbers = providerInvoices.Where(i => !acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
+
+            var responseMsg = $"Accepted: {string.Join(" / ", acceptedInvoicesNumbers.Select(n => $"#{n}"))}\n" +
+                $"Rejected: {string.Join(" / ", rejectedInvoicesNumbers.Select(n => $"#{n}"))}";
+
+            var finalResponse = new SubmitDocumentsResponseDTO()
+            {
+                IsAllSuccess = rejectedInvoicesNumbers.Count() == 0,
+                IsAllFailure = acceptedInvoicesNumbers.Count() == 0,
+                ResponseMessage = responseMsg
+            };
+
+            return finalResponse;
         }
     }
 }
