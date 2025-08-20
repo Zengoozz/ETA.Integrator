@@ -50,7 +50,9 @@ const InvoicesTable = ({
          .then((response) => {
             notificationApi.open({
                type: "success",
-               content: response.responseMessage,
+               message: (
+                  <span dangerouslySetInnerHTML={{ __html: response.responseMessage.replace(/\n/g, "<br/>") }} />
+               ),
                duration: 0,
             });
          })

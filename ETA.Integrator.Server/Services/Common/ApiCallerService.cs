@@ -102,8 +102,11 @@ namespace ETA.Integrator.Server.Services.Common
             var acceptedInvoicesNumbers = providerInvoices.Where(i => acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
             var rejectedInvoicesNumbers = providerInvoices.Where(i => !acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
 
-            var responseMsg = $"Accepted: {string.Join(" / ", acceptedInvoicesNumbers.Select(n => $"#{n}"))}\n" +
-                $"Rejected: {string.Join(" / ", rejectedInvoicesNumbers.Select(n => $"#{n}"))}";
+            var responseMsg = acceptedInvoicesNumbers.Count() == 0 ? $"Accepted: NONE\n"
+                : $"Accepted: {string.Join(" / ", acceptedInvoicesNumbers.Select(n => $"#{n}"))}\n";
+
+            responseMsg += rejectedInvoicesNumbers.Count() == 0 ? $"Rejected: {string.Join(" / ", rejectedInvoicesNumbers.Select(n => $"#{n}"))}"
+                : $"Rejected: {string.Join(" / ", rejectedInvoicesNumbers.Select(n => $"#{n}"))}";
 
             var finalResponse = new SubmitDocumentsResponseDTO()
             {
