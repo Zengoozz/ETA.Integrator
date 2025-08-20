@@ -46,4 +46,8 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Data\ETA_DB.db" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
