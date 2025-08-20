@@ -38,7 +38,7 @@ namespace ETA.Integrator.Server.Controllers
         {
             var response = await _apiCallerService.SubmitDocuments(invoicesList);
 
-            return StatusCode(response.StatusCode, response.Message);
+            return Ok(response);
         }
 
         [HttpGet("GetRecent")]

@@ -47,10 +47,10 @@ namespace ETA.Integrator.Server.Services.Common
 
             var request = _requestFactoryService.ConnectToProvider(model);
             var response = await _httpRequestSenderService.SendRequest(request);
-            var processedResponse = await _responseProcessorService.ConnectToProvider(response);
+            var processedResponse = await _responseProcessorService.ProcessResponse<ProviderLoginResponseModel>(response);
 
             _customConfig.Provider_Token = processedResponse.Token ?? "";
-            
+
             return processedResponse;
         }
 
@@ -58,9 +58,9 @@ namespace ETA.Integrator.Server.Services.Common
         {
             var request = await _requestFactoryService.ConnectToConsumer(model);
             var response = await _httpRequestSenderService.SendRequest(request);
-            var processedResponse = await _responseProcessorService.ConnectToConsumer(response);
+            var processedResponse = await _responseProcessorService.ProcessResponse<ConsumerConnectionResponseModel>(response);
 
-            if(string.IsNullOrEmpty(processedResponse.access_token))
+            if (string.IsNullOrEmpty(processedResponse.access_token))
                 throw new ProblemDetailsException(
                     StatusCodes.Status401Unauthorized,
                     "AUTH_FAILED",
@@ -76,7 +76,7 @@ namespace ETA.Integrator.Server.Services.Common
         {
             var request = _requestFactoryService.GetProviderInvoices(fromDate, toDate, invoiceType);
             var response = await _httpRequestSenderService.SendRequest(request);
-            var processedResponse = await _responseProcessorService.GetProviderInvoices(response);
+            var processedResponse = await _responseProcessorService.ProcessResponse<List<ProviderInvoiceViewModel>>(response);
 
             if (processedResponse.Count() > 0)
                 await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
@@ -88,17 +88,15 @@ namespace ETA.Integrator.Server.Services.Common
         {
             var request = _requestFactoryService.GetRecentDocuments();
             var response = await _httpRequestSenderService.SendRequest(request);
-            return await _responseProcessorService.GetRecentDocuments(response);
+            return await _responseProcessorService.ProcessResponse<GetRecentDocumentsResponseDTO>(response);
         }
 
-        public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(List<ProviderInvoiceViewModel> providerInvoices)
+        public async Task<SuccessfulResponseDTO> SubmitDocuments(List<ProviderInvoiceViewModel> providerInvoices)
         {
             var request = await _requestFactoryService.SubmitDocuments(providerInvoices);
             var response = await _httpRequestSenderService.SendRequest(request);
-            var processedResponse = await _responseProcessorService.SubmitDocuments(response);
-
-            if (processedResponse.IsSuccess)
-                await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse.SuccessfulResponseDTO);
+            var processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
+            await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse);
 
             return processedResponse;
         }

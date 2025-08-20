@@ -9,10 +9,6 @@ namespace ETA.Integrator.Server.Interface.Services.Common
 {
     public interface IResponseProcessorService
     {
-        Task<ProviderLoginResponseModel> ConnectToProvider(RestResponse response);
-        Task<ConsumerConnectionResponseModel> ConnectToConsumer(RestResponse response);
-        Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(RestResponse response);
-        Task<GetRecentDocumentsResponseDTO> GetRecentDocuments(RestResponse response);
-        Task<SubmitDocumentsResponseDTO> SubmitDocuments(RestResponse response);
+        Task<T> ProcessResponse<T>(RestResponse response) where T : new();
     }
 }

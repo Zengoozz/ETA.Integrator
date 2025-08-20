@@ -1,276 +1,99 @@
 ﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
+using ETA.Integrator.Server.Helpers;
 using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Provider.Response;
 using RestSharp;
+using System.Collections.Generic;
+using System.Net;
 using System.Text.Json;
 
 namespace ETA.Integrator.Server.Services.Common
 {
     public class ResponseProcessorService : IResponseProcessorService
     {
-        public Task<ProviderLoginResponseModel> ConnectToProvider(RestResponse response)
+        public Task<T> ProcessResponse<T>(RestResponse response) where T : new()
         {
-            ProviderLoginResponseModel? serializedResponse = new();
+            ValidateResponse(response);
 
-            if (response is not null && response.Content is not null && response.IsSuccessful)
+            T serializedResponse = GenericHelpers.JsonDeserialize<T>(response.Content ?? "");
+
+            if (typeof(T) == typeof(ProviderLoginResponseModel))
             {
-                try
-                {
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNameCaseInsensitive = true
-                    };
+                var obj = serializedResponse as ProviderLoginResponseModel;
 
-                    serializedResponse = JsonSerializer.Deserialize<ProviderLoginResponseModel>(response.Content, options);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("JSON Error: " + ex.Message);
-                    throw;
-                }
-
-                if (serializedResponse is null)
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZATION_FAILED",
-                        detail: "Could not serialize the response."
-                        );
-
-                if (serializedResponse.IsError)
+                if (obj is not null && obj.IsError)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status401Unauthorized,
                         message: "UNAUTHORIZED",
-                        detail: String.IsNullOrEmpty(serializedResponse.Message) ? "No further details" : serializedResponse.Message
+                        detail: String.IsNullOrEmpty(obj.Message) ? "No further details" : obj.Message
                         );
             }
+
+            return Task.FromResult(serializedResponse!);
+        }
+        private static void ValidateResponse(RestResponse response)
+        {
+            if (response is null || response.Content is null)
+            {
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: response is null ? "RESPONSE_NULL" : "CONTENT_NULL",
+                    detail: response is null ? "No response to process" : response.ErrorMessage ?? "Content of the response is not available for unknown reason"
+                    );
+            }
+
+            if ((response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Accepted) && response.IsSuccessStatusCode)
+                return;
             else
             {
-                throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "LOGIN_FAILED",
-                        detail: response?.ErrorMessage ?? serializedResponse.Message
-                        );
-            }
+                var errDetail = response.Content ?? response.ErrorMessage ?? "Response failed";
 
-            return Task.FromResult(serializedResponse);
-        }
-        public Task<ConsumerConnectionResponseModel> ConnectToConsumer(RestResponse response)
-        {
-            ConsumerConnectionResponseModel? serializedResponse = new();
+                if (response.StatusCode == HttpStatusCode.Forbidden || response.StatusCode == HttpStatusCode.Unauthorized)
+                {// FORBIDDEN OR UNAUHORIZED
+                    errDetail = response.Content ?? response.ErrorMessage ?? ((int)response.StatusCode == StatusCodes.Status403Forbidden ? "Needs permissions to do the request" : "Unauthorized to do the request");
 
-            if (response is null || response.Content is null || !response.IsSuccessful)
-            {
-                var detailMsg = response is null || response.Content is null ? "No response to process" : "API response failure";
-
-                throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "RESPONSE_ERR",
-                        detail: detailMsg
-                        );
-            }
-
-            try
-            {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true
-                };
-
-                serializedResponse = JsonSerializer.Deserialize<ConsumerConnectionResponseModel>(response.Content, options);
-            }
-            catch (JsonException)
-            {
-                throw;
-            }
-
-            if (serializedResponse is null)
-                throw new ProblemDetailsException(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SERIALIZATION_FAILED",
-                    detail: "Could not serialize the response."
-                    );
-
-            return Task.FromResult(serializedResponse);
-
-        }
-        public Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(RestResponse response)
-        {
-            List<ProviderInvoiceViewModel>? serializedResponse = new();
-            if (response != null && (int)response.StatusCode == StatusCodes.Status200OK && response.Content != null)
-            {
-                try
-                {
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNameCaseInsensitive = true
-                    };
-
-                    serializedResponse = JsonSerializer.Deserialize<List<ProviderInvoiceViewModel>>(response.Content, options);
-                }
-                catch (JsonException)
-                {
-                    throw;
-                }
-            }
-            else
-            {
-                throw new ProblemDetailsException(
-                   (int?)response?.StatusCode ?? StatusCodes.Status500InternalServerError,
-                   "PROVIDER_SERVER_ERR",
-                    response?.Content ?? "response content is null"
-                   );
-            }
-
-            if (serializedResponse is null)
-                throw new ProblemDetailsException(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SERIALIZATION_FAILED",
-                    detail: "Could not serialize the response."
-                    );
-
-
-            return Task.FromResult(serializedResponse);
-        }
-        public Task<GetRecentDocumentsResponseDTO> GetRecentDocuments(RestResponse response)
-        {
-            GetRecentDocumentsResponseDTO? serializedResponse = new();
-
-            if (response is null || !response.IsSuccessful || (int)response.StatusCode != StatusCodes.Status200OK || response.Content is null)
-            {
-                if (response is null)
                     throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "BAD_PARAMS",
-                        detail: "No response to process."
+                        (int)response.StatusCode,
+                        (int)response.StatusCode == StatusCodes.Status403Forbidden ? "NEED_PERMISSIONS" : "UNAUTHORIZED",
+                        errDetail
                         );
-
-                else if ((int)response.StatusCode == StatusCodes.Status403Forbidden)
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status403Forbidden,
-                        message: "CONSUMER_FAILURE",
-                        detail: response.ErrorMessage ?? response.Content ?? "Unexpected error"
-                        );
-
-                else
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "UNKNOWN",
-                        detail: response.ErrorMessage ?? response.Content ?? "Unexpected error"
-                        );
-            }
-
-            if ((int)response.StatusCode == StatusCodes.Status200OK)
-            {
-                try
-                {
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNameCaseInsensitive = true
-                    };
-
-                    serializedResponse = JsonSerializer.Deserialize<GetRecentDocumentsResponseDTO>(response.Content, options);
                 }
-                catch (JsonException)
-                {
-                    throw;
-                }
-            }
 
-            if (serializedResponse is null)
-                throw new ProblemDetailsException(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SERIALIZATION_FAILED",
-                    detail: "Could not serialize the response."
-                    );
+                if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
+                {// UNPROCESSABLE ENTITY
+                    errDetail = "Unexpected error";
 
-            return Task.FromResult(serializedResponse);
-        }
-        public Task<SubmitDocumentsResponseDTO> SubmitDocuments(RestResponse response)
-        {
-            if (response is null)
-                throw new ProblemDetailsException(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    message: "BAD_PARAMS",
-                    detail: "No response to process."
-                    );
-
-            if ((int)response.StatusCode == StatusCodes.Status422UnprocessableEntity)
-            {
-                var errDetails = "Unexpected error";
-
-                if (response.Headers is not null && response.Headers.Count > 0)
-                {
-                    var retryAfterHeader = response.Headers
-                        .FirstOrDefault(h => h.Name.Equals("Retry-After", StringComparison.OrdinalIgnoreCase));
-
-                    if (retryAfterHeader is not null && retryAfterHeader.Value is not null)
+                    if (response.Headers is not null && response.Headers.Count > 0)
                     {
-                        var seconds = Int32.Parse(retryAfterHeader.Value);
-                        var minutes = seconds / 60;
-                        var durationPart = minutes == 0 ? $"{seconds} seconds." : $"{minutes} minutes.";
-                        errDetails = $"This invoice has been sent within the last 10 minutes. Try again in {durationPart}";
+                        var retryAfterHeader = response.Headers
+                            .FirstOrDefault(h => h.Name.Equals("Retry-After", StringComparison.OrdinalIgnoreCase));
+
+                        if (retryAfterHeader is not null && retryAfterHeader.Value is not null)
+                        {
+                            var seconds = Int32.Parse(retryAfterHeader.Value);
+                            var minutes = seconds / 60;
+                            var durationPart = minutes == 0 ? $"{seconds} seconds." : $"{minutes} minutes.";
+                            errDetail = $"This invoice has been sent within the last 10 minutes. Try again in {durationPart}";
+                        }
                     }
+
+                    throw new ProblemDetailsException(
+                        StatusCodes.Status422UnprocessableEntity,
+                        "UNPROCESSABLE_CONTENT",
+                        errDetail
+                        );
                 }
 
                 throw new ProblemDetailsException(
-                    StatusCodes.Status422UnprocessableEntity,
-                    "UNPROCESSABLE_CONTENT",
-                    errDetails
+                    (int?)response.StatusCode ?? StatusCodes.Status500InternalServerError,
+                    "RESPONSE_FAILED",
+                    errDetail
                     );
             }
-
-
-            SubmitDocumentsResponseDTO responseDTO = new SubmitDocumentsResponseDTO();
-
-            if ((int)response.StatusCode == StatusCodes.Status202Accepted && response.Content != null)
-            {
-                SuccessfulResponseDTO? serializedResponse = new();
-
-                try
-                {
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        PropertyNameCaseInsensitive = true
-                    };
-
-                    serializedResponse = JsonSerializer.Deserialize<SuccessfulResponseDTO>(response.Content, options);
-                }
-                catch (JsonException)
-                {
-                    throw;
-                }
-
-                if (serializedResponse is null)
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZATION_FAILED",
-                        detail: "Could not serialize the response."
-                        );
-                else
-                {
-                    responseDTO.SuccessfulResponseDTO = serializedResponse;
-                    responseDTO.StatusCode = (int)response.StatusCode;
-                    responseDTO.IsSuccess = true;
-                }
-
-            }
-            else
-            {
-                responseDTO.IsSuccess = false;
-                responseDTO.StatusCode = (int)response.StatusCode;
-                responseDTO.Message = response.ErrorMessage ?? "";
-            }
-
-            return Task.FromResult(responseDTO);
         }
     }
 }
