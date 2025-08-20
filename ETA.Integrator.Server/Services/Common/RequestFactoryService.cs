@@ -8,6 +8,7 @@ using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Provider.Requests;
+using Microsoft.Extensions.Options;
 using RestSharp;
 using System.Net;
 
@@ -15,16 +16,16 @@ namespace ETA.Integrator.Server.Services.Common
 {
     public class RequestFactoryService : IRequestFactoryService
     {
-        private readonly ILogger<RequestFactoryService> _logger;
+        private readonly CustomConfigurations _customConfig;
         private readonly ISettingsStepService _settingsStepService;
         private readonly ISignatureConsumerService _signatureConsumerService;
         public RequestFactoryService(
-            ILogger<RequestFactoryService> logger,
+            IOptions<CustomConfigurations> customConfig,
             ISettingsStepService settingsStepService,
             ISignatureConsumerService signatureConsumerService
             )
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _customConfig = customConfig.Value;
             _settingsStepService = settingsStepService ?? throw new ArgumentNullException(nameof(_settingsStepService));
             _signatureConsumerService = signatureConsumerService;
         }
@@ -125,9 +126,14 @@ namespace ETA.Integrator.Server.Services.Common
         private InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin)
         {
 
-            //TODO: Validate the invoices data integrity
+            //TODO: Rework this
+            var url = _customConfig.Consumer_APIBaseUrl;
+            string[] parts = url.Split('.');
+            bool isProduction = false;
+            if (parts.Length > 1)
+                isProduction = parts[1] != "preprod";
 
-            InvoiceModel document = invoiceViewModel.FromViewModel(issuer);
+            InvoiceModel document = invoiceViewModel.FromViewModel(issuer, isProduction);
 
             //_signatureConsumerService.SignDocument(document, tokenPin);
 

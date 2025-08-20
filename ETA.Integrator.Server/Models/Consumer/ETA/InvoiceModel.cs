@@ -34,14 +34,36 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
 
     public static class InvoiceModelMapper
     {
-        public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer)
+        public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer, bool isProduction = false)
         {
             if (viewModel is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status400BadRequest,
-                    message: "InvoiceModelMapper/FromViewModel: PROVIDER_INVOICE_NULL",
+                    message: "PROVIDER_INVOICE_NULL",
                     detail: "Mapping provider invoice to the consumer invoice failed!"
                     );
+
+            if (viewModel.RegistrationNumber == "NOT_FOUND" || string.IsNullOrEmpty(viewModel.RegistrationNumber))
+                throw new ProblemDetailsException(
+                   statusCode: StatusCodes.Status400BadRequest,
+                   message: "NOT_FOUND",
+                   detail: $"Invoice #{viewModel.InvoiceNumber}: Reciever (${viewModel.ReceiverName}) has no registeration number."
+                   );
+
+            var listOfNeededProps = new List<string> { "Country", "Governate", "RegionCity", "Street", "BuildingNumber" };
+
+            var receiverAddressObjDict = viewModel.ReceiverAddress.GetType()
+                 .GetProperties()
+                 .ToDictionary(p => p.Name, p => p.GetValue(viewModel.ReceiverAddress));
+
+            var isAddressCorrupt = receiverAddressObjDict.Any(d => listOfNeededProps.Contains(d.Key) && d.Value is null);
+
+            if (isAddressCorrupt)
+                throw new ProblemDetailsException(
+                       statusCode: StatusCodes.Status400BadRequest,
+                       message: "INVALID",
+                       detail: $"Invoice #{viewModel.InvoiceNumber}: Reciever ({viewModel.ReceiverName}) has invalid address."
+                       );
 
             return new InvoiceModel
             {
@@ -49,14 +71,14 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 Receiver = new ReceiverModel
                 {
                     Type = "B",
-                    Id = viewModel.RegistrationNumber == "NOT_FOUND" ? "313717919" : viewModel.RegistrationNumber,
+                    Id = viewModel.RegistrationNumber,
                     Name = viewModel.ReceiverName,
                     Address = viewModel.ReceiverAddress
                 },
                 TaxTotals = new List<TaxTotalModel>(),
                 Signatures = new List<SignatureModel>(),
                 DocumentType = "i",
-                DocumentTypeVersion = "0.9",
+                DocumentTypeVersion = isProduction ? "1.0" : "0.9",
                 DateTimeIssued = GenericHelpers.GetCurrentUTCTime(-1),
                 TaxpayerActivityCode = "8610",
                 InternalID = viewModel.InvoiceId.ToString(),
@@ -83,14 +105,14 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 TotalDiscountAmount = 0, // Based on the Sum of InvoiceLines Discount.Amount
                 ExtraDiscountAmount = 0,
                 TotalItemsDiscountAmount = 0, // Based on the Sum of TotalDiscountAmount and ExtraDiscountAmount
-                //document.purchaseOrderReference = ; // OPTIONAL
-                //document.purchaseOrderDescription = ; // OPTIONAL
-                //document.salesOrderReference = ; // OPTIONAL
-                //document.salesOrderDescription = ; // OPTIONAL
-                //document.proformaInvoiceNumber = ; // OPTIONAL
-                //document.payment = ; // OPTIONAL
-                //document.delivery = ; // OPTIONAL
-                //document.ServiceDeliveryDate = ; //OPTIONAL
+                                              //document.purchaseOrderReference = ; // OPTIONAL
+                                              //document.purchaseOrderDescription = ; // OPTIONAL
+                                              //document.salesOrderReference = ; // OPTIONAL
+                                              //document.salesOrderDescription = ; // OPTIONAL
+                                              //document.proformaInvoiceNumber = ; // OPTIONAL
+                                              //document.payment = ; // OPTIONAL
+                                              //document.delivery = ; // OPTIONAL
+                                              //document.ServiceDeliveryDate = ; //OPTIONAL
             };
         }
     }
