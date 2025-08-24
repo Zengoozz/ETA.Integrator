@@ -366,3 +366,4 @@ FodyWeavers.xsd
 /ETA.Integrator.Server/Data/ETA_DB.db-wal
 
 /ETA.Integrator.Server/Data/ETA_DB.*
+/ETA.Integrator.Server/wwwroot
