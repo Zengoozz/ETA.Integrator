@@ -1,5 +1,5 @@
 ﻿using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Interface.Services;
+using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Core;
 using MediatR;
@@ -16,12 +16,12 @@ using System.Text;
 using System.Text.Json;
 using ISession = Net.Pkcs11Interop.HighLevelAPI.ISession;
 
-namespace ETA.Integrator.Server.Services
+namespace ETA.Integrator.Server.Services.Consumer
 {
-    public class SignatureService : ISignatureService
+    public class SignatureConsumerService : ISignatureConsumerService
     {
-        private readonly ILogger<SignatureService> _logger;
-        public SignatureService(ILogger<SignatureService> logger)
+        private readonly ILogger<SignatureConsumerService> _logger;
+        public SignatureConsumerService(ILogger<SignatureConsumerService> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -32,7 +32,7 @@ namespace ETA.Integrator.Server.Services
                 if (request is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZE_TOKEN_INTERNAL_ERR",
+                        message: "BAD_PARAMS",
                         detail: "Signature/SerializeToken: Serialize token failed (request)."
                         );
 
@@ -41,7 +41,7 @@ namespace ETA.Integrator.Server.Services
                     if (request.First is null)
                         throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SERIALIZE_TOKEN_INTERNAL_ERR",
+                        message: "BAD_PARAMS",
                         detail: "Signature/SerializeToken: Serialize token failed (parent)."
                         );
 
@@ -117,8 +117,8 @@ namespace ETA.Integrator.Server.Services
                 _logger.LogError("SignatureService/GenerateCanonicalString: Serialized JSON data is required.");
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "CANONICAL_INTERNAL_ERR",
-                    detail: "SignatureService/GenerateCanonicalString: Serialized JSON data is required."
+                    message: "SignatureService/GenerateCanonicalString: BAD_PARAMS",
+                    detail: "Serialized JSON data is required."
                     );
             }
 
@@ -137,8 +137,8 @@ namespace ETA.Integrator.Server.Services
                     _logger.LogError("SignatureService/GenerateCanonicalString: Request object is null");
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "CANONICAL_INTERNAL_ERR",
-                        detail: "SignatureService/GenerateCanonicalString: Deserialized object is null (request)."
+                        message: "SignatureService/GenerateCanonicalString: SERIALIZATION_FAILED",
+                        detail: "Deserialized object has no value (request)."
                         );
                 }
                 else
@@ -163,8 +163,8 @@ namespace ETA.Integrator.Server.Services
                 if (pkcs11Library is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "PKCS_LIB_INTERNAL_ERR",
-                        detail: "SignatureService/LoadPkcsLibrary: Library is null."
+                        message: "SignatureService/LoadPkcsLibrary: PKCS_LIB_INTERNAL_ERR",
+                        detail: "Library has no value."
                         );
                 else
                     return pkcs11Library;
@@ -174,8 +174,8 @@ namespace ETA.Integrator.Server.Services
                 _logger.LogError("SignatureService/LoadPkcsLibrary: " + ex.Message);
                 throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "PKCS_LIB_LOADING_ERR",
-                        detail: "SignatureService/LoadPkcsLibrary:" + ex.Message
+                        message: "SignatureService/LoadPkcsLibrary: PKCS_LIB_LOADING_ERR",
+                        detail: "Unexpected error"
                         );
             }
         }
@@ -188,8 +188,8 @@ namespace ETA.Integrator.Server.Services
                 if (slot is null)
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SLOTS_INTERNAL_ERR",
-                        detail: "SignatureService/OpenSession: No slots found."
+                        message: "SignatureService/OpenSession: SLOTS_INTERNAL_ERR",
+                        detail: "No slots found."
                         );
                 else
                 {
@@ -198,8 +198,8 @@ namespace ETA.Integrator.Server.Services
                     if (session is null)
                         throw new ProblemDetailsException(
                             statusCode: StatusCodes.Status500InternalServerError,
-                            message: "SESSION_INTERNAL_ERR",
-                            detail: "SignatureService/OpenSession: Session is null."
+                            message: "SignatureService/OpenSession: SESSION_INTERNAL_ERR",
+                            detail: "Session has no value."
                             );
                     else
                         return session;
@@ -210,8 +210,8 @@ namespace ETA.Integrator.Server.Services
                 _logger.LogError("SignatureService/OpenSession: " + ex.Message);
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SLOTS_INTERNAL_ERR",
-                    detail: "SignatureService/OpenSession: " + ex.Message
+                    message: "SignatureService/OpenSession: SLOTS_INTERNAL_ERR",
+                    detail: "Unexpected error"
                     );
             }
         }
@@ -233,8 +233,8 @@ namespace ETA.Integrator.Server.Services
                 _logger.LogError("SignatureService/TokenLogin: " + ex.Message);
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "TOKEN_LOGIN_ERR",
-                    detail: "SignatureService/TokenLogin: " + ex.Message
+                    message: "SignatureService/TokenLogin: TOKEN_LOGIN_ERR",
+                    detail: "Unexpected error"
                     );
             }
         }
@@ -253,8 +253,8 @@ namespace ETA.Integrator.Server.Services
                 if (certificate is null)
                     throw new ProblemDetailsException(
                        statusCode: StatusCodes.Status500InternalServerError,
-                       message: "CERT_INTERNAL_ERR",
-                       detail: "SignatureService/FindCertificate: No certificate found."
+                       message: "SignatureService/FindCertificate: CERT_INTERNAL_ERR",
+                       detail: "No certificate found."
                        );
                 else
                     return certificate;
@@ -264,8 +264,8 @@ namespace ETA.Integrator.Server.Services
                 _logger.LogError("SignatureService/FindCertificate: " + ex.Message);
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "CERT_INTERNAL_ERR",
-                    detail: "SignatureService/FindCertificate: " + ex.Message
+                    message: "SignatureService/FindCertificate: CERT_INTERNAL_ERR",
+                    detail: "Unexpected error"
                     );
             }
         }
@@ -281,8 +281,8 @@ namespace ETA.Integrator.Server.Services
                 if (foundCerts[0] is null)
                     throw new ProblemDetailsException(
                       statusCode: StatusCodes.Status500InternalServerError,
-                      message: "STORE_CERT_INTERNAL_ERR",
-                      detail: "SignatureService/FindCertificateInStore: No matching certificate found."
+                      message: "SignatureService/FindCertificateInStore: STORE_CERT_INTERNAL_ERR",
+                      detail: "No matching certificate found."
                       );
                 else
                     return foundCerts[0];
@@ -292,8 +292,8 @@ namespace ETA.Integrator.Server.Services
                 _logger.LogError("SignatureService/FindCertificateInStore: " + ex.Message);
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "STORE_CERT_INTERNAL_ERR",
-                    detail: "SignatureService/FindCertificateInStore: " + ex.Message
+                    message: "SignatureService/FindCertificateInStore: STORE_CERT_INTERNAL_ERR",
+                    detail: "Unexpected error"
                     );
             }
         }
@@ -303,7 +303,7 @@ namespace ETA.Integrator.Server.Services
             {
                 ContentInfo content = new ContentInfo(new Oid("1.2.840.113549.1.7.5"), data);
 
-                EssCertIDv2 bouncyCertificate = new EssCertIDv2(new Org.BouncyCastle.Asn1.X509.AlgorithmIdentifier(new DerObjectIdentifier("1.2.840.113549.1.9.16.2.47")), this.HashBytes(certificateForSigning.RawData));
+                EssCertIDv2 bouncyCertificate = new EssCertIDv2(new Org.BouncyCastle.Asn1.X509.AlgorithmIdentifier(new DerObjectIdentifier("1.2.840.113549.1.9.16.2.47")), HashBytes(certificateForSigning.RawData));
                 SigningCertificateV2 signerCertificateV2 = new SigningCertificateV2(new EssCertIDv2[] { bouncyCertificate });
 
                 CmsSigner signer = new CmsSigner(certificateForSigning);
@@ -320,8 +320,8 @@ namespace ETA.Integrator.Server.Services
                 _logger.LogError("SignatureService/CreateSignedCms: " + ex.Message);
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "CMS_INTERNAL_ERR",
-                    detail: "SignatureService/CreateSignedCms: " + ex.Message
+                    message: "SignatureService/CreateSignedCms: CMS_INTERNAL_ERR",
+                    detail: "Unexpected error"
                     );
             }
         }
@@ -336,8 +336,8 @@ namespace ETA.Integrator.Server.Services
                 _logger.LogError("SignatureService/ComputeSignature: " + ex.Message);
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SIGNATURE_COMPUTE_ERR",
-                    detail: "SignatureService/ComputeSignature: " + ex.Message
+                    message: "SignatureService/ComputeSignature: SIGNATURE_COMPUTE_ERR",
+                    detail: "Unexpected error"
                     );
             }
         }
@@ -355,8 +355,8 @@ namespace ETA.Integrator.Server.Services
                 _logger.LogError("SignatureService/HashBytes: " + ex.Message);
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "HASH_BYTES_ERR",
-                    detail: "SignatureService/HashBytes: " + ex.Message
+                    message: "SignatureService/HashBytes: HASH_BYTES_ERR",
+                    detail: "Unexpected error"
                     );
             }
         }

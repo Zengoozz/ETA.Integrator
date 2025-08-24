@@ -4,32 +4,38 @@ using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Models.Core;
 using RestSharp;
+using ETA.Integrator.Server.Interface.Services.Consumer;
+using ETA.Integrator.Server.Interface.Services.Common;
 
-namespace ETA.Integrator.Server.Services
+namespace ETA.Integrator.Server.Services.Common
 {
-    public class ConsumerService : IConsumerService
+    public class RequestFactoryService : IRequestFactoryService
     {
-        private readonly ILogger<ConsumerService> _logger;
+        private readonly ILogger<RequestFactoryService> _logger;
         private readonly ISettingsStepService _settingsStepService;
-        private readonly ISignatureService _signatureService;
-        public ConsumerService(ILogger<ConsumerService> logger, ISettingsStepService settingsStepService, ISignatureService signatureService)
+        private readonly ISignatureConsumerService _signatureConsumerService;
+        public RequestFactoryService(
+            ILogger<RequestFactoryService> logger,
+            ISettingsStepService settingsStepService,
+            ISignatureConsumerService signatureConsumerService
+            )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settingsStepService = settingsStepService ?? throw new ArgumentNullException(nameof(_settingsStepService));
-            _signatureService = signatureService;
+            _signatureConsumerService = signatureConsumerService;
         }
 
         #region SUBMIT INVOICE
-        public async Task<RestRequest> SubmitInvoiceRequest(List<ProviderInvoiceViewModel> invoicesList)
+        public async Task<RestRequest> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
         {
             List<InvoiceModel> documents = new List<InvoiceModel>();
 
             var connectionSettings = await _settingsStepService.GetConnectionData();
 
-            if (String.IsNullOrWhiteSpace(connectionSettings.TokenPin))
+            if (connectionSettings is null || string.IsNullOrWhiteSpace(connectionSettings.TokenPin))
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
-                    message: "TOKEN_PIN_NOT_FOUND",
+                    message: "RequestFactoryService/SubmitDocuments: TOKEN_PIN_NOT_FOUND",
                     detail: "Token pin not found."
                     );
 
@@ -37,18 +43,21 @@ namespace ETA.Integrator.Server.Services
 
             IssuerDTO? issuerData = await _settingsStepService.GetIssuerData();
 
-            if (issuerData == null)
+            if (issuerData is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
-                    message: "ISSUER_NOT_FOUND",
+                    message: "RequestFactoryService/SubmitDocuments: ISSUER_NOT_FOUND",
                     detail: "Issuer data not found."
                     );
 
             IssuerModel? issuer = issuerData.FromDTO();
 
-            if (issuer == null)
-                throw new Exception("Issuer mapping failed");
-
+            if (issuer is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "RequestFactoryService/SubmitDocuments: ISSUER_MAPPING_FAILED",
+                    detail: "Issuer mapping failed"
+                    );
             #endregion
 
             #region INVOICE_PREP
@@ -67,7 +76,7 @@ namespace ETA.Integrator.Server.Services
             };
 
             var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
-                .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
+                            .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
             #endregion
 
             return submitRequest;
@@ -75,16 +84,19 @@ namespace ETA.Integrator.Server.Services
 
         private InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin)
         {
+
+            //TODO: Validate the invoices data integrity
+
             InvoiceModel document = invoiceViewModel.FromViewModel(issuer);
 
-            _signatureService.SignDocument(document, tokenPin);
+            //_signatureConsumerService.SignDocument(document, tokenPin);
 
             return document;
         }
 
         #endregion
 
-        public RestRequest GetRecentDocumentsRequest()
+        public RestRequest GetRecentDocuments()
         {
             DateTime utcNow = DateTime.UtcNow;
 
@@ -106,6 +118,26 @@ namespace ETA.Integrator.Server.Services
                 .AddQueryParameter("submissionDateFrom", trimmedUtcNow.AddMonths(-1).ToString())
                 .AddQueryParameter("submissionDateTo", trimmedUtcNow.ToString())
                 .AddQueryParameter("documentType", "i");
+
+            return request;
+        }
+
+        public RestRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
+        {
+            var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
+
+            if (fromDate != null && toDate != null && !string.IsNullOrWhiteSpace(invoiceType))
+            {
+                request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
+                    .AddParameter("toDate", toDate, ParameterType.QueryString)
+                    .AddParameter("invoiceType", invoiceType, ParameterType.QueryString);
+            }
+            else
+                throw new ProblemDetailsException(
+                    StatusCodes.Status400BadRequest,
+                    "RequestFactoryService/GetProviderInvoices: INVALID_PARAMS",
+                    "Please provide fromDate, toDate and invoiceType parameters."
+                    );
 
             return request;
         }

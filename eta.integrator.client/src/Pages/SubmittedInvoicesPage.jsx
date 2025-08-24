@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Card, message } from "antd";
+import { Card, message, notification } from "antd";
 import { LeftCircleOutlined } from "@ant-design/icons";
+
 
 import InvoicesTable from "../Components/InvoicesTable";
 
@@ -14,6 +15,7 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
    const [loading, setLoading] = useState(false);
    const [tableData, setTableData] = useState([]); // State to hold table data
    const [messageApi, contextHolder] = message.useMessage();
+   const [notificationApi, contextHolderNotification] = notification.useNotification();
    const navigate = useNavigate();
 
    useEffect(() => {
@@ -29,9 +31,12 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
          try {
             const response = await InvoicesService.getSubmittedInvoices();
             setTableData(response.result);
-         } catch (err) {
-            messageApi.error("Failed to fetch recent documents");
-            console.log("Failed to fetch recent documents", err);
+         } catch (error) {
+            notificationApi.error({
+               message: error.detail,
+               duration: 0,
+            });
+            console.error(error.message);
          } finally {
             loadingMessage(); // Close the loading message
             setLoading(false); // End loading
@@ -39,11 +44,12 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
       };
 
       fetchTableData();
-   }, [messageApi]);
+   }, [messageApi, notificationApi]);
 
    return (
       <>
          {contextHolder}
+         {contextHolderNotification}
          <Card style={{ width: "100%" }}>
             <CustomButton
                name="Invoices"

@@ -1,8 +1,12 @@
 ﻿using ETA.Integrator.Server.Data;
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Interface.Services;
+using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Repositories;
 using ETA.Integrator.Server.Services;
+using ETA.Integrator.Server.Services.Common;
+using ETA.Integrator.Server.Services.Consumer;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETA.Integrator.Server.Extensions
@@ -12,18 +16,25 @@ namespace ETA.Integrator.Server.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddTransient<ISettingsStepService, SettingsStepService>();
-            services.AddTransient<IConsumerService, ConsumerService>();
-            services.AddTransient<IRequestHandlerService, RequestHandlerService>();
-            services.AddTransient<ISignatureService, SignatureService>();
+            services.AddTransient<IInvoiceSubmissionLogService, InvoiceSubmissionLogService>();
+            services.AddTransient<IRequestFactoryService, RequestFactoryService>();
+            services.AddTransient<IResponseProcessorService, ResponseProcessorService>();
+            services.AddTransient<IApiCallerService, ApiCallerService>();
+            
+            #region ConsumerServices
+            services.AddTransient<ISignatureConsumerService, SignatureConsumerService>();
+            services.AddTransient<IHttpRequestSenderConsumerService, HttpRequestSenderConsumerService>();
+            #endregion
 
             return services;
         }
 
-        public static IServiceCollection AddRepositories(this IServiceCollection services)
+        public static IServiceCollection AddRepositories(this IServiceCollection repos)
         {
-            services.AddScoped<ISettingsStepRepository, SettingsStepRepository>();
+            repos.AddScoped<ISettingsStepRepository, SettingsStepRepository>();
+            repos.AddScoped<IInvoiceSubmissionLogRepository, InvoiceSubmissionLogRepository>();
 
-            return services;
+            return repos;
         }
 
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)

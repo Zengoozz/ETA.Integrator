@@ -5,7 +5,7 @@ import { InvoiceSearchValidationRules, InvoiceTypes } from "../Constants/Constan
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
+const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi, notificationApi }) => {
    const [form] = Form.useForm();
    const [loading, setLoading] = useState(false);
 
@@ -44,20 +44,30 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi }) => {
                invoiceType: invoiceTypeValue,
             };
 
-            return handleSearch(formattedValues).then(() => {
-               messageApi.open({
-                  type: "success",
-                  content: `Showing ${invoiceTypeLabel} from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
-                  duration: 2,
+            return handleSearch(formattedValues)
+               .then(() => {
+                  notificationApi.open({
+                     type: "success",
+                     message: `Showing ${invoiceTypeLabel}`,
+                     description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+                     duration: 3,
+                  });
+               })
+               .catch((error) => {
+                  notificationApi.error({
+                     message: error.detail,
+                     duration: 0,
+                  });
+                  console.error(error.message);
                });
-            });
          })
          .catch((error) => {
             if (error.type === "validation") {
                messageApi.error(error.message);
+               console.error(error.detail);
             } else {
                messageApi.error("Failed to fetch data. Please try again.");
-               console.error("Error:", error);
+               console.error(error.detail);
             }
          })
          .finally(() => {

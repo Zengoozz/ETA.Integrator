@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Flex, Card, message } from "antd";
+import { Flex, Card, message, notification } from "antd";
 import { RightCircleOutlined } from "@ant-design/icons";
 
 import InvoicesTable from "../Components/InvoicesTable";
@@ -12,34 +12,18 @@ import InvoicesService from "../Services/InvoicesService";
 import { ROUTES } from "../Constants/Constants";
 
 const InvoicesPage = ({ isMobile }) => {
-   const [loading, setLoading] = useState(false);
+   // const [loading, setLoading] = useState(false);
    const [tableData, setTableData] = useState([]); // State to hold table data
    const [messageApi, contextHolder] = message.useMessage();
+   const [notificationApi, contextHolderNotification] = notification.useNotification();
    const navigate = useNavigate();
 
    const onSubmit = async (selectedRows) => {
-      const loadingMessage = messageApi.open({
-         type: "loading",
-         content: "Action in progress..",
-         duration: 0,
-      });
-
-      // Start loading
-      setLoading(true);
-
       try {
          await InvoicesService.submitInvoices(selectedRows);
-         messageApi.open({
-            type: "success",
-            content: "Selected rows saved successfully!",
-            duration: 2,
-         });
       } catch (error) {
-         messageApi.error("Failed to save selected rows.");
-         console.error("Error saving selected rows", error);
-      } finally {
-         loadingMessage(); // Close the loading message
-         setLoading(false); // End loading
+         console.error(error.detail);
+         throw error;
       }
    };
 
@@ -51,24 +35,25 @@ const InvoicesPage = ({ isMobile }) => {
          setTableData(response); // Update table data with the response
       } catch (error) {
          console.error("Failed to fetch invoices", error);
+         throw error;
       }
    };
 
    return (
       <>
          {contextHolder}
+         {contextHolderNotification}
          <Card style={{ width: "100%" }}>
             <Flex
                vertical
                gap="middle"
             >
-               <Flex 
-               justify="space-between"
-               >
+               <Flex justify="space-between">
                   <InvoiceSearchForm
                      isMobile={isMobile}
                      handleSearch={handleSearch}
                      messageApi={messageApi}
+                     notificationApi={notificationApi}
                   />
 
                   <CustomButton
@@ -84,8 +69,9 @@ const InvoicesPage = ({ isMobile }) => {
                   isMobile={isMobile}
                   tableData={tableData}
                   onSubmit={onSubmit}
-                  loading={loading}
+                  // loading={loading}
                   messageApi={messageApi}
+                  notificationApi={notificationApi}
                   tableType="W"
                   tableColumns={InvoicesTableColumns}
                />

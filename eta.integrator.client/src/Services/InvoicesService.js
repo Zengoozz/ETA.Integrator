@@ -18,7 +18,7 @@ const submitInvoices = async (invoices) => {
    try {
       const response = await GenericService.makeRequestFactory(
          "POST",
-         "/Invoices/SubmitInvoice",
+         "/Invoices/SubmitDocuments",
          invoices
       );
       console.log(response);

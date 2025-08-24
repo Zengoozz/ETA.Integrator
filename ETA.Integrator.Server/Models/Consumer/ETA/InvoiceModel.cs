@@ -1,4 +1,5 @@
 ﻿using ETA.Integrator.Server.Helpers;
+using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
 
 namespace ETA.Integrator.Server.Models.Consumer.ETA
@@ -35,8 +36,12 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
     {
         public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer)
         {
-            if (viewModel == null)
-                return new InvoiceModel();
+            if (viewModel is null)
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    message: "InvoiceModelMapper/FromViewModel: PROVIDER_INVOICE_NULL",
+                    detail: "Mapping provider invoice to the consumer invoice failed!"
+                    );
 
             return new InvoiceModel
             {
