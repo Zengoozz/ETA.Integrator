@@ -10,7 +10,6 @@ using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Provider.Requests;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using System.Net;
 
 namespace ETA.Integrator.Server.Services.Common
 {
@@ -72,7 +71,7 @@ namespace ETA.Integrator.Server.Services.Common
         }
 
         #region SUBMIT INVOICE
-        public async Task<GenericRequest> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
+        public async Task<GenericRequest> SubmitDocuments(InvoiceRequest request)
         {
             GenericRequest genericRequest = new();
             List<InvoiceModel> documents = new List<InvoiceModel>();
@@ -104,9 +103,9 @@ namespace ETA.Integrator.Server.Services.Common
                     detail: "Issuer mapping failed"
                     );
 
-            foreach (var invoice in invoicesList)
+            foreach (var invoice in request.Invoices)
             {
-                var doc = PrepareInvoiceDetails(invoice, issuer, connectionSettings.TokenPin);
+                var doc = PrepareInvoiceDetails(invoice, issuer, connectionSettings.TokenPin, request.InvoiceType);
 
                 documents.Add(doc);
             }
@@ -123,7 +122,7 @@ namespace ETA.Integrator.Server.Services.Common
             return genericRequest;
         }
 
-        private InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin)
+        private InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin, string invoiceType)
         {
 
             //TODO: Rework this
@@ -133,9 +132,9 @@ namespace ETA.Integrator.Server.Services.Common
             if (parts.Length > 1)
                 isProduction = parts[1] != "preprod";
 
-            InvoiceModel document = invoiceViewModel.FromViewModel(issuer, isProduction);
+            InvoiceModel document = invoiceViewModel.FromViewModel(issuer, invoiceType, isProduction);
 
-            //_signatureConsumerService.SignDocument(document, tokenPin);
+            _signatureConsumerService.SignDocument(document, tokenPin);
 
             return document;
         }

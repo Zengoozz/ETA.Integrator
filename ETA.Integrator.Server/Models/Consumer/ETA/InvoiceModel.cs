@@ -34,7 +34,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
 
     public static class InvoiceModelMapper
     {
-        public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer, bool isProduction = false)
+        public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer, string invoiceType, bool isProduction = false)
         {
             if (viewModel is null)
                 throw new ProblemDetailsException(
@@ -70,7 +70,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 Issuer = issuer,
                 Receiver = new ReceiverModel
                 {
-                    Type = "B",
+                    Type = invoiceType == "I" ? "P" : "B",
                     Id = viewModel.RegistrationNumber,
                     Name = viewModel.ReceiverName,
                     Address = viewModel.ReceiverAddress

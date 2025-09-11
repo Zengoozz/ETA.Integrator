@@ -3,6 +3,7 @@ using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
@@ -91,9 +92,10 @@ namespace ETA.Integrator.Server.Services.Common
             return await _responseProcessorService.ProcessResponse<GetRecentDocumentsResponseDTO>(response);
         }
 
-        public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(List<ProviderInvoiceViewModel> providerInvoices)
+        public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(InvoiceRequest invoices)
         {
-            var request = await _requestFactoryService.SubmitDocuments(providerInvoices);
+            var providerInvoices = invoices.Invoices;
+            var request = await _requestFactoryService.SubmitDocuments(invoices);
             var response = await _httpRequestSenderService.SendRequest(request);
             var processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
             await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse);

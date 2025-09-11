@@ -11,7 +11,7 @@ namespace ETA.Integrator.Server.Interface.Services.Common
     {
         GenericRequest ConnectToProvider(ProviderLoginRequestModel model);
         Task<GenericRequest> ConnectToConsumer(ConnectionDTO? model = null);
-        Task<GenericRequest> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList);
+        Task<GenericRequest> SubmitDocuments(InvoiceRequest request);
         GenericRequest GetRecentDocuments();
         GenericRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType);
     }

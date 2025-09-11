@@ -13,6 +13,7 @@ import { ROUTES } from "../Constants/Constants";
 
 const InvoicesPage = ({ isMobile }) => {
     // const [loading, setLoading] = useState(false);
+    const [invoiceType, setInvoiceType] = useState("I");
     const [tableData, setTableData] = useState([]); // State to hold table data
     const [messageApi, contextHolder] = message.useMessage();
     const [notificationApi, contextHolderNotification] = notification.useNotification();
@@ -20,7 +21,7 @@ const InvoicesPage = ({ isMobile }) => {
 
     const onSubmit = async (selectedRows) => {
         try {
-            return await InvoicesService.submitInvoices(selectedRows);
+            return await InvoicesService.submitInvoices(selectedRows, invoiceType);
         } catch (error) {
             console.error(error.detail);
             throw error;
@@ -32,7 +33,7 @@ const InvoicesPage = ({ isMobile }) => {
             const response = await InvoicesService.getInvoicesAccordingToDateAsQueryParams(
                 values
             );
-
+            setInvoiceType(values.invoiceType);
             setTableData(response); // Update table data with the response
         } catch (error) {
             console.error("Failed to fetch invoices", error);

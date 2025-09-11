@@ -1,4 +1,5 @@
 ﻿using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
@@ -34,9 +35,9 @@ namespace ETA.Integrator.Server.Controllers
         }
 
         [HttpPost("SubmitDocuments")]
-        public async Task<IActionResult> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
+        public async Task<IActionResult> SubmitDocuments(InvoiceRequest request)
         {
-            var response = await _apiCallerService.SubmitDocuments(invoicesList);
+            var response = await _apiCallerService.SubmitDocuments(request);
 
             return Ok(response);
         }
@@ -48,5 +49,7 @@ namespace ETA.Integrator.Server.Controllers
 
             return Ok(response);
         }
+
+        
     }
 }
