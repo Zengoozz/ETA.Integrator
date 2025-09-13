@@ -74,7 +74,7 @@ namespace ETA.Integrator.Server.Services.Common
         public async Task<GenericRequest> SubmitDocuments(InvoiceRequest request)
         {
             GenericRequest genericRequest = new();
-            List<InvoiceModel> documents = new List<InvoiceModel>();
+            List<string> documents = new List<string>();
 
             var connectionSettings = await _settingsStepService.GetConnectionData();
 
@@ -110,19 +110,16 @@ namespace ETA.Integrator.Server.Services.Common
                 documents.Add(doc);
             }
 
-            var requestBody = new
-            {
-                documents
-            };
+            string combinedJson = "{ \"documents\": [" + string.Join(",", documents) + "] }";
 
             genericRequest.Request = new RestRequest("/api/v1/documentsubmissions", Method.Post)
-                            .AddHeader("Content-Type", "application/json").AddJsonBody(requestBody);
+                            .AddHeader("Content-Type", "application/json").AddStringBody(combinedJson , ContentType.Json);
             genericRequest.ClientType = ClientType.Consumer;
 
             return genericRequest;
         }
 
-        private InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin, string invoiceType)
+        private string PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin, string invoiceType)
         {
 
             //TODO: Rework this
@@ -132,11 +129,11 @@ namespace ETA.Integrator.Server.Services.Common
             if (parts.Length > 1)
                 isProduction = parts[1] != "preprod";
 
-            InvoiceModel document = invoiceViewModel.FromViewModel(issuer, invoiceType, isProduction);
-
-            _signatureConsumerService.SignDocument(document, tokenPin);
-
-            return document;
+            var document = invoiceViewModel.FromViewModel(issuer, invoiceType, isProduction);
+            
+            var signedDocument = _signatureConsumerService.SignDocument(document, tokenPin);
+            if (signedDocument == null) throw new Exception("Invoice cannot be empty");
+            return signedDocument;
         }
 
         #endregion

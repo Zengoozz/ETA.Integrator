@@ -8,7 +8,7 @@ namespace ETA.Integrator.Server.Dtos
         public ReceiverModel Receiver { get; set; } = new ReceiverModel();
         public string DocumentType { get; set; } = string.Empty;
         public string DocumentTypeVersion { get; set; } = string.Empty;
-        public DateTime DateTimeIssued { get; set; }
+        public string DateTimeIssued { get; set; } = "";
         public string TaxpayerActivityCode { get; set; } = string.Empty;
         public string InternalID { get; set; } = string.Empty;
         public string PurchaseOrderReference { get; set; } = string.Empty;

@@ -10,7 +10,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
         public ReceiverModel Receiver { get; set; } = new ReceiverModel();
         public string DocumentType { get; set; } = string.Empty; // Must be "i"
         public string DocumentTypeVersion { get; set; } = string.Empty; // Must be "1.0"
-        public DateTime DateTimeIssued { get; set; }
+        public string DateTimeIssued { get; set; } = "";
         public string TaxpayerActivityCode { get; set; } = string.Empty;
         public string InternalID { get; set; } = string.Empty;
         public string PurchaseOrderReference { get; set; } = string.Empty;
@@ -79,14 +79,14 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 Signatures = new List<SignatureModel>(),
                 DocumentType = "i",
                 DocumentTypeVersion = isProduction ? "1.0" : "0.9",
-                DateTimeIssued = GenericHelpers.GetCurrentUTCTime(-1),
+                DateTimeIssued = GenericHelpers.GetCurrentUTCTime(-70).ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 TaxpayerActivityCode = "8610",
                 InternalID = viewModel.InvoiceId.ToString(),
                 InvoiceLines = viewModel.InvoiceItems.Select(item => new InvoiceLineModel
                 {
                     Description = item.Description,
                     ItemType = item.ItemType,
-                    ItemCode = item.ItemCode,
+                    ItemCode = "EG-538562838-9991",
                     UnitType = item.UnitType,
                     Quantity = item.Quantity,
                     UnitValue = item.UnitValue,

@@ -7,8 +7,11 @@ using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Ess;
+using Org.BouncyCastle.Asn1.Ocsp;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
@@ -97,21 +100,25 @@ namespace ETA.Integrator.Server.Services.Consumer
         }
         private string SerializeToJson(InvoiceToSerializeDTO dto)
         {
-            var options = new JsonSerializerOptions
+            var settings = new JsonSerializerSettings
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping, // Ensure proper Unicode escaping
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy
+                    {
+                        ProcessDictionaryKeys = true,
+                        OverrideSpecifiedNames = true
+                    }
+                },
+                Formatting = Formatting.Indented
             };
 
-            var jsonString = System.Text.Json.JsonSerializer.Serialize(dto, options);
+            var jsonString = JsonConvert.SerializeObject(dto , settings);
 
             return jsonString;
         }
         private string GenerateCanonicalString(string serializedJson)
         {
-            StringBuilder serialized = new StringBuilder();
-
             if (string.IsNullOrWhiteSpace(serializedJson))
             {
                 _logger.LogError("SignatureService/GenerateCanonicalString: Serialized JSON data is required.");
@@ -119,44 +126,96 @@ namespace ETA.Integrator.Server.Services.Consumer
                     statusCode: StatusCodes.Status500InternalServerError,
                     message: "SignatureService/GenerateCanonicalString: BAD_PARAMS",
                     detail: "Serialized JSON data is required."
-                    );
+                );
             }
 
+            var request = JsonConvert.DeserializeObject<JToken>(serializedJson, new JsonSerializerSettings
+            {
+                FloatFormatHandling = FloatFormatHandling.String,
+                FloatParseHandling = FloatParseHandling.Decimal,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                DateParseHandling = DateParseHandling.None
+            });
+
+            if (request is null)
+            {
+                _logger.LogError("SignatureService/GenerateCanonicalString: Request object is null");
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SignatureService/GenerateCanonicalString: SERIALIZATION_FAILED",
+                    detail: "Deserialized object has no value (request)."
+                );
+            }
+
+            return CanonicalizeToken(request);
+        }
+
+        private string CanonicalizeToken(JToken request)
+        {
+           
+            string serialized = "";
+            if (request.Parent is null)
+            {
+                if (request.First == null){
+                    return "";
+                }
+                CanonicalizeToken(request.First);
+            }
             else
             {
-                var request = JsonConvert.DeserializeObject<JObject>(serializedJson, new JsonSerializerSettings
+                if (request.Type == JTokenType.Property)
                 {
-                    FloatFormatHandling = FloatFormatHandling.String,
-                    FloatParseHandling = FloatParseHandling.Decimal,
-                    DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                    DateParseHandling = DateParseHandling.None
-                });
-
-                if (request is null)
-                {
-                    _logger.LogError("SignatureService/GenerateCanonicalString: Request object is null");
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SignatureService/GenerateCanonicalString: SERIALIZATION_FAILED",
-                        detail: "Deserialized object has no value (request)."
-                        );
+                    string name = ((JProperty)request).Name.ToUpper();
+                    serialized += "\"" + name + "\"";
+                    foreach (var property in request)
+                    {
+                        if (property.Type == JTokenType.Object)
+                        {
+                            serialized += CanonicalizeToken(property);
+                        }
+                        if (property.Type == JTokenType.Boolean || property.Type == JTokenType.Integer || property.Type == JTokenType.Float || property.Type == JTokenType.Date)
+                        {
+                            serialized += "\"" + property.Value<string>() + "\"";
+                        }
+                        if (property.Type == JTokenType.String)
+                        {
+                            serialized += JsonConvert.ToString(property.Value<string>());
+                        }
+                        if (property.Type == JTokenType.Array)
+                        {
+                            foreach (var item in property.Children())
+                            {
+                                serialized += "\"" + ((JProperty)request).Name.ToUpper() + "\"";
+                                serialized += CanonicalizeToken(item);
+                            }
+                        }
+                    }
                 }
-                else
+                // Added to fix "References"
+                if (request.Type == JTokenType.String)
                 {
-                    SerializeToken(request, serialized);
+                    serialized += JsonConvert.ToString(request.Value<string>());
+                }
+            }
+            if (request.Type == JTokenType.Object)
+            {
+                foreach (var property in request.Children())
+                {
+
+                    if (property.Type == JTokenType.Object || property.Type == JTokenType.Property)
+                    {
+                        serialized += CanonicalizeToken(property);
+                    }
                 }
             }
 
-            return serialized.ToString();
+            return serialized;
         }
+
         private IPkcs11Library LoadPkcsLibrary()
         {
             try
             {
-                // var path = @"C:\Program Files (x86)\EnterSafe\ePass2003\eTPKCS11.dll";
-                // var path = @"C:\Windows\System32\eps2003csp11.dll";
-                // var path = @"C:\Windows\System32\eTPKCS11.dll";
-                //var path = @"C:\Windows\System32\eps2003csp11.dll";
                 var path = Environment.Is64BitProcess ?
                     @"C:\Windows\System32\eps2003csp11.dll" :
                     @"C:\Windows\SysWOW64\eps2003csp11.dll";
@@ -188,27 +247,6 @@ namespace ETA.Integrator.Server.Services.Consumer
             try
             {
                 ISlot? slot = pkcsLibrary.GetSlotList(SlotsType.WithTokenPresent).FirstOrDefault();
-                //ISlot? slot = null;
-                //var slots = pkcsLibrary.GetSlotList(SlotsType.WithOrWithoutTokenPresent);
-
-                //foreach (var s in slots)
-                //{
-                //    try
-                //    {
-                //        var info = s.GetTokenInfo();
-                //        Console.WriteLine($"Slot {s.SlotId} Label: {info.Label}");
-                //        slot = s;
-                //        break;
-                //    }
-                //    catch
-                //    {
-                //        throw new ProblemDetailsException(
-                //        statusCode: StatusCodes.Status500InternalServerError,
-                //        message: "SignatureService/OpenSession: SLOTS_INTERNAL_ERR",
-                //        detail: $"No slots found."
-                //        );
-                //    }
-                //}
 
                 if (slot is null)
                     throw new ProblemDetailsException(
@@ -395,33 +433,39 @@ namespace ETA.Integrator.Server.Services.Consumer
             }
         }
 
-        public void SignDocument(InvoiceModel model, string tokenPin)
+        public string SignDocument(InvoiceModel model, string tokenPin)
         {
             model.Signatures = new List<SignatureModel>();
             SignatureModel signature = new SignatureModel();
             signature.SignatureType = "I";
 
             var serializedJson = SerializeToJson(model.FromInvoiceModel());
+            //Debug.WriteLine("==== Serialized JSON ====");
+            //Debug.WriteLine(serializedJson);
+            //var canonicalString = GenerateCanonicalString(serializedJson);
+            //Debug.WriteLine("==== Canonical String ====");
+            //Debug.WriteLine(canonicalString);
 
-            var canonicalString = GenerateCanonicalString(serializedJson);
+            //IPkcs11Library pkcsLibrary = LoadPkcsLibrary();
 
-            IPkcs11Library pkcsLibrary = LoadPkcsLibrary();
+            //ISession session = OpenSession(pkcsLibrary);
 
-            ISession session = OpenSession(pkcsLibrary);
+            //TokenLogin(session, tokenPin);
 
-            TokenLogin(session, tokenPin);
+            //IObjectHandle certificate = FindCertificate(session);
 
-            IObjectHandle certificate = FindCertificate(session);
+            //X509Certificate2 certificateForSigning = FindCertificateInStore("Egypt Trust CA G6");
 
-            X509Certificate2 certificateForSigning = FindCertificateInStore("Egypt Trust CA G6");
+            //SignedCms signedCms = CreateSignedCms(Encoding.UTF8.GetBytes(canonicalString), certificate, certificateForSigning);
 
-            SignedCms signedCms = CreateSignedCms(Encoding.UTF8.GetBytes(canonicalString), certificate, certificateForSigning);
+            //byte[] encodedCms = ComputeSignature(signedCms);
 
-            byte[] encodedCms = ComputeSignature(signedCms);
+            //signature.Value = Convert.ToBase64String(encodedCms);
 
-            signature.Value = Convert.ToBase64String(encodedCms);
-
-            model.Signatures.Add(signature);
+            //model.Signatures.Add(signature);
+            var invoiceSigner = new InvoiceSignerService(tokenPin);
+            var fullSignedDocument = invoiceSigner.SignDocument(serializedJson);
+            return fullSignedDocument;
         }
     }
 }
