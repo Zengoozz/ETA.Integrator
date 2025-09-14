@@ -1,5 +1,6 @@
 ﻿using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
+using ETA.Integrator.Server.Dtos.ConsumerAPI.GetSubmission;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
@@ -104,10 +105,10 @@ namespace ETA.Integrator.Server.Services.Common
             var acceptedInvoicesNumbers = providerInvoices.Where(i => acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
             var rejectedInvoicesNumbers = providerInvoices.Where(i => !acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
 
-            var responseMsg = acceptedInvoicesNumbers.Count() == 0 ? $"Accepted: NONE\n"
-                : $"Accepted: {string.Join(" / ", acceptedInvoicesNumbers.Select(n => $"#{n}"))}\n";
+            var responseMsg = acceptedInvoicesNumbers.Count() == 0 ? $"Submitted: NONE\n"
+                : $"Submitted: {string.Join(" / ", acceptedInvoicesNumbers.Select(n => $"#{n}"))}\n";
 
-            responseMsg += rejectedInvoicesNumbers.Count() == 0 ? $"Rejected: {string.Join(" / ", rejectedInvoicesNumbers.Select(n => $"#{n}"))}"
+            responseMsg += rejectedInvoicesNumbers.Count() == 0 ? $"Rejected: NONE\n"
                 : $"Rejected: {string.Join(" / ", rejectedInvoicesNumbers.Select(n => $"#{n}"))}";
 
             var finalResponse = new SubmitDocumentsResponseDTO()
@@ -118,6 +119,13 @@ namespace ETA.Integrator.Server.Services.Common
             };
 
             return finalResponse;
+        }
+
+        public async Task<List<GetSubmissionResponseDTO>> GetSubmission(string uuid, int pageNumber = 5, int pageSize = 10)
+        {
+            var request = _requestFactoryService.GetSubmission(uuid, pageNumber, pageSize);
+            var response = await _httpRequestSenderService.SendRequest(request);
+            return await _responseProcessorService.ProcessResponse<List<GetSubmissionResponseDTO>>(response);
         }
     }
 }
