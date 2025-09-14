@@ -2,11 +2,9 @@
 using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
-using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Core;
-using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Provider.Requests;
 using Microsoft.Extensions.Options;
 using RestSharp;
@@ -15,18 +13,16 @@ namespace ETA.Integrator.Server.Services.Common
 {
     public class RequestFactoryService : IRequestFactoryService
     {
-        private readonly CustomConfigurations _customConfig;
         private readonly ISettingsStepService _settingsStepService;
-        private readonly ISignatureConsumerService _signatureConsumerService;
+        private readonly IDocumentSignerService _documentSignerService;
         public RequestFactoryService(
             IOptions<CustomConfigurations> customConfig,
             ISettingsStepService settingsStepService,
-            ISignatureConsumerService signatureConsumerService
+            IDocumentSignerService documentSignerService
             )
         {
-            _customConfig = customConfig.Value;
             _settingsStepService = settingsStepService ?? throw new ArgumentNullException(nameof(_settingsStepService));
-            _signatureConsumerService = signatureConsumerService;
+            _documentSignerService = documentSignerService;
         }
 
         public GenericRequest ConnectToProvider(ProviderLoginRequestModel model)
@@ -70,7 +66,6 @@ namespace ETA.Integrator.Server.Services.Common
             return genericRequest;
         }
 
-        #region SUBMIT INVOICE
         public async Task<GenericRequest> SubmitDocuments(InvoiceRequest request)
         {
             GenericRequest genericRequest = new();
@@ -103,41 +98,27 @@ namespace ETA.Integrator.Server.Services.Common
                     detail: "Issuer mapping failed"
                     );
 
-            foreach (var invoice in request.Invoices)
+            try
             {
-                var doc = PrepareInvoiceDetails(invoice, issuer, connectionSettings.TokenPin, request.InvoiceType);
-
-                documents.Add(doc);
+                documents = _documentSignerService.SignMultipleDocuments(request.Invoices, issuer, request.InvoiceType, connectionSettings.TokenPin);
+            }
+            catch (Exception ex)
+            {
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SIGNING_ERR",
+                    detail: $"Document signing failed. {ex.Message}"
+                    );
             }
 
             string combinedJson = "{ \"documents\": [" + string.Join(",", documents) + "] }";
 
             genericRequest.Request = new RestRequest("/api/v1/documentsubmissions", Method.Post)
-                            .AddHeader("Content-Type", "application/json").AddStringBody(combinedJson , ContentType.Json);
+                            .AddHeader("Content-Type", "application/json").AddStringBody(combinedJson, ContentType.Json);
             genericRequest.ClientType = ClientType.Consumer;
 
             return genericRequest;
         }
-
-        private string PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin, string invoiceType)
-        {
-
-            //TODO: Rework this
-            var url = _customConfig.Consumer_APIBaseUrl;
-            string[] parts = url.Split('.');
-            bool isProduction = false;
-            if (parts.Length > 1)
-                isProduction = parts[1] != "preprod";
-
-            var document = invoiceViewModel.FromViewModel(issuer, invoiceType, isProduction);
-            
-            var signedDocument = _signatureConsumerService.SignDocument(document, tokenPin);
-            if (signedDocument == null) throw new Exception("Invoice cannot be empty");
-            return signedDocument;
-        }
-
-        #endregion
-
         public GenericRequest GetRecentDocuments()
         {
             GenericRequest genericRequest = new();

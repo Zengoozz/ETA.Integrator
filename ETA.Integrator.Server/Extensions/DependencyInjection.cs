@@ -2,11 +2,9 @@
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
-using ETA.Integrator.Server.Interface.Services.Consumer;
 using ETA.Integrator.Server.Repositories;
 using ETA.Integrator.Server.Services;
 using ETA.Integrator.Server.Services.Common;
-using ETA.Integrator.Server.Services.Consumer;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETA.Integrator.Server.Extensions
@@ -20,12 +18,9 @@ namespace ETA.Integrator.Server.Extensions
             services.AddTransient<IRequestFactoryService, RequestFactoryService>();
             services.AddTransient<IResponseProcessorService, ResponseProcessorService>();
             services.AddTransient<IApiCallerService, ApiCallerService>();
-            
-            #region ConsumerServices
-            services.AddTransient<ISignatureConsumerService, SignatureConsumerService>();
             services.AddTransient<IHttpRequestSenderService, HttpRequestSenderService>();
-            #endregion
-
+            services.AddTransient<IDocumentSignerService, DocumentSignerService>();
+            
             return services;
         }
 
