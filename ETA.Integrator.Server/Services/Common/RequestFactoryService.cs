@@ -175,9 +175,8 @@ namespace ETA.Integrator.Server.Services.Common
         {
             GenericRequest genericRequest = new();
             genericRequest.Request = new RestRequest($"/api/v1/documentsubmissions/{uuid}", Method.Get)
-                .AddHeader("Accept", "application/json")
-                .AddQueryParameter("pageNo", pageNumber)
-                .AddQueryParameter("pageSize", pageSize);
+                .AddParameter("pageNo", pageNumber, ParameterType.QueryString)
+                .AddParameter("pageSize", pageSize, ParameterType.QueryString);
             genericRequest.ClientType = ClientType.Consumer;
 
             return genericRequest;
@@ -187,7 +186,6 @@ namespace ETA.Integrator.Server.Services.Common
         {
             GenericRequest genericRequest = new();
             genericRequest.Request = new RestRequest("/api/v1/documents/search", Method.Get)
-                .AddHeader("Accept", "application/json")
                 .AddQueryParameter("documentType", "i")
                 .AddQueryParameter("submissionDateFrom", submissionDateFrom)
                 .AddQueryParameter("submissionDateTo", submissionDateTo);

@@ -109,9 +109,9 @@ namespace ETA.Integrator.Server.Services.Common
             return logResponse;
         }
 
-        public async Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageSize = 10, int pageNumber = 1)
+        public async Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageSize = 100, int pageNumber = 1)
         {
-            GenericRequest request = _requestFactoryService.GetSubmission(submissionId, pageNumber, pageSize);
+            GenericRequest request = _requestFactoryService.GetSubmission(submissionId, pageSize, pageNumber);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             return await _responseProcessorService.ProcessResponse<SubmissionResponseDTO>(response);
         }

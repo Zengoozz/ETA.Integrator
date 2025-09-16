@@ -18,7 +18,7 @@ namespace ETA.Integrator.Server.Interface.Services.Common
         Task<SubmitDocumentsResponseDTO> SubmitDocuments(InvoiceRequest request);
         Task<RecentDocumentsResponseDTO> GetRecentDocuments();
         Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType);
-        Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageNumber = 5, int pageSize = 10);
+        Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageNumber = 1, int pageSize = 100);
         Task<SearchDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo);
 
     }

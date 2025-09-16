@@ -50,6 +50,13 @@ namespace ETA.Integrator.Server.Controllers
             return Ok(response);
         }
 
-        
+        [HttpGet("GetSubmissions")]
+        public async Task<IActionResult> GetSubmissions(string submissionId, int pageNumber = 1, int pageSize = 100)
+        {
+            var response = await _apiCallerService.GetSubmission(submissionId, pageNumber, pageSize);
+
+            return Ok(response);
+        }
+
     }
 }
