@@ -6,8 +6,8 @@
         public int DocumentCount { get; set; }
         public DateTime DateTimeReceived { get; set; }
         public string OverallStatus { get; set; } = string.Empty;
-        public List<DocumentSummaryParentDTO> DocumentSummary { get; set; } = new();
-        public DocumentSummaryParentDTO DocumentSummaryMetadata { get; set; } = new();
+        public List<SubmissionSummaryDTO> DocumentSummary { get; set; } = new();
+        public SubmissionSummaryDTO DocumentSummaryMetadata { get; set; } = new();
     }
 
 }

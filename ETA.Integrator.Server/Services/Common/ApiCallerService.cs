@@ -47,9 +47,9 @@ namespace ETA.Integrator.Server.Services.Common
                     "Getting provider api url failed"
                     );
 
-            var request = _requestFactoryService.ConnectToProvider(model);
-            var response = await _httpRequestSenderService.SendRequest(request);
-            var processedResponse = await _responseProcessorService.ProcessResponse<ProviderLoginResponseModel>(response);
+            GenericRequest request = _requestFactoryService.ConnectToProvider(model);
+            RestResponse response = await _httpRequestSenderService.SendRequest(request);
+            ProviderLoginResponseModel processedResponse = await _responseProcessorService.ProcessResponse<ProviderLoginResponseModel>(response);
 
             _customConfig.Provider_Token = processedResponse.Token ?? "";
 
@@ -58,9 +58,9 @@ namespace ETA.Integrator.Server.Services.Common
 
         public async Task<ConsumerConnectionResponseModel> ConnectToConsumer(ConnectionDTO? model)
         {
-            var request = await _requestFactoryService.ConnectToConsumer(model);
-            var response = await _httpRequestSenderService.SendRequest(request);
-            var processedResponse = await _responseProcessorService.ProcessResponse<ConsumerConnectionResponseModel>(response);
+            GenericRequest request = await _requestFactoryService.ConnectToConsumer(model);
+            RestResponse response = await _httpRequestSenderService.SendRequest(request);
+            ConsumerConnectionResponseModel processedResponse = await _responseProcessorService.ProcessResponse<ConsumerConnectionResponseModel>(response);
 
             if (string.IsNullOrEmpty(processedResponse.access_token))
                 throw new ProblemDetailsException(
@@ -76,9 +76,9 @@ namespace ETA.Integrator.Server.Services.Common
 
         public async Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
         {
-            var request = _requestFactoryService.GetProviderInvoices(fromDate, toDate, invoiceType);
-            var response = await _httpRequestSenderService.SendRequest(request);
-            var processedResponse = await _responseProcessorService.ProcessResponse<List<ProviderInvoiceViewModel>>(response);
+            GenericRequest request = _requestFactoryService.GetProviderInvoices(fromDate, toDate, invoiceType);
+            RestResponse response = await _httpRequestSenderService.SendRequest(request);
+            List<ProviderInvoiceViewModel> processedResponse = await _responseProcessorService.ProcessResponse<List<ProviderInvoiceViewModel>>(response);
 
             if (processedResponse.Count() > 0)
                 await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
@@ -88,33 +88,33 @@ namespace ETA.Integrator.Server.Services.Common
 
         public async Task<GetRecentDocumentsResponseDTO> GetRecentDocuments()
         {
-            var request = _requestFactoryService.GetRecentDocuments();
-            var response = await _httpRequestSenderService.SendRequest(request);
+            GenericRequest request = _requestFactoryService.GetRecentDocuments();
+            RestResponse response = await _httpRequestSenderService.SendRequest(request);
             return await _responseProcessorService.ProcessResponse<GetRecentDocumentsResponseDTO>(response);
         }
 
         public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(InvoiceRequest invoices)
         {
-            var providerInvoices = invoices.Invoices;
-            var request = await _requestFactoryService.SubmitDocuments(invoices);
-            var response = await _httpRequestSenderService.SendRequest(request);
-            var processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
+            List<ProviderInvoiceViewModel> providerInvoices = invoices.Invoices;
+            GenericRequest request = await _requestFactoryService.SubmitDocuments(invoices);
+            RestResponse response = await _httpRequestSenderService.SendRequest(request);
+            SuccessfulResponseDTO processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
             await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse);
 
-            var acceptedInvoicesIds = processedResponse.AcceptedDocuments.Select(a => a.InternalId).ToList();
-            var acceptedInvoicesNumbers = providerInvoices.Where(i => acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
-            var rejectedInvoicesNumbers = providerInvoices.Where(i => !acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
+            List<string> acceptedInvoicesIds = processedResponse.AcceptedDocuments.Select(a => a.InternalId).ToList();
+            List<string> acceptedInvoicesNumbers = providerInvoices.Where(i => acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
+            List<string> rejectedInvoicesNumbers = providerInvoices.Where(i => !acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
 
-            var responseMsg = acceptedInvoicesNumbers.Count() == 0 ? $"Submitted: NONE\n"
+            string responseMsg = acceptedInvoicesNumbers.Count == 0 ? $"Submitted: NONE\n"
                 : $"Submitted: {string.Join(" / ", acceptedInvoicesNumbers.Select(n => $"#{n}"))}\n";
 
-            responseMsg += rejectedInvoicesNumbers.Count() == 0 ? $"Rejected: NONE\n"
+            responseMsg += rejectedInvoicesNumbers.Count == 0 ? $"Rejected: NONE\n"
                 : $"Rejected: {string.Join(" / ", rejectedInvoicesNumbers.Select(n => $"#{n}"))}";
 
-            var finalResponse = new SubmitDocumentsResponseDTO()
+            SubmitDocumentsResponseDTO finalResponse = new SubmitDocumentsResponseDTO()
             {
-                IsAllSuccess = rejectedInvoicesNumbers.Count() == 0,
-                IsAllFailure = acceptedInvoicesNumbers.Count() == 0,
+                IsAllSuccess = rejectedInvoicesNumbers.Count == 0,
+                IsAllFailure = acceptedInvoicesNumbers.Count == 0,
                 ResponseMessage = responseMsg
             };
 
@@ -123,9 +123,16 @@ namespace ETA.Integrator.Server.Services.Common
 
         public async Task<List<GetSubmissionResponseDTO>> GetSubmission(string uuid, int pageNumber = 5, int pageSize = 10)
         {
-            var request = _requestFactoryService.GetSubmission(uuid, pageNumber, pageSize);
-            var response = await _httpRequestSenderService.SendRequest(request);
+            GenericRequest request = _requestFactoryService.GetSubmission(uuid, pageNumber, pageSize);
+            RestResponse response = await _httpRequestSenderService.SendRequest(request);
             return await _responseProcessorService.ProcessResponse<List<GetSubmissionResponseDTO>>(response);
+        }
+
+        public async Task<GetRecentDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo)
+        {
+            GenericRequest request = _requestFactoryService.SearchDocuments(submissionDateFrom, submissionDateTo); // Implement when needed
+            RestResponse response = await _httpRequestSenderService.SendRequest(request);
+            return await _responseProcessorService.ProcessResponse<GetRecentDocumentsResponseDTO>(response);
         }
     }
 }

@@ -15,5 +15,6 @@ namespace ETA.Integrator.Server.Interface.Services.Common
         GenericRequest GetRecentDocuments();
         GenericRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType);
         GenericRequest GetSubmission(string uuid, int pageNumber, int pageSize);
+        GenericRequest SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo);
     }
 }

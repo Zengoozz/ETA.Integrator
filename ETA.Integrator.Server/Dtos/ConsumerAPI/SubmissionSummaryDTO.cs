@@ -1,7 +1,7 @@
 ﻿
 namespace ETA.Integrator.Server.Dtos.ConsumerAPI
 {
-    public class DocumentSummaryParentDTO
+    public class SubmissionSummaryDTO
     {
         public string Uuid { get; set; } = string.Empty;
         public string LongId { get; set; } = string.Empty;
