@@ -1,5 +1,4 @@
-﻿
-namespace ETA.Integrator.Server.Dtos.ConsumerAPI
+﻿namespace ETA.Integrator.Server.Dtos.ConsumerAPI.Submission
 {
     public class SubmissionSummaryDTO
     {

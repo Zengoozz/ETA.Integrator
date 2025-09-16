@@ -1,4 +1,4 @@
-﻿using ETA.Integrator.Server.Dtos.ConsumerAPI;
+﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.Submission;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Helpers.Enums;

@@ -1,4 +1,6 @@
-﻿namespace ETA.Integrator.Server.Dtos.ConsumerAPI
+﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.Submission;
+
+namespace ETA.Integrator.Server.Dtos.ConsumerAPI
 {
     public class DocumentSummaryDTO : SubmissionSummaryDTO
     {

@@ -1,6 +1,6 @@
 ﻿using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
-using ETA.Integrator.Server.Dtos.ConsumerAPI.GetSubmission;
+using ETA.Integrator.Server.Dtos.ConsumerAPI.RecentDocuments;
+using ETA.Integrator.Server.Dtos.ConsumerAPI.Submission;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SearchDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services;
@@ -87,11 +87,11 @@ namespace ETA.Integrator.Server.Services.Common
             return processedResponse;
         }
 
-        public async Task<GetRecentDocumentsResponseDTO> GetRecentDocuments()
+        public async Task<RecentDocumentsResponseDTO> GetRecentDocuments()
         {
             GenericRequest request = _requestFactoryService.GetRecentDocuments();
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
-            return await _responseProcessorService.ProcessResponse<GetRecentDocumentsResponseDTO>(response);
+            return await _responseProcessorService.ProcessResponse<RecentDocumentsResponseDTO>(response);
         }
 
         public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(InvoiceRequest invoicesRequest)
@@ -100,7 +100,7 @@ namespace ETA.Integrator.Server.Services.Common
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             SuccessfulResponseDTO processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
 
-            GetSubmissionResponseDTO submissionResponse = new();
+            SubmissionResponseDTO submissionResponse = new();
             if (!String.IsNullOrEmpty(processedResponse.SubmissionId))
                 submissionResponse = await GetSubmission(processedResponse.SubmissionId, invoicesRequest.Invoices.Count);
 
@@ -109,11 +109,11 @@ namespace ETA.Integrator.Server.Services.Common
             return logResponse;
         }
 
-        public async Task<GetSubmissionResponseDTO> GetSubmission(string submissionId, int pageSize = 10, int pageNumber = 1)
+        public async Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageSize = 10, int pageNumber = 1)
         {
             GenericRequest request = _requestFactoryService.GetSubmission(submissionId, pageNumber, pageSize);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
-            return await _responseProcessorService.ProcessResponse<GetSubmissionResponseDTO>(response);
+            return await _responseProcessorService.ProcessResponse<SubmissionResponseDTO>(response);
         }
 
         public async Task<SearchDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo)
