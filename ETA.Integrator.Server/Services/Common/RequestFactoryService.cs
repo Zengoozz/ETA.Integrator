@@ -119,6 +119,7 @@ namespace ETA.Integrator.Server.Services.Common
 
             return genericRequest;
         }
+        
         public GenericRequest GetRecentDocuments()
         {
             GenericRequest genericRequest = new();
@@ -171,11 +172,11 @@ namespace ETA.Integrator.Server.Services.Common
             return genericRequest;
         }
 
-        public GenericRequest GetSubmission(string uuid, int pageNumber, int pageSize)
+        public GenericRequest GetSubmission(string uuid, int pageNo, int pageSize)
         {
             GenericRequest genericRequest = new();
             genericRequest.Request = new RestRequest($"/api/v1/documentsubmissions/{uuid}", Method.Get)
-                .AddParameter("pageNo", pageNumber, ParameterType.QueryString)
+                .AddParameter("pageNo", pageNo, ParameterType.QueryString)
                 .AddParameter("pageSize", pageSize, ParameterType.QueryString);
             genericRequest.ClientType = ClientType.Consumer;
 

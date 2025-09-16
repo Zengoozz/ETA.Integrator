@@ -102,16 +102,17 @@ namespace ETA.Integrator.Server.Services.Common
 
             SubmissionResponseDTO submissionResponse = new();
             if (!String.IsNullOrEmpty(processedResponse.SubmissionId))
-                submissionResponse = await GetSubmission(processedResponse.SubmissionId, invoicesRequest.Invoices.Count);
+                submissionResponse = await GetSubmission(processedResponse.SubmissionId, 1, invoicesRequest.Invoices.Count);
 
             SubmitDocumentsResponseDTO logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, submissionResponse.DocumentSummary);
 
             return logResponse;
         }
 
-        public async Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageSize = 100, int pageNumber = 1)
+        public async Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageNo = 1, int pageSize = 100)
         {
-            GenericRequest request = _requestFactoryService.GetSubmission(submissionId, pageSize, pageNumber);
+            pageSize = pageSize > 100 ? pageSize : 100;
+            GenericRequest request = _requestFactoryService.GetSubmission(submissionId, pageNo, pageSize);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             return await _responseProcessorService.ProcessResponse<SubmissionResponseDTO>(response);
         }
