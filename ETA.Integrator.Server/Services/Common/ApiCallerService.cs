@@ -1,6 +1,7 @@
 ﻿using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.GetSubmission;
+using ETA.Integrator.Server.Dtos.ConsumerAPI.SearchDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
@@ -93,46 +94,33 @@ namespace ETA.Integrator.Server.Services.Common
             return await _responseProcessorService.ProcessResponse<GetRecentDocumentsResponseDTO>(response);
         }
 
-        public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(InvoiceRequest invoices)
+        public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(InvoiceRequest invoicesRequest)
         {
-            List<ProviderInvoiceViewModel> providerInvoices = invoices.Invoices;
-            GenericRequest request = await _requestFactoryService.SubmitDocuments(invoices);
+            GenericRequest request = await _requestFactoryService.SubmitDocuments(invoicesRequest);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             SuccessfulResponseDTO processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
-            await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse);
 
-            List<string> acceptedInvoicesIds = processedResponse.AcceptedDocuments.Select(a => a.InternalId).ToList();
-            List<string> acceptedInvoicesNumbers = providerInvoices.Where(i => acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
-            List<string> rejectedInvoicesNumbers = providerInvoices.Where(i => !acceptedInvoicesIds.Contains(i.InvoiceId.ToString())).Select(i => i.InvoiceNumber).ToList();
+            GetSubmissionResponseDTO submissionResponse = new();
+            if (!String.IsNullOrEmpty(processedResponse.SubmissionId))
+                submissionResponse = await GetSubmission(processedResponse.SubmissionId, invoicesRequest.Invoices.Count);
 
-            string responseMsg = acceptedInvoicesNumbers.Count == 0 ? $"Submitted: NONE\n"
-                : $"Submitted: {string.Join(" / ", acceptedInvoicesNumbers.Select(n => $"#{n}"))}\n";
+            SubmitDocumentsResponseDTO logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, submissionResponse.DocumentSummary);
 
-            responseMsg += rejectedInvoicesNumbers.Count == 0 ? $"Rejected: NONE\n"
-                : $"Rejected: {string.Join(" / ", rejectedInvoicesNumbers.Select(n => $"#{n}"))}";
-
-            SubmitDocumentsResponseDTO finalResponse = new SubmitDocumentsResponseDTO()
-            {
-                IsAllSuccess = rejectedInvoicesNumbers.Count == 0,
-                IsAllFailure = acceptedInvoicesNumbers.Count == 0,
-                ResponseMessage = responseMsg
-            };
-
-            return finalResponse;
+            return logResponse;
         }
 
-        public async Task<List<GetSubmissionResponseDTO>> GetSubmission(string uuid, int pageNumber = 5, int pageSize = 10)
+        public async Task<GetSubmissionResponseDTO> GetSubmission(string submissionId, int pageSize = 10, int pageNumber = 1)
         {
-            GenericRequest request = _requestFactoryService.GetSubmission(uuid, pageNumber, pageSize);
+            GenericRequest request = _requestFactoryService.GetSubmission(submissionId, pageNumber, pageSize);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
-            return await _responseProcessorService.ProcessResponse<List<GetSubmissionResponseDTO>>(response);
+            return await _responseProcessorService.ProcessResponse<GetSubmissionResponseDTO>(response);
         }
 
-        public async Task<GetRecentDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo)
+        public async Task<SearchDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo)
         {
             GenericRequest request = _requestFactoryService.SearchDocuments(submissionDateFrom, submissionDateTo); // Implement when needed
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
-            return await _responseProcessorService.ProcessResponse<GetRecentDocumentsResponseDTO>(response);
+            return await _responseProcessorService.ProcessResponse<SearchDocumentsResponseDTO>(response);
         }
     }
 }

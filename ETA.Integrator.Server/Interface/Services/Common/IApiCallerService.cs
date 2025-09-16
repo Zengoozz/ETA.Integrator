@@ -1,6 +1,7 @@
 ﻿using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.GetSubmission;
+using ETA.Integrator.Server.Dtos.ConsumerAPI.SearchDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Consumer.Response;
@@ -17,8 +18,8 @@ namespace ETA.Integrator.Server.Interface.Services.Common
         Task<SubmitDocumentsResponseDTO> SubmitDocuments(InvoiceRequest request);
         Task<GetRecentDocumentsResponseDTO> GetRecentDocuments();
         Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType);
-        Task<List<GetSubmissionResponseDTO>> GetSubmission(string uuid, int pageNumber = 5, int pageSize = 10);
-        Task<GetRecentDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo);
+        Task<GetSubmissionResponseDTO> GetSubmission(string submissionId, int pageNumber = 5, int pageSize = 10);
+        Task<SearchDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo);
 
     }
 }
