@@ -3,7 +3,7 @@
     public enum InvoiceStatus
     {
         Cancelled = -3,
-        NotValid = -2,
+        Invalid = -2,
         Rejected = -1,
         NotSubmitted = 0,
         Submitted = 1, // InProgress
