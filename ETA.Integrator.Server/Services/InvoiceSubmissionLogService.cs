@@ -27,6 +27,7 @@ namespace ETA.Integrator.Server.Services
                 InternalId = x.InternalId,
                 SubmissionId = x.Uuid,
                 Status = (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted"),
+                StatusStringfied = submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted",
                 SubmissionDate = DateTime.Now,
             });
 
@@ -39,6 +40,7 @@ namespace ETA.Integrator.Server.Services
             {
                 InternalId = x.InternalId,
                 Status = InvoiceStatus.Rejected,
+                StatusStringfied = "Rejected",
                 SubmissionDate = DateTime.Now,
                 RejectionReasonJSON = x.Error is not null ? JsonSerializer.Serialize(x.Error) : ""
             });
