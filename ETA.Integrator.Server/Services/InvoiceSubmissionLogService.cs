@@ -1,6 +1,7 @@
 ﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.Submission;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Entities;
+using ETA.Integrator.Server.Helpers;
 using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Interface.Services;
@@ -21,14 +22,16 @@ namespace ETA.Integrator.Server.Services
         {
             string responseMessage = "";
             List<InvoiceSubmissionLog> invoiceSubmissionLogs = new List<InvoiceSubmissionLog>();
-            
+            var utcNow = GenericHelpers.GetCurrentUTCTime(-70);
+
+
             var listOfAccepted = responseDTO.AcceptedDocuments.Select(x => new InvoiceSubmissionLog
             {
                 InternalId = x.InternalId,
                 SubmissionId = x.Uuid,
                 Status = (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted"),
                 StatusStringfied = submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted",
-                SubmissionDate = DateTime.Now,
+                SubmissionDate = submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.DateTimeIssued ?? utcNow,
             });
 
             responseMessage += !listOfAccepted.Any() ? $"Submitted: NONE\n"
@@ -41,7 +44,7 @@ namespace ETA.Integrator.Server.Services
                 InternalId = x.InternalId,
                 Status = InvoiceStatus.Rejected,
                 StatusStringfied = "Rejected",
-                SubmissionDate = DateTime.Now,
+                SubmissionDate = utcNow,
                 RejectionReasonJSON = x.Error is not null ? JsonSerializer.Serialize(x.Error) : ""
             });
 
