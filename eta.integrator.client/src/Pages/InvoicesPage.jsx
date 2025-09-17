@@ -10,6 +10,7 @@ import CustomButton from "../Components/CustomButton";
 import { InvoicesTableColumns } from "../Constants/ConstantsComponents";
 import InvoicesService from "../Services/InvoicesService";
 import { ROUTES } from "../Constants/Constants";
+import useSearchColumn from "../Hooks/useSearchColumn";
 
 const InvoicesPage = ({ isMobile }) => {
     // const [loading, setLoading] = useState(false);
@@ -19,7 +20,11 @@ const InvoicesPage = ({ isMobile }) => {
     const [tableData, setTableData] = useState([]); // State to hold table data
     const [messageApi, contextHolder] = message.useMessage();
     const [notificationApi, contextHolderNotification] = notification.useNotification();
+    const { getColumnSearchProps, filteredData } = useSearchColumn(
+      tableData || []
+    );
     const navigate = useNavigate();
+    const tableColumns = InvoicesTableColumns(getColumnSearchProps);
 
     const onSubmit = async (selectedRows) => {
         try {
@@ -74,11 +79,11 @@ const InvoicesPage = ({ isMobile }) => {
                     <InvoicesTable
                         isMobile={isMobile}
                         key={searchKey} // Use searchKey to force re-render
-                        tableData={tableData}
+                        tableData={filteredData}
                         messageApi={messageApi}
                         notificationApi={notificationApi}
                         tableType="W"
-                        tableColumns={InvoicesTableColumns}
+                        tableColumns={tableColumns}
                         onSubmit={onSubmit}
                         submissionCallBack={() => handleSearch(searchValues)}
                     />

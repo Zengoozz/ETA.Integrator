@@ -1,26 +1,30 @@
 import { CheckCircleTwoTone, CloseCircleTwoTone } from "@ant-design/icons";
 import dayjs from "dayjs";
 
-const InvoicesTableColumns = [
+const InvoicesTableColumns = (getColumnSearchProps) => ([
    {
       title: "Receipt Number",
       dataIndex: "invoiceNumber",
       render: (text) => <a>{text}</a>,
+      ...getColumnSearchProps("invoiceNumber", "search"),
    },
    {
       title: "Visit Type",
       dataIndex: "invoiceType",
       render: (text) => text,
+      ...getColumnSearchProps("invoiceType", "search"),
    },
    {
       title: "Company",
       dataIndex: "receiverName",
       render: (text) => text,
+      ...getColumnSearchProps("receiverName", "search"),
    },
    {
       title: "Tax Registeration Number",
       dataIndex: "registrationNumber",
       render: (text) => text,
+      ...getColumnSearchProps("registrationNumber", "search"),
    },
    {
       title: "Net Price",
@@ -58,7 +62,7 @@ const InvoicesTableColumns = [
          );
       },
    },
-];
+]);
 
 const SubmittedInvoiceColumns = [
    {
