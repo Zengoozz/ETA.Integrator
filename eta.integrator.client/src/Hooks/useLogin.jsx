@@ -1,10 +1,8 @@
-// import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../Services/AuthService";
 
 export const useLogin = (setLogIn, notificationApi, setLoading) => {
    const navigate = useNavigate();
-   // const [loading, setLoading] = useState(false);
 
    const handleLogin = async (values) => {
       setLoading(true);

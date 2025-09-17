@@ -29,8 +29,9 @@ namespace ETA.Integrator.Server.Services.Common
                     throw new ProblemDetailsException(
                         statusCode: StatusCodes.Status401Unauthorized,
                         message: "UNAUTHORIZED",
-                        detail: String.IsNullOrEmpty(obj.Message) ? "No further details" : obj.Message
+                        detail: String.IsNullOrEmpty(obj.Message) ? "Username or password incorrect" : obj.Message
                         );
+
             }
 
             return Task.FromResult(serializedResponse!);
