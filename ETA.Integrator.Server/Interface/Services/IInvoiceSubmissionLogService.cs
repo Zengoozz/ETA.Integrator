@@ -6,7 +6,7 @@ namespace ETA.Integrator.Server.Interface.Services
 {
     public interface IInvoiceSubmissionLogService
     {
-        Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO responseDTO, List<SubmissionSummaryDTO> submissions);
+        Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO responseDTO, List<SubmissionSummaryDTO> submissions, List<ProviderInvoiceViewModel> invoices);
         Task ValidateInvoiceStatus(List<ProviderInvoiceViewModel> invoices);
     }
 }

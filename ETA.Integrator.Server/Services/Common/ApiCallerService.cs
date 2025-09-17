@@ -104,7 +104,7 @@ namespace ETA.Integrator.Server.Services.Common
             if (!String.IsNullOrEmpty(processedResponse.SubmissionId))
                 submissionResponse = await GetSubmission(processedResponse.SubmissionId, 1, invoicesRequest.Invoices.Count);
 
-            SubmitDocumentsResponseDTO logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, submissionResponse.DocumentSummary);
+            SubmitDocumentsResponseDTO logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, submissionResponse.DocumentSummary, invoicesRequest.Invoices);
 
             return logResponse;
         }

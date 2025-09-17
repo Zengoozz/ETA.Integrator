@@ -18,7 +18,7 @@ namespace ETA.Integrator.Server.Services
             _invoiceSubmissionLogRepository = invoiceSubmissionLogRepository;
         }
 
-        public async Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO responseDTO, List<SubmissionSummaryDTO> submissions)
+        public async Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO responseDTO, List<SubmissionSummaryDTO> submissions, List<ProviderInvoiceViewModel> invoices)
         {
             string responseMessage = "";
             List<InvoiceSubmissionLog> invoiceSubmissionLogs = new List<InvoiceSubmissionLog>();
@@ -35,8 +35,12 @@ namespace ETA.Integrator.Server.Services
                 SubmissionDate = submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.DateTimeIssued ?? utcNow,
             });
 
-            responseMessage += !listOfAccepted.Any() ? $"Submitted: NONE\n"
-                : $"Submitted: {string.Join(" / ", listOfAccepted.Select(n => $"#{n.InternalId}"))}\n";
+            var test = listOfAccepted.Select(n => n.InternalId);
+            invoices.Where(i => listOfAccepted.Select(n => n.InternalId).Contains(i.InvoiceId.ToString())).Select(i => $"#{i.InvoiceNumber}");
+            responseMessage += !listOfAccepted.Any() ?
+                $"Submitted: NONE\n" :
+                $"Submitted: {string.Join(" / ",
+                    invoices.Where(i => listOfAccepted.Select(n => n.InternalId).Contains(i.InvoiceId.ToString())).Select(i => $"#{i.InvoiceNumber}"))}\n";
 
             invoiceSubmissionLogs.AddRange(listOfAccepted);
 
@@ -49,11 +53,13 @@ namespace ETA.Integrator.Server.Services
                 RejectionReasonJSON = x.Error is not null ? JsonSerializer.Serialize(x.Error) : ""
             });
 
-            responseMessage += !listOfRejected.Any() ? $"Rejected: NONE\n"
-                : $"Rejected: {string.Join(" / ", listOfRejected.Select(n => $"#{n.InternalId}"))}\n";
+            responseMessage += !listOfRejected.Any() ?
+                $"Rejected: NONE\n" :
+                $"Rejected: {string.Join(" / ",
+                    invoices.Where(i => listOfRejected.Select(n => n.InternalId).Contains(i.InvoiceId.ToString())).Select(i => $"#{i.InvoiceNumber}"))}\n";
 
             invoiceSubmissionLogs.AddRange(listOfRejected);
-            
+
             await _invoiceSubmissionLogRepository.SaveList(invoiceSubmissionLogs);
 
             SubmitDocumentsResponseDTO response = new SubmitDocumentsResponseDTO()
@@ -70,8 +76,8 @@ namespace ETA.Integrator.Server.Services
         {
             var listOfInvoiceIds = invoices.Select(x => x.InvoiceId.ToString()).ToList();
             var invoiceLogs = await _invoiceSubmissionLogRepository.GetByListOfInternalIds(listOfInvoiceIds);
-            
-            if(invoiceLogs.Count > 0)
+
+            if (invoiceLogs.Count > 0)
             {
                 foreach (var invoice in invoices)
                 {

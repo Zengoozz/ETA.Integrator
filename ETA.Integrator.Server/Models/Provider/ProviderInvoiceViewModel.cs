@@ -1,5 +1,4 @@
 ﻿using ETA.Integrator.Server.Models.Consumer.ETA;
-using System.ComponentModel.DataAnnotations;
 
 namespace ETA.Integrator.Server.Models.Provider
 {
