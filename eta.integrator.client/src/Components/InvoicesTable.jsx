@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Divider, Table, Flex } from "antd";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 
@@ -7,13 +7,15 @@ import CustomButton from "../Components/CustomButton";
 const InvoicesTable = ({
    isMobile,
    tableData,
-   onSubmit = null,
    messageApi,
    notificationApi,
    tableType,
    tableColumns,
+   onSubmit = null,
+   submissionCallBack = null,
+   selectedRowsToAction = [],
+   setSelectedRowsToActionOn = null,
 }) => {
-   const [selectedRowToSubmit, setSelectedRowToSubmit] = useState([]);
    const [loading, setLoading] = useState(false);
    // rowSelection object indicates the need for row selection
    const rowSelection = {
@@ -23,7 +25,8 @@ const InvoicesTable = ({
             "selectedRows: ",
             selectedRows
          );
-         setSelectedRowToSubmit(selectedRows); // Update the selected rows state
+         
+         setSelectedRowsToActionOn(selectedRows); // Update the selected rows state
       },
       getCheckboxProps: (record) => ({
          disabled: record.isReviewed === true, // Column configuration not to be checked
@@ -32,7 +35,7 @@ const InvoicesTable = ({
    };
 
    const handleSubmitButtonClick = () => {
-      if (!selectedRowToSubmit || selectedRowToSubmit.length === 0) {
+      if (!selectedRowsToAction || selectedRowsToAction.length === 0) {
          console.warn("No rows selected.");
          messageApi.warning("Please select at least one row to submit.");
          return;
@@ -46,7 +49,7 @@ const InvoicesTable = ({
 
       // Start loading
       setLoading(true);
-      onSubmit(selectedRowToSubmit)
+      onSubmit(selectedRowsToAction)
          .then((response) => {
             notificationApi.open({
                type: "success",
@@ -66,6 +69,8 @@ const InvoicesTable = ({
          .finally(() => {
             loadingMessage(); // Close the loading message
             setLoading(false); // End loading
+            if(tableType == "W") 
+               submissionCallBack(); // Clear selection after submission
          });
    };
 

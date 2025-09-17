@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flex, Card, message, notification } from "antd";
 import { RightCircleOutlined } from "@ant-design/icons";
@@ -13,7 +13,8 @@ import { ROUTES } from "../Constants/Constants";
 
 const InvoicesPage = ({ isMobile }) => {
     // const [loading, setLoading] = useState(false);
-    const [invoiceType, setInvoiceType] = useState("I");
+    const [selectedRowToSubmit, setSelectedRowToSubmit] = useState([]);
+    const [searchValues, setSearchValues] = useState({dateFrom: null, dateTo: null, invoiceType: "I"});
     const [tableData, setTableData] = useState([]); // State to hold table data
     const [messageApi, contextHolder] = message.useMessage();
     const [notificationApi, contextHolderNotification] = notification.useNotification();
@@ -21,7 +22,7 @@ const InvoicesPage = ({ isMobile }) => {
 
     const onSubmit = async (selectedRows) => {
         try {
-            return await InvoicesService.submitInvoices(selectedRows, invoiceType);
+            return await InvoicesService.submitInvoices(selectedRows, searchValues.invoiceType);
         } catch (error) {
             console.error(error.detail);
             throw error;
@@ -33,8 +34,9 @@ const InvoicesPage = ({ isMobile }) => {
             const response = await InvoicesService.getInvoicesAccordingToDateAsQueryParams(
                 values
             );
-            setInvoiceType(values.invoiceType);
+            setSearchValues(values);
             setTableData(response); // Update table data with the response
+            setSelectedRowToSubmit([]); // Clear selected rows after search
         } catch (error) {
             console.error("Failed to fetch invoices", error);
             throw error;
@@ -70,12 +72,14 @@ const InvoicesPage = ({ isMobile }) => {
                     <InvoicesTable
                         isMobile={isMobile}
                         tableData={tableData}
-                        onSubmit={onSubmit}
-                        // loading={loading}
                         messageApi={messageApi}
                         notificationApi={notificationApi}
                         tableType="W"
                         tableColumns={InvoicesTableColumns}
+                        onSubmit={onSubmit}
+                        submissionCallBack={() => handleSearch(searchValues)}
+                        selectedRowsToSubmit={selectedRowToSubmit}
+                        setSelectedRowsToActionOn={setSelectedRowToSubmit}
                     />
                 </Flex>
             </Card>
