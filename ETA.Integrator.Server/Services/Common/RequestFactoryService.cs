@@ -104,11 +104,14 @@ namespace ETA.Integrator.Server.Services.Common
             }
             catch (Exception ex)
             {
-                throw new ProblemDetailsException(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SIGNING_ERR",
-                    detail: $"Document signing failed. {ex.Message}"
-                    );
+                if (ex is ProblemDetailsException)
+                    throw;
+                else
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SIGNING_ERR",
+                        detail: $"Document signing failed. {ex.Message}"
+                        );
             }
 
             string combinedJson = "{ \"documents\": [" + string.Join(",", documents) + "] }";
@@ -119,7 +122,7 @@ namespace ETA.Integrator.Server.Services.Common
 
             return genericRequest;
         }
-        
+
         public GenericRequest GetRecentDocuments()
         {
             GenericRequest genericRequest = new();
