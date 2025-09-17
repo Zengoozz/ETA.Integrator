@@ -11,7 +11,7 @@ const useSearchColumn = (initialData) => {
       setFilteredData(initialData || []);
    }, [initialData]);
 
-   const getColumnSearchProps = (dataIndex, placeholder) => ({
+   const getColumnSearchProps = (dataIndex, placeholder, caseSenestivity = false) => ({
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
          <div style={{ padding: 8 }}>
             <Input
@@ -25,7 +25,7 @@ const useSearchColumn = (initialData) => {
             <Space>
                <Button
                   type="primary"
-                  onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                  onClick={() => handleSearch(selectedKeys, confirm, dataIndex, caseSenestivity)}
                   icon={<SearchOutlined />}
                   size="small"
                   style={{ width: 90 }}
@@ -33,7 +33,7 @@ const useSearchColumn = (initialData) => {
                   Search
                </Button>
                <Button
-                  onClick={() => handleReset(clearFilters, confirm, dataIndex)}
+                  onClick={() => handleReset(clearFilters, confirm, dataIndex, caseSenestivity)}
                   size="small"
                   style={{ width: 90 }}
                >
@@ -58,16 +58,16 @@ const useSearchColumn = (initialData) => {
       return path.split(".").reduce((acc, part) => acc && acc[part], obj);
    };
 
-   const handleSearch = (selectedKeys, confirm, dataIndex) => {
+   const handleSearch = (selectedKeys, confirm, dataIndex, caseSenestivity) => {
       confirm();
 
       const newFilters = { ...activeFilters, [dataIndex]: selectedKeys[0] };
       setActiveFilters(newFilters);
 
-      applyFilters(newFilters);
+      applyFilters(newFilters, caseSenestivity);
    };
 
-   const handleReset = (clearFilters, confirm, dataIndex) => {
+   const handleReset = (clearFilters, confirm, dataIndex, caseSenestivity) => {
       clearFilters();
 
       const newFilters = { ...activeFilters };
@@ -77,18 +77,18 @@ const useSearchColumn = (initialData) => {
       if (Object.keys(newFilters).length === 0) {
          setFilteredData(initialData);
       } else {
-         applyFilters(newFilters);
+         applyFilters(newFilters, caseSenestivity);
       }
       confirm();
    };
 
-   const applyFilters = (filters) => {
+   const applyFilters = (filters, caseSenestivity) => {
       let filtered = initialData;
 
       Object.keys(filters).forEach((key) => {
-         const filterValue = filters[key].toLowerCase();
+         const filterValue = caseSenestivity ? filters[key] : filters[key].toLowerCase();
          filtered = filtered.filter((item) =>
-            item[key]?.toString().toLowerCase().includes(filterValue)
+            caseSenestivity ? item[key]?.toString().includes(filterValue) : item[key]?.toString().toLowerCase().includes(filterValue)
          );
       });
 

@@ -13,84 +13,90 @@ import { ROUTES } from "../Constants/Constants";
 import useSearchColumn from "../Hooks/useSearchColumn";
 
 const InvoicesPage = ({ isMobile }) => {
-    // const [loading, setLoading] = useState(false);
-    const [searchKey , setSearchKey] = useState(1);
-    
-    const [searchValues, setSearchValues] = useState({dateFrom: null, dateTo: null, invoiceType: "I"});
-    const [tableData, setTableData] = useState([]); // State to hold table data
-    const [messageApi, contextHolder] = message.useMessage();
-    const [notificationApi, contextHolderNotification] = notification.useNotification();
-    const { getColumnSearchProps, filteredData } = useSearchColumn(
-      tableData || []
-    );
-    const navigate = useNavigate();
-    const tableColumns = InvoicesTableColumns(getColumnSearchProps);
+   // const [loading, setLoading] = useState(false);
+   const [searchKey, setSearchKey] = useState(1);
 
-    const onSubmit = async (selectedRows) => {
-        try {
-            return await InvoicesService.submitInvoices(selectedRows, searchValues.invoiceType);
-        } catch (error) {
-            console.error(error.detail);
-            throw error;
-        }
-    };
+   const [searchValues, setSearchValues] = useState({
+      dateFrom: null,
+      dateTo: null,
+      invoiceType: "I",
+   });
+   const [tableData, setTableData] = useState([]); // State to hold table data
+   const [messageApi, contextHolder] = message.useMessage();
+   const [notificationApi, contextHolderNotification] = notification.useNotification();
+   const { getColumnSearchProps, filteredData } = useSearchColumn(tableData || []);
+   
+   const navigate = useNavigate();
+   const tableColumns = InvoicesTableColumns(getColumnSearchProps);
 
-    const handleSearch = async (values) => {
-        try {
-            const response = await InvoicesService.getInvoicesAccordingToDateAsQueryParams(
-                values
-            );
-            setSearchValues(values);
-            setTableData(response); // Update table data with the response
+   const onSubmit = async (selectedRows) => {
+      try {
+         return await InvoicesService.submitInvoices(
+            selectedRows,
+            searchValues.invoiceType
+         );
+      } catch (error) {
+         console.error(error.detail);
+         throw error;
+      }
+   };
 
-            setSearchKey(searchKey + 1); // Force re-render of InvoicesTable by changing key
-        } catch (error) {
-            console.error("Failed to fetch invoices", error);
-            throw error;
-        }
-    };
+   const handleSearch = async (values) => {
+      try {
+         const response = await InvoicesService.getInvoicesAccordingToDateAsQueryParams(
+            values
+         );
+         setSearchValues(values);
+         setTableData(response); // Update table data with the response
 
-    return (
-        <>
-            {contextHolder}
-            {contextHolderNotification}
-            <Card style={{ width: "100%" }}>
-                <Flex
-                    vertical
-                    gap="middle"
-                >
-                    <Flex justify="space-between">
-                        <InvoiceSearchForm
-                            isMobile={isMobile}
-                            handleSearch={handleSearch}
-                            messageApi={messageApi}
-                            notificationApi={notificationApi}
-                        />
+         setSearchKey(searchKey + 1); // Force re-render of InvoicesTable by changing key
+      } catch (error) {
+         console.error("Failed to fetch invoices", error);
+         throw error;
+      }
+   };
 
-                        <CustomButton
-                            name="Submitted Invoices"
-                            icon={<RightCircleOutlined />}
-                            handleClick={() => navigate(ROUTES.SUBMITTED)}
-                            type="link"
-                            style={{ padding: 0 }}
-                        />
-                    </Flex>
+   return (
+      <>
+         {contextHolder}
+         {contextHolderNotification}
+         <Card style={{ width: "100%" }}>
+            <Flex
+               vertical
+               gap="middle"
+            >
+               <Flex justify="space-between">
+                  <InvoiceSearchForm
+                     isMobile={isMobile}
+                     handleSearch={handleSearch}
+                     messageApi={messageApi}
+                     notificationApi={notificationApi}
+                  />
 
-                    <InvoicesTable
-                        isMobile={isMobile}
-                        key={searchKey} // Use searchKey to force re-render
-                        tableData={filteredData}
-                        messageApi={messageApi}
-                        notificationApi={notificationApi}
-                        tableType="W"
-                        tableColumns={tableColumns}
-                        onSubmit={onSubmit}
-                        submissionCallBack={() => handleSearch(searchValues)}
-                    />
-                </Flex>
-            </Card>
-        </>
-    );
+                  <CustomButton
+                     name="Submitted Invoices"
+                     icon={<RightCircleOutlined />}
+                     handleClick={() => navigate(ROUTES.SUBMITTED)}
+                     type="link"
+                     style={{ padding: 0 }}
+                  />
+               </Flex>
+
+               <InvoicesTable
+                  isMobile={isMobile}
+                  key={searchKey} // Use searchKey to force re-render
+                  tableData={filteredData}
+                  messageApi={messageApi}
+                  notificationApi={notificationApi}
+                  tableType="W"
+                  tableColumns={tableColumns}
+                  onSubmit={onSubmit}
+                  submissionCallBack={() => handleSearch(searchValues)}
+               />
+            </Flex>
+         </Card>
+      </>
+   );
 };
 
 export default InvoicesPage;

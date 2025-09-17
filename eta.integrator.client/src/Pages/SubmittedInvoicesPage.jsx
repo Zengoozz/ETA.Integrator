@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Card, message, notification } from "antd";
 import { LeftCircleOutlined } from "@ant-design/icons";
 
-
 import InvoicesTable from "../Components/InvoicesTable";
 
 import { SubmittedInvoiceColumns } from "../Constants/ConstantsComponents";
@@ -10,13 +9,17 @@ import InvoicesService from "../Services/InvoicesService";
 import { ROUTES } from "../Constants/Constants";
 import { useNavigate } from "react-router-dom";
 import CustomButton from "../Components/CustomButton";
+import useSearchColumn from "../Hooks/useSearchColumn";
 
 const SubmittedInvoicesPage = ({ isMobile }) => {
    const [loading, setLoading] = useState(false);
    const [tableData, setTableData] = useState([]); // State to hold table data
    const [messageApi, contextHolder] = message.useMessage();
    const [notificationApi, contextHolderNotification] = notification.useNotification();
+   const { getColumnSearchProps, filteredData } = useSearchColumn(tableData || []);
+
    const navigate = useNavigate();
+   const tableColumns = SubmittedInvoiceColumns(getColumnSearchProps);
 
    useEffect(() => {
       const fetchTableData = async () => {
@@ -61,11 +64,11 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
 
             <InvoicesTable
                isMobile={isMobile}
-               tableData={tableData}
+               tableData={filteredData}
                loading={loading}
                messageApi={messageApi}
                tableType="R"
-               tableColumns={SubmittedInvoiceColumns}
+               tableColumns={tableColumns}
             />
          </Card>
       </>

@@ -1,7 +1,7 @@
 import { CheckCircleTwoTone, CloseCircleTwoTone } from "@ant-design/icons";
 import dayjs from "dayjs";
 
-const InvoicesTableColumns = (getColumnSearchProps) => ([
+const InvoicesTableColumns = (getColumnSearchProps) => [
    {
       title: "Receipt Number",
       dataIndex: "invoiceNumber",
@@ -62,21 +62,27 @@ const InvoicesTableColumns = (getColumnSearchProps) => ([
          );
       },
    },
-]);
+];
 
-const SubmittedInvoiceColumns = [
+const SubmittedInvoiceColumns = (getColumnSearchProps) => [
    {
-      title: "Id / InternalId",
-      render: (_, record) => (
-         <>
-            <p style={{ margin: 0, display: "flex", flexDirection:"column", alignItems: "center" }}>
-               <a target="_blank" href={record.publicUrl}>{record.uuid} /</a>
-               <p style={{ margin: 0 }}>
-                  <strong>{record.internalId}</strong>
-               </p>
-            </p>
-         </>
+      title: "UUID",
+      dataIndex: "uuid",
+      render: (text, record) => (
+         <a
+            target="_blank"
+            href={record.publicUrl}
+         >
+            {text}
+         </a>
       ),
+      ...getColumnSearchProps("uuid", "search"),
+   },
+   {
+      title: "Internal Id",
+      dataIndex: "internalId",
+      render: (text) => <>{text}</>,
+      ...getColumnSearchProps("internalId", "search"),
    },
    {
       title: "Date Time Received",
@@ -97,11 +103,13 @@ const SubmittedInvoiceColumns = [
       title: "Receiver",
       dataIndex: "receiverName",
       render: (text) => <>{text}</>,
+      ...getColumnSearchProps("receiverName", "search"),
    },
    {
       title: "Status",
       dataIndex: "status",
       render: (text) => <>{text}</>,
+      ...getColumnSearchProps("status", "search", true),
    },
 ];
 
