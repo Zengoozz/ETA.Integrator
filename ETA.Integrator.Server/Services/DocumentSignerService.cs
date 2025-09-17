@@ -36,176 +36,6 @@ namespace ETA.Integrator.Server.Services
 
             List<string> documents = new List<string>();
 
-            var signingCert = GetSigningCertificate(tokenPin);
-
-            foreach (var model in viewModels) 
-            {
-                var invoice = model.FromViewModel(issuer, invoiceType, isProduction);
-
-                invoice.Signatures = new List<SignatureModel>();
-                SignatureModel signature = new SignatureModel();
-                signature.SignatureType = "I";
-
-                var sourceDocumentJson = SerializedDocumentToJson(invoice.FromInvoiceModel());
-
-                string cades = "";
-
-                JObject? request = JsonConvert.DeserializeObject<JObject>(sourceDocumentJson, new JsonSerializerSettings()
-                {
-                    FloatFormatHandling = FloatFormatHandling.String,
-                    FloatParseHandling = FloatParseHandling.Decimal,
-                    DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                    DateParseHandling = DateParseHandling.None,
-                    ContractResolver = new DefaultContractResolver
-                    {
-                        NamingStrategy = new CamelCaseNamingStrategy()
-                        {
-                            ProcessDictionaryKeys = true,
-                            OverrideSpecifiedNames = true
-                        }
-                    }
-                });
-
-                if (request == null)
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SIGNING_ERR",
-                        detail: "Request can not be null"
-                        );
-
-                //Start serialize
-                string canonicalString = Canonicalize(request);
-                var documentVersion = request["documentTypeVersion"];
-
-                if (documentVersion == null)
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status500InternalServerError,
-                        message: "SIGNING_ERR",
-                        detail: "Document type version doesn't exist"
-                        );
-
-                // retrieve cades
-                if (documentVersion.Value<string>() == "0.9")
-                {
-                    cades = "ANY";
-                }
-                else
-                {
-                    cades = SignWithCMS(canonicalString, tokenPin, signingCert);
-                }
-
-                JObject signaturesObject = new JObject(
-                                    new JProperty("signatureType", "I"),
-                                    new JProperty("value", cades));
-
-                JArray signaturesArray = [signaturesObject];
-                request.Add("signatures", signaturesArray);
-
-
-                var signedDocument = JsonConvert.SerializeObject(request);
-
-                if (signedDocument == null)
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status404NotFound,
-                        message: "SIGNING_ERR",
-                        detail: "Invoice cannot be empty"
-                        );
-
-                documents.Add(signedDocument);
-            }
-
-            return documents;
-        }
-        public string SignDocument(InvoiceModel invoice, string tokenPin)
-        {
-            invoice.Signatures = new List<SignatureModel>();
-            SignatureModel signature = new SignatureModel();
-            signature.SignatureType = "I";
-
-            var sourceDocumentJson = SerializedDocumentToJson(invoice.FromInvoiceModel());
-
-            string cades = "";
-
-            JObject? request = JsonConvert.DeserializeObject<JObject>(sourceDocumentJson, new JsonSerializerSettings()
-            {
-                FloatFormatHandling = FloatFormatHandling.String,
-                FloatParseHandling = FloatParseHandling.Decimal,
-                DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                DateParseHandling = DateParseHandling.None,
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new CamelCaseNamingStrategy()
-                    {
-                        ProcessDictionaryKeys = true,
-                        OverrideSpecifiedNames = true
-                    }
-                }
-            });
-
-            if (request == null)
-                throw new ProblemDetailsException(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SIGNING_ERR",
-                    detail: "Request can not be null"
-                    );
-
-            //Start serialize
-            string canonicalString = Canonicalize(request);
-            var documentVersion = request["documentTypeVersion"];
-
-            if (documentVersion == null)
-                throw new ProblemDetailsException(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    message: "SIGNING_ERR",
-                    detail: "Document type version doesn't exist"
-                    );
-
-            // retrieve cades
-            if (documentVersion.Value<string>() == "0.9")
-            {
-                cades = "ANY";
-            }
-            else
-            {
-                var signingCert = GetSigningCertificate(tokenPin);
-                cades = SignWithCMS(canonicalString, tokenPin, signingCert);
-            }
-
-            JObject signaturesObject = new JObject(
-                                    new JProperty("signatureType", "I"),
-                                    new JProperty("value", cades));
-
-            JArray signaturesArray = [signaturesObject];
-            request.Add("signatures", signaturesArray);
-
-
-            return JsonConvert.SerializeObject(request);
-        }
-        private static string SignWithCMS(string serializedText, string tokenPin, X509Certificate2 signingCert)
-        {
-            byte[] data = Encoding.UTF8.GetBytes(serializedText);
-
-            EssCertIDv2 bouncyCertificate = new EssCertIDv2(
-                new Org.BouncyCastle.Asn1.X509.AlgorithmIdentifier(new DerObjectIdentifier("1.2.840.113549.1.9.16.2.47")),
-                HashBytes(signingCert.RawData)
-            );
-
-            SigningCertificateV2 signerCertificateV2 = new SigningCertificateV2(new EssCertIDv2[] { bouncyCertificate });
-            CmsSigner signer = new CmsSigner(signingCert);
-
-            signer.DigestAlgorithm = new Oid("2.16.840.1.101.3.4.2.1");
-            signer.SignedAttributes.Add(new Pkcs9SigningTime(DateTime.UtcNow));
-            signer.SignedAttributes.Add(new AsnEncodedData(new Oid("1.2.840.113549.1.9.16.2.47"), signerCertificateV2.GetEncoded()));
-
-            ContentInfo content = new ContentInfo(new Oid("1.2.840.113549.1.7.5"), data);
-            SignedCms cms = new SignedCms(content, true);
-            cms.ComputeSignature(signer);
-            var output = cms.Encode();
-
-            return Convert.ToBase64String(output);
-        }
-        private static X509Certificate2 GetSigningCertificate(string tokenPin)
-        {
             var DllLibPath = @"C:\Windows\System32\eps2003csp11.dll";
 
             Pkcs11InteropFactories factories = new Pkcs11InteropFactories();
@@ -263,9 +93,108 @@ namespace ETA.Integrator.Server.Services
                     var certForSigning = foundCerts[0];
                     store.Close();
 
-                    return certForSigning;
+                    foreach (var model in viewModels)
+                    {
+                        var invoice = model.FromViewModel(issuer, invoiceType, isProduction);
+
+                        invoice.Signatures = new List<SignatureModel>();
+                        SignatureModel signature = new SignatureModel();
+                        signature.SignatureType = "I";
+
+                        var sourceDocumentJson = SerializedDocumentToJson(invoice.FromInvoiceModel());
+
+                        string cades = "";
+
+                        JObject? request = JsonConvert.DeserializeObject<JObject>(sourceDocumentJson, new JsonSerializerSettings()
+                        {
+                            FloatFormatHandling = FloatFormatHandling.String,
+                            FloatParseHandling = FloatParseHandling.Decimal,
+                            DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                            DateParseHandling = DateParseHandling.None,
+                            ContractResolver = new DefaultContractResolver
+                            {
+                                NamingStrategy = new CamelCaseNamingStrategy()
+                                {
+                                    ProcessDictionaryKeys = true,
+                                    OverrideSpecifiedNames = true
+                                }
+                            }
+                        });
+
+                        if (request == null)
+                            throw new ProblemDetailsException(
+                                statusCode: StatusCodes.Status500InternalServerError,
+                                message: "SIGNING_ERR",
+                                detail: "Request can not be null"
+                                );
+
+                        //Start serialize
+                        string canonicalString = Canonicalize(request);
+                        var documentVersion = request["documentTypeVersion"];
+
+                        if (documentVersion == null)
+                            throw new ProblemDetailsException(
+                                statusCode: StatusCodes.Status500InternalServerError,
+                                message: "SIGNING_ERR",
+                                detail: "Document type version doesn't exist"
+                                );
+
+                        // retrieve cades
+                        if (documentVersion.Value<string>() == "0.9")
+                        {
+                            cades = "ANY";
+                        }
+                        else
+                        {
+                            cades = SignWithCMS(canonicalString, certForSigning);
+                        }
+
+                        JObject signaturesObject = new JObject(
+                                            new JProperty("signatureType", "I"),
+                                            new JProperty("value", cades));
+
+                        JArray signaturesArray = [signaturesObject];
+                        request.Add("signatures", signaturesArray);
+
+
+                        var signedDocument = JsonConvert.SerializeObject(request);
+
+                        if (signedDocument == null)
+                            throw new ProblemDetailsException(
+                                statusCode: StatusCodes.Status404NotFound,
+                                message: "SIGNING_ERR",
+                                detail: "Invoice cannot be empty"
+                                );
+
+                        documents.Add(signedDocument);
+                    }
                 }
             }
+
+            return documents;
+        }
+        private static string SignWithCMS(string serializedText, X509Certificate2 signingCert)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(serializedText);
+
+            EssCertIDv2 bouncyCertificate = new EssCertIDv2(
+                new Org.BouncyCastle.Asn1.X509.AlgorithmIdentifier(new DerObjectIdentifier("1.2.840.113549.1.9.16.2.47")),
+                HashBytes(signingCert.RawData)
+            );
+
+            SigningCertificateV2 signerCertificateV2 = new SigningCertificateV2(new EssCertIDv2[] { bouncyCertificate });
+            CmsSigner signer = new CmsSigner(signingCert);
+
+            signer.DigestAlgorithm = new Oid("2.16.840.1.101.3.4.2.1");
+            signer.SignedAttributes.Add(new Pkcs9SigningTime(DateTime.UtcNow));
+            signer.SignedAttributes.Add(new AsnEncodedData(new Oid("1.2.840.113549.1.9.16.2.47"), signerCertificateV2.GetEncoded()));
+
+            ContentInfo content = new ContentInfo(new Oid("1.2.840.113549.1.7.5"), data);
+            SignedCms cms = new SignedCms(content, true);
+            cms.ComputeSignature(signer);
+            var output = cms.Encode();
+
+            return Convert.ToBase64String(output);
         }
         private static byte[] HashBytes(byte[] input)
         {
@@ -378,6 +307,5 @@ namespace ETA.Integrator.Server.Services
             return serialized;
         }
 
-        
     }
 }
