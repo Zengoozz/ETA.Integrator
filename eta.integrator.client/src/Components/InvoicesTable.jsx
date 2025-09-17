@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Divider, Table, Flex } from "antd";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 
@@ -13,11 +13,12 @@ const InvoicesTable = ({
    tableColumns,
    onSubmit = null,
    submissionCallBack = null,
-   selectedRowsToAction = [],
-   setSelectedRowsToActionOn = null,
 }) => {
    const [loading, setLoading] = useState(false);
+   const [selectedRowsToAction, setSelectedRowsToActionOn] = useState([]);
    // rowSelection object indicates the need for row selection
+   useEffect(() => {},[]);
+
    const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
          console.info(

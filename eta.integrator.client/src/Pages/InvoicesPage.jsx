@@ -13,7 +13,8 @@ import { ROUTES } from "../Constants/Constants";
 
 const InvoicesPage = ({ isMobile }) => {
     // const [loading, setLoading] = useState(false);
-    const [selectedRowToSubmit, setSelectedRowToSubmit] = useState([]);
+    const [searchKey , setSearchKey] = useState(1);
+    
     const [searchValues, setSearchValues] = useState({dateFrom: null, dateTo: null, invoiceType: "I"});
     const [tableData, setTableData] = useState([]); // State to hold table data
     const [messageApi, contextHolder] = message.useMessage();
@@ -36,7 +37,8 @@ const InvoicesPage = ({ isMobile }) => {
             );
             setSearchValues(values);
             setTableData(response); // Update table data with the response
-            setSelectedRowToSubmit([]); // Clear selected rows after search
+
+            setSearchKey(searchKey + 1); // Force re-render of InvoicesTable by changing key
         } catch (error) {
             console.error("Failed to fetch invoices", error);
             throw error;
@@ -71,6 +73,7 @@ const InvoicesPage = ({ isMobile }) => {
 
                     <InvoicesTable
                         isMobile={isMobile}
+                        key={searchKey} // Use searchKey to force re-render
                         tableData={tableData}
                         messageApi={messageApi}
                         notificationApi={notificationApi}
@@ -78,8 +81,6 @@ const InvoicesPage = ({ isMobile }) => {
                         tableColumns={InvoicesTableColumns}
                         onSubmit={onSubmit}
                         submissionCallBack={() => handleSearch(searchValues)}
-                        selectedRowsToSubmit={selectedRowToSubmit}
-                        setSelectedRowsToActionOn={setSelectedRowToSubmit}
                     />
                 </Flex>
             </Card>
