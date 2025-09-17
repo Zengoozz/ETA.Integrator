@@ -1,7 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import AuthService from "../Services/AuthService";
 
-export const useLogin = (setLogIn, notificationApi, setLoading) => {
+export const useLogin = (
+   setLogIn,
+   notificationApi,
+   setLoading,
+   setCredentialsIncorrect
+) => {
    const navigate = useNavigate();
 
    const handleLogin = async (values) => {
@@ -19,6 +24,7 @@ export const useLogin = (setLogIn, notificationApi, setLoading) => {
             message: error.detail,
             duration: 0,
          });
+         setCredentialsIncorrect(true);
       } finally {
          setLoading(false);
       }

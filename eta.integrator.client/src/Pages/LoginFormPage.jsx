@@ -7,9 +7,15 @@ import { LoginFormValidationRules } from "../Constants/Constants";
 import { useLogin } from "../Hooks/useLogin";
 
 const LoginFormPage = ({ setLogIn, isMobile }) => {
+   const [credentialsIncorrect, setCredentialsIncorrect] = useState(false);
    const [loading, setLoading] = useState(false);
    const [notificationApi, contextHolderNotification] = notification.useNotification();
-   const { handleLogin } = useLogin(setLogIn, notificationApi, setLoading);
+   const { handleLogin } = useLogin(
+      setLogIn,
+      notificationApi,
+      setLoading,
+      setCredentialsIncorrect
+   );
 
    const onLoginFailed = (errorInfo) => {
       console.log("Failed:", errorInfo);
@@ -40,6 +46,8 @@ const LoginFormPage = ({ setLogIn, isMobile }) => {
                      size={isMobile ? "large" : "middle"}
                      placeholder="Username"
                      autoComplete="off"
+                     status={credentialsIncorrect ? "warning" : ""}
+                     onInput={() => setCredentialsIncorrect(false)}
                   />
                </Form.Item>
 
@@ -51,6 +59,8 @@ const LoginFormPage = ({ setLogIn, isMobile }) => {
                      prefix={<LockOutlined />}
                      size={isMobile ? "large" : "middle"}
                      placeholder="Password"
+                     status={credentialsIncorrect ? "warning" : ""}
+                     onInput={() => setCredentialsIncorrect(false)}
                   />
                </Form.Item>
 
