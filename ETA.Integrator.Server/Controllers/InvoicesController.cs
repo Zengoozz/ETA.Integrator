@@ -1,10 +1,7 @@
 ﻿using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Models;
-using ETA.Integrator.Server.Models.Core;
-using ETA.Integrator.Server.Models.Provider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using RestSharp;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -12,18 +9,12 @@ namespace ETA.Integrator.Server.Controllers
     [ApiController]
     public class InvoicesController : ControllerBase
     {
-        private readonly CustomConfigurations _customConfig;
-        private readonly ILogger<InvoicesController> _logger;
         private readonly IApiCallerService _apiCallerService;
 
         public InvoicesController(
-            IOptions<CustomConfigurations> customConfigurations,
-            ILogger<InvoicesController> logger,
             IApiCallerService apiCallerService
             )
         {
-            _logger = logger;
-            _customConfig = customConfigurations.Value;
             _apiCallerService = apiCallerService;
         }
         [HttpGet]
@@ -50,6 +41,13 @@ namespace ETA.Integrator.Server.Controllers
             return Ok(response);
         }
 
-        
+        [HttpGet("GetSubmissions")]
+        public async Task<IActionResult> GetSubmissions(string submissionId, int pageNo = 1, int pageSize = 100)
+        {
+            var response = await _apiCallerService.GetSubmission(submissionId, pageNo, pageSize);
+
+            return Ok(response);
+        }
+
     }
 }

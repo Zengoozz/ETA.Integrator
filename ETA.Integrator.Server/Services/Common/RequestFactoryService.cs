@@ -119,6 +119,7 @@ namespace ETA.Integrator.Server.Services.Common
 
             return genericRequest;
         }
+        
         public GenericRequest GetRecentDocuments()
         {
             GenericRequest genericRequest = new();
@@ -136,7 +137,7 @@ namespace ETA.Integrator.Server.Services.Common
             );
 
             genericRequest.Request = new RestRequest("/api/v1/documents/recent", Method.Get)
-                .AddHeader("Content-Type", "application/json")
+                .AddHeader("Accept", "application/json")
                 .AddQueryParameter("pageNo", 1)
                 .AddQueryParameter("pageSize", 100)
                 .AddQueryParameter("submissionDateFrom", trimmedUtcNow.AddMonths(-1).ToString())
@@ -171,5 +172,27 @@ namespace ETA.Integrator.Server.Services.Common
             return genericRequest;
         }
 
+        public GenericRequest GetSubmission(string uuid, int pageNo, int pageSize)
+        {
+            GenericRequest genericRequest = new();
+            genericRequest.Request = new RestRequest($"/api/v1/documentsubmissions/{uuid}", Method.Get)
+                .AddParameter("pageNo", pageNo, ParameterType.QueryString)
+                .AddParameter("pageSize", pageSize, ParameterType.QueryString);
+            genericRequest.ClientType = ClientType.Consumer;
+
+            return genericRequest;
+        }
+
+        public GenericRequest SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo)
+        {
+            GenericRequest genericRequest = new();
+            genericRequest.Request = new RestRequest("/api/v1/documents/search", Method.Get)
+                .AddQueryParameter("documentType", "i")
+                .AddQueryParameter("submissionDateFrom", submissionDateFrom)
+                .AddQueryParameter("submissionDateTo", submissionDateTo);
+            genericRequest.ClientType = ClientType.Consumer;
+
+            return genericRequest;
+        }
     }
 }

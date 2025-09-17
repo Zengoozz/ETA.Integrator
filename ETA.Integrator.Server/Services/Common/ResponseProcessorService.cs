@@ -1,4 +1,4 @@
-﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.GetRecentDocuments;
+﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.RecentDocuments;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Helpers;
 using ETA.Integrator.Server.Interface.Services.Common;

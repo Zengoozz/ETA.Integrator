@@ -1,10 +1,10 @@
-﻿namespace ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments
+﻿namespace ETA.Integrator.Server.Dtos.ConsumerAPI
 {
-    public class Error
+    public class ErrorDTO
     {
         public string Code { get; set; } = "";  
         public string Message { get; set; } = "";
         public string? Target { get; set; }
-        public List<Error> Details { get; set; } = new();
+        public List<ErrorDTO> Details { get; set; } = new();
     }
 }

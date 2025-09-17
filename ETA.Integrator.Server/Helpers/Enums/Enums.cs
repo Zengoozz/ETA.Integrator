@@ -2,10 +2,12 @@
 {
     public enum InvoiceStatus
     {
+        Cancelled = -3,
+        Invalid = -2,
         Rejected = -1,
         NotSubmitted = 0,
-        Submitted = 1,
-        Success = 2
+        Submitted = 1, // InProgress
+        Valid = 2
     }
 
     public enum ClientType

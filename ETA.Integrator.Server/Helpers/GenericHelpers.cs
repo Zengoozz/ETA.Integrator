@@ -22,6 +22,13 @@ namespace ETA.Integrator.Server.Helpers
             return trimmedUtcNow;
         }
 
+        public static (DateTime start, DateTime end) GetStartAndEndOfDay(DateTime date)
+        {
+            DateTime startOfDay = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, DateTimeKind.Utc);
+            DateTime endOfDay = new DateTime(date.Year, date.Month, date.Day, 23, 59, 59, DateTimeKind.Utc);
+            return (startOfDay, endOfDay);
+        }
+
         public static T JsonDeserialize<T> (string content, JsonSerializerOptions? opt = null) where T : new()
         {
             var options = new JsonSerializerOptions
