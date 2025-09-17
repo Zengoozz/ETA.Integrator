@@ -28,7 +28,8 @@ namespace ETA.Integrator.Server.Services
             var listOfAccepted = responseDTO.AcceptedDocuments.Select(x => new InvoiceSubmissionLog
             {
                 InternalId = x.InternalId,
-                SubmissionId = x.Uuid,
+                Uuid = x.Uuid,
+                SubmissionId = responseDTO.SubmissionId,
                 Status = (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted"),
                 StatusStringfied = submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted",
                 SubmissionDate = submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.DateTimeIssued ?? utcNow,
