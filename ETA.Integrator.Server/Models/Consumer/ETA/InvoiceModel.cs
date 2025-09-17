@@ -10,7 +10,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
         public ReceiverModel Receiver { get; set; } = new ReceiverModel();
         public string DocumentType { get; set; } = string.Empty; // Must be "i"
         public string DocumentTypeVersion { get; set; } = string.Empty; // Must be "1.0"
-        public DateTime DateTimeIssued { get; set; }
+        public string DateTimeIssued { get; set; } = "";
         public string TaxpayerActivityCode { get; set; } = string.Empty;
         public string InternalID { get; set; } = string.Empty;
         public string PurchaseOrderReference { get; set; } = string.Empty;
@@ -34,37 +34,59 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
 
     public static class InvoiceModelMapper
     {
-        public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer)
+        public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer, string invoiceType, bool isProduction = false)
         {
             if (viewModel is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status400BadRequest,
-                    message: "InvoiceModelMapper/FromViewModel: PROVIDER_INVOICE_NULL",
+                    message: "PROVIDER_INVOICE_NULL",
                     detail: "Mapping provider invoice to the consumer invoice failed!"
                     );
+
+            if (viewModel.RegistrationNumber == "NOT_FOUND" || string.IsNullOrEmpty(viewModel.RegistrationNumber))
+                throw new ProblemDetailsException(
+                   statusCode: StatusCodes.Status400BadRequest,
+                   message: "NOT_FOUND",
+                   detail: $"Invoice #{viewModel.InvoiceNumber}: Reciever ({viewModel.ReceiverName}) has no registeration number."
+                   );
+
+            var listOfNeededProps = new List<string> { "Country", "Governate", "RegionCity", "Street", "BuildingNumber" };
+
+            var receiverAddressObjDict = viewModel.ReceiverAddress.GetType()
+                 .GetProperties()
+                 .ToDictionary(p => p.Name, p => p.GetValue(viewModel.ReceiverAddress));
+
+            var isAddressCorrupt = receiverAddressObjDict.Any(d => listOfNeededProps.Contains(d.Key) && d.Value is null);
+
+            if (isAddressCorrupt)
+                throw new ProblemDetailsException(
+                       statusCode: StatusCodes.Status400BadRequest,
+                       message: "INVALID",
+                       detail: $"Invoice #{viewModel.InvoiceNumber}: Reciever ({viewModel.ReceiverName}) has invalid address."
+                       );
 
             return new InvoiceModel
             {
                 Issuer = issuer,
                 Receiver = new ReceiverModel
                 {
-                    Type = "B",
-                    Id = viewModel.RegistrationNumber == "NOT_FOUND" ? "313717919" : viewModel.RegistrationNumber,
+                    Type = invoiceType == "I" ? "P" : "B",
+                    Id = viewModel.RegistrationNumber,
                     Name = viewModel.ReceiverName,
                     Address = viewModel.ReceiverAddress
                 },
                 TaxTotals = new List<TaxTotalModel>(),
                 Signatures = new List<SignatureModel>(),
                 DocumentType = "i",
-                DocumentTypeVersion = "0.9",
-                DateTimeIssued = GenericHelpers.GetCurrentUTCTime(-1),
+                DocumentTypeVersion = isProduction ? "1.0" : "0.9",
+                DateTimeIssued = GenericHelpers.GetCurrentUTCTime(-70).ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 TaxpayerActivityCode = "8610",
                 InternalID = viewModel.InvoiceId.ToString(),
                 InvoiceLines = viewModel.InvoiceItems.Select(item => new InvoiceLineModel
                 {
                     Description = item.Description,
                     ItemType = item.ItemType,
-                    ItemCode = item.ItemCode,
+                    ItemCode = "EG-538562838-9991",
                     UnitType = item.UnitType,
                     Quantity = item.Quantity,
                     UnitValue = item.UnitValue,
@@ -83,14 +105,14 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 TotalDiscountAmount = 0, // Based on the Sum of InvoiceLines Discount.Amount
                 ExtraDiscountAmount = 0,
                 TotalItemsDiscountAmount = 0, // Based on the Sum of TotalDiscountAmount and ExtraDiscountAmount
-                //document.purchaseOrderReference = ; // OPTIONAL
-                //document.purchaseOrderDescription = ; // OPTIONAL
-                //document.salesOrderReference = ; // OPTIONAL
-                //document.salesOrderDescription = ; // OPTIONAL
-                //document.proformaInvoiceNumber = ; // OPTIONAL
-                //document.payment = ; // OPTIONAL
-                //document.delivery = ; // OPTIONAL
-                //document.ServiceDeliveryDate = ; //OPTIONAL
+                                              //document.purchaseOrderReference = ; // OPTIONAL
+                                              //document.purchaseOrderDescription = ; // OPTIONAL
+                                              //document.salesOrderReference = ; // OPTIONAL
+                                              //document.salesOrderDescription = ; // OPTIONAL
+                                              //document.proformaInvoiceNumber = ; // OPTIONAL
+                                              //document.payment = ; // OPTIONAL
+                                              //document.delivery = ; // OPTIONAL
+                                              //document.ServiceDeliveryDate = ; //OPTIONAL
             };
         }
     }

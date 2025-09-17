@@ -20,9 +20,11 @@ builder.Services.AddAllServices(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
-app.UseDefaultFiles();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseRouting();
+app.UseCors("AllowAll");
+//app.UseDefaultFiles();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -33,13 +35,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-//app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapFallbackToFile("/index.html");
+app.MapFallbackToFile("index.html");
 app.Run();
 
 

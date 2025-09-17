@@ -18,7 +18,7 @@ const InvoicesTable = ({
    // rowSelection object indicates the need for row selection
    const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
-         console.log(
+         console.info(
             `selectedRowKeys: ${selectedRowKeys}`,
             "selectedRows: ",
             selectedRows
@@ -47,11 +47,13 @@ const InvoicesTable = ({
       // Start loading
       setLoading(true);
       onSubmit(selectedRowToSubmit)
-         .then(() => {
-            messageApi.open({
+         .then((response) => {
+            notificationApi.open({
                type: "success",
-               content: "Selected rows saved successfully!",
-               duration: 2,
+               message: (
+                  <span dangerouslySetInnerHTML={{ __html: response.responseMessage.replace(/\n/g, "<br/>") }} />
+               ),
+               duration: 0,
             });
          })
          .catch((error) => {

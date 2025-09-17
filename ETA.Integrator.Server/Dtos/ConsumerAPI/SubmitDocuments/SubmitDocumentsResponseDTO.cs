@@ -2,9 +2,8 @@
 {
     public class SubmitDocumentsResponseDTO
     {
-        public int StatusCode {  get; set; }    
-        public bool IsSuccess { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public SuccessfulResponseDTO SuccessfulResponseDTO { get; set; } = new();
+        public bool IsAllSuccess { get; set; } = false;
+        public bool IsAllFailure { get; set; } = false;
+        public string ResponseMessage { get; set; } = string.Empty;
     }
 }

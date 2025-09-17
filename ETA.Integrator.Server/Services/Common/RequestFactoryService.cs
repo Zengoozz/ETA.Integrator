@@ -1,52 +1,91 @@
-﻿using ETA.Integrator.Server.Interface.Services;
-using ETA.Integrator.Server.Models.Consumer.ETA;
-using ETA.Integrator.Server.Models.Provider;
-using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Models.Core;
-using RestSharp;
-using ETA.Integrator.Server.Interface.Services.Consumer;
+﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Helpers.Enums;
+using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Models;
+using ETA.Integrator.Server.Models.Consumer.ETA;
+using ETA.Integrator.Server.Models.Core;
+using ETA.Integrator.Server.Models.Provider.Requests;
+using Microsoft.Extensions.Options;
+using RestSharp;
 
 namespace ETA.Integrator.Server.Services.Common
 {
     public class RequestFactoryService : IRequestFactoryService
     {
-        private readonly ILogger<RequestFactoryService> _logger;
         private readonly ISettingsStepService _settingsStepService;
-        private readonly ISignatureConsumerService _signatureConsumerService;
+        private readonly IDocumentSignerService _documentSignerService;
         public RequestFactoryService(
-            ILogger<RequestFactoryService> logger,
+            IOptions<CustomConfigurations> customConfig,
             ISettingsStepService settingsStepService,
-            ISignatureConsumerService signatureConsumerService
+            IDocumentSignerService documentSignerService
             )
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settingsStepService = settingsStepService ?? throw new ArgumentNullException(nameof(_settingsStepService));
-            _signatureConsumerService = signatureConsumerService;
+            _documentSignerService = documentSignerService;
         }
 
-        #region SUBMIT INVOICE
-        public async Task<RestRequest> SubmitDocuments(List<ProviderInvoiceViewModel> invoicesList)
+        public GenericRequest ConnectToProvider(ProviderLoginRequestModel model)
         {
-            List<InvoiceModel> documents = new List<InvoiceModel>();
+            GenericRequest genericRequest = new();
+
+            genericRequest.Request = new RestRequest("/api/Auth/LogIn", Method.Post).AddJsonBody(model);
+            genericRequest.ClientType = ClientType.Provider;
+
+            return genericRequest;
+        }
+
+        public async Task<GenericRequest> ConnectToConsumer(ConnectionDTO? model)
+        {
+            GenericRequest genericRequest = new();
+            ConnectionDTO? connectionConfig = model;
+
+            if (connectionConfig is null)
+                connectionConfig = await _settingsStepService.GetConnectionData();
+
+            // CLIENT_ID | CLIENT_SECRET VALIDATION
+            if (connectionConfig is null || string.IsNullOrWhiteSpace(connectionConfig.ClientId) || string.IsNullOrWhiteSpace(connectionConfig.ClientSecret))
+            {
+                var errMsg = connectionConfig is null ? "whole" : (string.IsNullOrWhiteSpace(connectionConfig.ClientId) ? "(client_id)" : "(client_secret)");
+
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    message: "NOT_FOUND",
+                    detail: $"Connection configuration {errMsg} not found"
+                    );
+            }
+
+
+            genericRequest.Request = new RestRequest("/connect/token", Method.Post)
+                .AddParameter("grant_type", "client_credentials")
+                .AddParameter("client_id", connectionConfig.ClientId)
+                .AddParameter("client_secret", connectionConfig.ClientSecret)
+                .AddParameter("scope", "InvoicingAPI");
+            genericRequest.ClientType = ClientType.ConsumerAuth;
+
+            return genericRequest;
+        }
+
+        public async Task<GenericRequest> SubmitDocuments(InvoiceRequest request)
+        {
+            GenericRequest genericRequest = new();
+            List<string> documents = new List<string>();
 
             var connectionSettings = await _settingsStepService.GetConnectionData();
 
             if (connectionSettings is null || string.IsNullOrWhiteSpace(connectionSettings.TokenPin))
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
-                    message: "RequestFactoryService/SubmitDocuments: TOKEN_PIN_NOT_FOUND",
+                    message: "TOKEN_PIN_NOT_FOUND",
                     detail: "Token pin not found."
                     );
-
-            #region ISSUER_PREP
 
             IssuerDTO? issuerData = await _settingsStepService.GetIssuerData();
 
             if (issuerData is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status404NotFound,
-                    message: "RequestFactoryService/SubmitDocuments: ISSUER_NOT_FOUND",
+                    message: "ISSUER_NOT_FOUND",
                     detail: "Issuer data not found."
                     );
 
@@ -55,51 +94,37 @@ namespace ETA.Integrator.Server.Services.Common
             if (issuer is null)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    message: "RequestFactoryService/SubmitDocuments: ISSUER_MAPPING_FAILED",
+                    message: "ISSUER_MAPPING_FAILED",
                     detail: "Issuer mapping failed"
                     );
-            #endregion
 
-            #region INVOICE_PREP
-            foreach (var invoice in invoicesList)
+            try
             {
-                var doc = PrepareInvoiceDetails(invoice, issuer, connectionSettings.TokenPin);
-
-                documents.Add(doc);
+                documents = _documentSignerService.SignMultipleDocuments(request.Invoices, issuer, request.InvoiceType, connectionSettings.TokenPin);
             }
-            #endregion
-
-            #region REQUEST_PREPARE
-            var submitRequestBody = new
+            catch (Exception ex)
             {
-                documents
-            };
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    message: "SIGNING_ERR",
+                    detail: $"Document signing failed. {ex.Message}"
+                    );
+            }
 
-            var submitRequest = new RestRequest("/api/v1/documentsubmissions", Method.Post)
-                            .AddHeader("Content-Type", "application/json").AddJsonBody(submitRequestBody);
-            #endregion
+            string combinedJson = "{ \"documents\": [" + string.Join(",", documents) + "] }";
 
-            return submitRequest;
+            genericRequest.Request = new RestRequest("/api/v1/documentsubmissions", Method.Post)
+                            .AddHeader("Content-Type", "application/json").AddStringBody(combinedJson, ContentType.Json);
+            genericRequest.ClientType = ClientType.Consumer;
+
+            return genericRequest;
         }
-
-        private InvoiceModel PrepareInvoiceDetails(ProviderInvoiceViewModel invoiceViewModel, IssuerModel issuer, string tokenPin)
+        
+        public GenericRequest GetRecentDocuments()
         {
+            GenericRequest genericRequest = new();
 
-            //TODO: Validate the invoices data integrity
-
-            InvoiceModel document = invoiceViewModel.FromViewModel(issuer);
-
-            //_signatureConsumerService.SignDocument(document, tokenPin);
-
-            return document;
-        }
-
-        #endregion
-
-        public RestRequest GetRecentDocuments()
-        {
             DateTime utcNow = DateTime.UtcNow;
-
             // Create a new DateTime without milliseconds
             DateTime trimmedUtcNow = new DateTime(
                 utcNow.Year,
@@ -111,35 +136,63 @@ namespace ETA.Integrator.Server.Services.Common
                 DateTimeKind.Utc
             );
 
-            var request = new RestRequest("/api/v1/documents/recent", Method.Get)
-                .AddHeader("Content-Type", "application/json")
+            genericRequest.Request = new RestRequest("/api/v1/documents/recent", Method.Get)
+                .AddHeader("Accept", "application/json")
                 .AddQueryParameter("pageNo", 1)
                 .AddQueryParameter("pageSize", 100)
                 .AddQueryParameter("submissionDateFrom", trimmedUtcNow.AddMonths(-1).ToString())
                 .AddQueryParameter("submissionDateTo", trimmedUtcNow.ToString())
                 .AddQueryParameter("documentType", "i");
+            genericRequest.ClientType = ClientType.Consumer;
 
-            return request;
+            return genericRequest;
         }
 
-        public RestRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
+        public GenericRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
         {
-            var request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
+            GenericRequest genericRequest = new();
+
+            genericRequest.Request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
 
             if (fromDate != null && toDate != null && !string.IsNullOrWhiteSpace(invoiceType))
             {
-                request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
+                genericRequest.Request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
                     .AddParameter("toDate", toDate, ParameterType.QueryString)
                     .AddParameter("invoiceType", invoiceType, ParameterType.QueryString);
             }
             else
                 throw new ProblemDetailsException(
                     StatusCodes.Status400BadRequest,
-                    "RequestFactoryService/GetProviderInvoices: INVALID_PARAMS",
+                    "INVALID_PARAMS",
                     "Please provide fromDate, toDate and invoiceType parameters."
                     );
 
-            return request;
+            genericRequest.ClientType = ClientType.Provider;
+
+            return genericRequest;
+        }
+
+        public GenericRequest GetSubmission(string uuid, int pageNo, int pageSize)
+        {
+            GenericRequest genericRequest = new();
+            genericRequest.Request = new RestRequest($"/api/v1/documentsubmissions/{uuid}", Method.Get)
+                .AddParameter("pageNo", pageNo, ParameterType.QueryString)
+                .AddParameter("pageSize", pageSize, ParameterType.QueryString);
+            genericRequest.ClientType = ClientType.Consumer;
+
+            return genericRequest;
+        }
+
+        public GenericRequest SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo)
+        {
+            GenericRequest genericRequest = new();
+            genericRequest.Request = new RestRequest("/api/v1/documents/search", Method.Get)
+                .AddQueryParameter("documentType", "i")
+                .AddQueryParameter("submissionDateFrom", submissionDateFrom)
+                .AddQueryParameter("submissionDateTo", submissionDateTo);
+            genericRequest.ClientType = ClientType.Consumer;
+
+            return genericRequest;
         }
     }
 }

@@ -70,6 +70,7 @@ namespace ETA.Integrator.Server.Repositories
                 if (existed != null)
                 {
                     existed.Status = status;
+                    existed.StatusStringfied = status.ToString();
                     await _context.SaveChangesAsync();
                 }
                 else
