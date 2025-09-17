@@ -1,10 +1,10 @@
-import { useState } from "react";
+// import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../Services/AuthService";
 
-export const useLogin = (setLogIn) => {
+export const useLogin = (setLogIn, notificationApi, setLoading) => {
    const navigate = useNavigate();
-   const [loading, setLoading] = useState(false);
+   // const [loading, setLoading] = useState(false);
 
    const handleLogin = async (values) => {
       setLoading(true);
@@ -16,13 +16,15 @@ export const useLogin = (setLogIn) => {
             setLogIn(true);
             navigate("/", { replace: true });
          }
-
-      } catch (err) {
-         console.error("Login failed:", err);
+      } catch (error) {
+         notificationApi.error({
+            message: error.detail,
+            duration: 0,
+         });
       } finally {
          setLoading(false);
       }
    };
 
-   return { handleLogin, loading };
+   return { handleLogin };
 };
