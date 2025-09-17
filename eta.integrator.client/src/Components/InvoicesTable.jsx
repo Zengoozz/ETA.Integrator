@@ -17,7 +17,7 @@ const InvoicesTable = ({
    const [loading, setLoading] = useState(false);
    const [selectedRowsToAction, setSelectedRowsToActionOn] = useState([]);
    // rowSelection object indicates the need for row selection
-   useEffect(() => {},[]);
+   useEffect(() => {}, []);
 
    const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
@@ -26,7 +26,7 @@ const InvoicesTable = ({
             "selectedRows: ",
             selectedRows
          );
-         
+
          setSelectedRowsToActionOn(selectedRows); // Update the selected rows state
       },
       getCheckboxProps: (record) => ({
@@ -55,7 +55,11 @@ const InvoicesTable = ({
             notificationApi.open({
                type: "success",
                message: (
-                  <span dangerouslySetInnerHTML={{ __html: response.responseMessage.replace(/\n/g, "<br/>") }} />
+                  <span
+                     dangerouslySetInnerHTML={{
+                        __html: response.responseMessage.replace(/\n/g, "<br/>"),
+                     }}
+                  />
                ),
                duration: 0,
             });
@@ -67,11 +71,10 @@ const InvoicesTable = ({
             });
             console.error(error.message);
          })
-         .finally(() => {
+         .finally(async () => {
+            if (tableType == "W") await submissionCallBack();
             loadingMessage(); // Close the loading message
             setLoading(false); // End loading
-            if(tableType == "W") 
-               submissionCallBack(); // Clear selection after submission
          });
    };
 
@@ -90,7 +93,7 @@ const InvoicesTable = ({
          )}
 
          <Divider />
-         
+
          <Table
             rowSelection={
                tableType == "W"
