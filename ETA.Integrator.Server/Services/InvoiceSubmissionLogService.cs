@@ -18,25 +18,23 @@ namespace ETA.Integrator.Server.Services
             _invoiceSubmissionLogRepository = invoiceSubmissionLogRepository;
         }
 
-        public async Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO responseDTO, List<SubmissionSummaryDTO> submissions, List<ProviderInvoiceViewModel> invoices)
+        public async Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO submitResponseDTO, List<SubmissionSummaryDTO> submissionsSummary, List<ProviderInvoiceViewModel> invoices)
         {
             string responseMessage = "";
             List<InvoiceSubmissionLog> invoiceSubmissionLogs = new List<InvoiceSubmissionLog>();
             var utcNow = GenericHelpers.GetCurrentUTCTime(-70);
 
 
-            var listOfAccepted = responseDTO.AcceptedDocuments.Select(x => new InvoiceSubmissionLog
+            var listOfAccepted = submitResponseDTO.AcceptedDocuments.Select(x => new InvoiceSubmissionLog
             {
                 InternalId = x.InternalId,
                 Uuid = x.Uuid,
-                SubmissionId = responseDTO.SubmissionId,
-                Status = (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted"),
-                StatusStringfied = submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted",
-                SubmissionDate = submissions.FirstOrDefault(d => d.InternalId == x.InternalId)?.DateTimeIssued ?? utcNow,
+                SubmissionId = submitResponseDTO.SubmissionId,
+                Status = (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), submissionsSummary.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted"),
+                StatusStringfied = submissionsSummary.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted",
+                SubmissionDate = submissionsSummary.FirstOrDefault(d => d.InternalId == x.InternalId)?.DateTimeIssued ?? utcNow,
             });
 
-            var test = listOfAccepted.Select(n => n.InternalId);
-            invoices.Where(i => listOfAccepted.Select(n => n.InternalId).Contains(i.InvoiceId.ToString())).Select(i => $"#{i.InvoiceNumber}");
             responseMessage += !listOfAccepted.Any() ?
                 $"Submitted: NONE\n" :
                 $"Submitted: {string.Join(" / ",
@@ -44,7 +42,7 @@ namespace ETA.Integrator.Server.Services
 
             invoiceSubmissionLogs.AddRange(listOfAccepted);
 
-            var listOfRejected = responseDTO.RejectedDocuments.Select(x => new InvoiceSubmissionLog
+            var listOfRejected = submitResponseDTO.RejectedDocuments.Select(x => new InvoiceSubmissionLog
             {
                 InternalId = x.InternalId,
                 Status = InvoiceStatus.Rejected,

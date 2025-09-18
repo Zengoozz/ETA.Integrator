@@ -13,6 +13,7 @@ using ETA.Integrator.Server.Models.Provider.Requests;
 using ETA.Integrator.Server.Models.Provider.Response;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System.Net;
 
 namespace ETA.Integrator.Server.Services.Common
 {
@@ -111,9 +112,26 @@ namespace ETA.Integrator.Server.Services.Common
 
         public async Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageNo = 1, int pageSize = 100)
         {
+            await Task.Delay(1000);
             pageSize = pageSize > 100 ? pageSize : 100;
             GenericRequest request = _requestFactoryService.GetSubmission(submissionId, pageNo, pageSize);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
+            int retries = 0;
+            while (response.StatusCode == HttpStatusCode.NotFound && retries < 3)
+            {
+                await Task.Delay(1000);
+                response = await _httpRequestSenderService.SendRequest(request);
+                retries++;
+            }
+            //case not found also 
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new SubmissionResponseDTO()
+                {
+                    Uuid = submissionId,
+                    DocumentSummary = []
+                };
+            }
             return await _responseProcessorService.ProcessResponse<SubmissionResponseDTO>(response);
         }
 
