@@ -186,7 +186,7 @@ namespace ETA.Integrator.Server.Services.Common
             return genericRequest;
         }
 
-        public GenericRequest SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string recieverType, string direction)
+        public GenericRequest SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string receiverType, string direction)
         {
             GenericRequest genericRequest = new();
             genericRequest.Request = new RestRequest("/api/v1/documents/search", Method.Get)
@@ -194,7 +194,7 @@ namespace ETA.Integrator.Server.Services.Common
                 .AddQueryParameter("submissionDateFrom", submissionDateFrom)
                 .AddQueryParameter("submissionDateTo", submissionDateTo)
                 .AddQueryParameter("status", status)
-                .AddQueryParameter("recieverType", recieverType)
+                .AddQueryParameter("receiverType", receiverType)
                 .AddQueryParameter("direction", direction);
             genericRequest.ClientType = ClientType.Consumer;
 
