@@ -49,5 +49,13 @@ namespace ETA.Integrator.Server.Controllers
             return Ok(response);
         }
 
+        [HttpGet("SearchDocuments")]
+        public async Task<IActionResult> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string direction, string status, string recieverType)
+        {
+            var response = await _apiCallerService.SearchDocuments(submissionDateFrom, submissionDateTo, direction, status, recieverType);
+
+            return Ok(response);
+        }
+
     }
 }
