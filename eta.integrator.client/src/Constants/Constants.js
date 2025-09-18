@@ -1309,7 +1309,10 @@ const SettingsValidationRules = {
 
 const InvoiceSearchValidationRules = {
    invoiceType: [{ required: true, message: "Please select the invoice type!" }],
+   invoiceStatus: [{ required: true, message: "Please select the invoice status!" }],
 };
+
+
 
 const IssuerTypes = [
    {
@@ -1337,6 +1340,17 @@ const InvoiceTypes = [
    },
 ];
 
+const InvoiceStatus = [
+   {
+      value: "V",
+      label: "Valid",
+   },
+   {
+      value: "I",
+      label: "Invalid",
+   },
+];
+
 const ROUTES = {
    HOME: "/home",
    LOGIN: "/login",
@@ -1353,5 +1367,6 @@ export {
    InvoiceSearchValidationRules,
    IssuerTypes,
    InvoiceTypes,
+   InvoiceStatus,
    ROUTES,
 };

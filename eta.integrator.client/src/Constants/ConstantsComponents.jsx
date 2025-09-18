@@ -31,11 +31,11 @@ const InvoicesTableColumns = (getColumnSearchProps) => [
       dataIndex: "netPrice",
       render: (value) => value.toFixed(2),
    },
-   {
-      title: "Vat Net",
-      dataIndex: "vatNet",
-      render: (value) => value.toFixed(2),
-   },
+   // {
+   //    title: "Vat Net",
+   //    dataIndex: "vatNet",
+   //    render: (value) => value.toFixed(2),
+   // },
    {
       title: "Date",
       dataIndex: "createdDate",

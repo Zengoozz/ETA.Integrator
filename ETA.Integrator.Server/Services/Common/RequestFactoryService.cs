@@ -188,6 +188,8 @@ namespace ETA.Integrator.Server.Services.Common
 
         public GenericRequest SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string receiverType, string direction)
         {
+            submissionDateTo = submissionDateTo.AddHours(23).AddMinutes(59).AddSeconds(59);
+
             GenericRequest genericRequest = new();
             genericRequest.Request = new RestRequest("/api/v1/documents/search", Method.Get)
                 .AddQueryParameter("documentType", "i")

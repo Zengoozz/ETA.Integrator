@@ -83,8 +83,8 @@ const InvoicesPage = ({ isMobile }) => {
                </Flex>
 
                <InvoicesTable
-                  isMobile={isMobile}
                   key={searchKey} // Use searchKey to force re-render
+                  isMobile={isMobile}
                   tableData={filteredData}
                   messageApi={messageApi}
                   notificationApi={notificationApi}

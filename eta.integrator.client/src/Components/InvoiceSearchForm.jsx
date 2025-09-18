@@ -1,11 +1,21 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { DatePicker, Button, Form, Flex, Select } from "antd";
-import { InvoiceSearchValidationRules, InvoiceTypes } from "../Constants/Constants";
+import {
+   InvoiceSearchValidationRules,
+   InvoiceStatus,
+   InvoiceTypes,
+} from "../Constants/Constants";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi, notificationApi }) => {
+const InvoiceSearchForm = ({
+   isMobile,
+   handleSearch,
+   messageApi,
+   notificationApi,
+   isStatusIncluded = false,
+}) => {
    const [form] = Form.useForm();
    const [loading, setLoading] = useState(false);
 
@@ -38,20 +48,39 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi, notificationApi
                };
             }
 
-            const formattedValues = {
+            var formattedValues = {
                dateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
                dateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
                invoiceType: invoiceTypeValue,
             };
 
+            var notificationMessage = `Showing ${invoiceTypeLabel}`;
+
+            if (isStatusIncluded) {
+               const invoiceStatusLabel =
+                  InvoiceStatus.find((i) => i.value === values.InvoiceStatus)?.label ??
+                  "all";
+
+               formattedValues = {
+                  dateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
+                  dateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
+                  invoiceType: invoiceTypeValue,
+                  invoiceStatus: values.InvoiceStatus,
+               };
+
+               notificationMessage = `Showing ${invoiceTypeLabel} of ${invoiceStatusLabel} status`;
+            }
+
+            var notificationObject = {
+               type: "success",
+               message: notificationMessage,
+               description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+               duration: 3,
+            };
+
             return handleSearch(formattedValues)
                .then(() => {
-                  notificationApi.open({
-                     type: "success",
-                     message: `Showing ${invoiceTypeLabel}`,
-                     description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
-                     duration: 3,
-                  });
+                  notificationApi.open(notificationObject);
                })
                .catch((error) => {
                   notificationApi.error({
@@ -76,11 +105,18 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi, notificationApi
          });
    };
 
+   const intialValues = isStatusIncluded
+      ? {
+           InvoiceType: "I",
+           InvoiceStatus: "V",
+        }
+      : {
+           InvoiceType: "I",
+        };
+
    return (
       <Form
-         initialValues={{
-            InvoiceType: "I",
-         }}
+         initialValues={intialValues}
          form={form}
          layout={isMobile ? "vertical" : "inline"}
       >
@@ -106,7 +142,6 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi, notificationApi
                   autoComplete="off"
                />
             </Form.Item>
-
             <Form.Item //TODO: Styling the dropdown
                // label="Invoice Type"
                name="InvoiceType"
@@ -123,6 +158,24 @@ const InvoiceSearchForm = ({ isMobile, handleSearch, messageApi, notificationApi
                   ))}
                </Select>
             </Form.Item>
+
+            {isStatusIncluded && (
+               <Form.Item
+                  name="InvoiceStatus"
+                  rules={InvoiceSearchValidationRules.invoiceStatus}
+               >
+                  <Select placeholder="Please select invoice status">
+                     {InvoiceStatus.map((type) => (
+                        <Option
+                           key={type.value}
+                           value={type.value}
+                        >
+                           {type.label}
+                        </Option>
+                     ))}
+                  </Select>
+               </Form.Item>
+            )}
 
             <Form.Item>
                <Button

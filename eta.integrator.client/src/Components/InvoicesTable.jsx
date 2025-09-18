@@ -11,6 +11,7 @@ const InvoicesTable = ({
    notificationApi,
    tableType,
    tableColumns,
+   isSubmittedInvoicesTable = false,
    onSubmit = null,
    submissionCallBack = null,
 }) => {
@@ -30,7 +31,7 @@ const InvoicesTable = ({
          setSelectedRowsToActionOn(selectedRows); // Update the selected rows state
       },
       getCheckboxProps: (record) => ({
-         disabled: record.isReviewed === true, // Column configuration not to be checked
+         disabled: isSubmittedInvoicesTable ? record.status === "Valid" : record.isReviewed === true, // Column configuration not to be checked
          name: record.invoiceNumber,
       }),
    };
@@ -109,7 +110,7 @@ const InvoicesTable = ({
                width: isMobile ? 150 : "auto",
                responsive: ["md"],
             }))}
-            rowKey={(record) => record.invoiceNumber}
+            rowKey={(record) => isSubmittedInvoicesTable ? record.longId : record.invoiceNumber}
             pagination={{
                pageSize: isMobile ? 5 : 10,
                responsive: true,
