@@ -135,9 +135,9 @@ namespace ETA.Integrator.Server.Services.Common
             return await _responseProcessorService.ProcessResponse<SubmissionResponseDTO>(response);
         }
 
-        public async Task<SearchDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string direction, string status, string recieverType)
+        public async Task<SearchDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string recieverType, string direction)
         {
-            GenericRequest request = _requestFactoryService.SearchDocuments(submissionDateFrom, submissionDateTo, direction, status, recieverType); // Implement when needed
+            GenericRequest request = _requestFactoryService.SearchDocuments(submissionDateFrom, submissionDateTo, status, recieverType, direction);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             return await _responseProcessorService.ProcessResponse<SearchDocumentsResponseDTO>(response);
         }

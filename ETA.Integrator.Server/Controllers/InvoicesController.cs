@@ -50,9 +50,9 @@ namespace ETA.Integrator.Server.Controllers
         }
 
         [HttpGet("SearchDocuments")]
-        public async Task<IActionResult> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string direction, string status, string recieverType)
+        public async Task<IActionResult> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string recieverType, string direction = "Sent")
         {
-            var response = await _apiCallerService.SearchDocuments(submissionDateFrom, submissionDateTo, direction, status, recieverType);
+            var response = await _apiCallerService.SearchDocuments(submissionDateFrom, submissionDateTo, status, recieverType, direction);
 
             return Ok(response);
         }
