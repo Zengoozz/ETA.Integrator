@@ -1,6 +1,7 @@
 ﻿using ETA.Integrator.Server.Helpers;
 using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
+using Microsoft.Extensions.Options;
 
 namespace ETA.Integrator.Server.Models.Consumer.ETA
 {
@@ -34,7 +35,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
 
     public static class InvoiceModelMapper
     {
-        public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer, string invoiceType, bool isProduction = false)
+        public static InvoiceModel FromViewModel(this ProviderInvoiceViewModel viewModel, IssuerModel issuer, string invoiceType, string itemCode, bool isProduction = false)
         {
             if (viewModel is null)
                 throw new ProblemDetailsException(
@@ -86,7 +87,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 {
                     Description = item.Description,
                     ItemType = item.ItemType,
-                    ItemCode = "EG-538562838-9991",
+                    ItemCode = itemCode,
                     UnitType = item.UnitType,
                     Quantity = item.Quantity,
                     UnitValue = item.UnitValue,
@@ -116,6 +117,4 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
             };
         }
     }
-
-
 }

@@ -95,7 +95,7 @@ namespace ETA.Integrator.Server.Services
 
                     foreach (var model in viewModels)
                     {
-                        var invoice = model.FromViewModel(issuer, invoiceType, isProduction);
+                        var invoice = model.FromViewModel(issuer, invoiceType, _customConfig.ItemCode, isProduction);
 
                         invoice.Signatures = new List<SignatureModel>();
                         SignatureModel signature = new SignatureModel();
