@@ -4,7 +4,7 @@ namespace ETA.Integrator.Server.Models.Provider
 {
     public class ProviderInvoiceViewModel
     {
-        public int InvoiceId { set; get; }
+        public string InvoiceId { set; get; } = string.Empty;
         public string InvoiceType { set; get; } = string.Empty;
         public string InvoiceNumber { get; set; } = string.Empty;
         public string RegistrationNumber { set; get; } = string.Empty;

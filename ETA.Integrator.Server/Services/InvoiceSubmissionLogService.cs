@@ -38,7 +38,7 @@ namespace ETA.Integrator.Server.Services
             responseMessage += !listOfAccepted.Any() ?
                 $"Submitted: NONE\n" :
                 $"Submitted: {string.Join(" / ",
-                    invoices.Where(i => listOfAccepted.Select(n => n.InternalId).Contains(i.InvoiceId.ToString())).Select(i => $"#{i.InvoiceNumber}"))}\n";
+                    invoices.Where(i => listOfAccepted.Select(n => n.InternalId).Contains(i.InvoiceId)).Select(i => $"#{i.InvoiceNumber}"))}\n";
 
             invoiceSubmissionLogs.AddRange(listOfAccepted);
 
@@ -54,7 +54,7 @@ namespace ETA.Integrator.Server.Services
             responseMessage += !listOfRejected.Any() ?
                 $"Rejected: NONE\n" :
                 $"Rejected: {string.Join(" / ",
-                    invoices.Where(i => listOfRejected.Select(n => n.InternalId).Contains(i.InvoiceId.ToString())).Select(i => $"#{i.InvoiceNumber}"))}\n";
+                    invoices.Where(i => listOfRejected.Select(n => n.InternalId).Contains(i.InvoiceId)).Select(i => $"#{i.InvoiceNumber}"))}\n";
 
             invoiceSubmissionLogs.AddRange(listOfRejected);
 
@@ -72,14 +72,14 @@ namespace ETA.Integrator.Server.Services
 
         public async Task ValidateInvoiceStatus(List<ProviderInvoiceViewModel> invoices)
         {
-            var listOfInvoiceIds = invoices.Select(x => x.InvoiceId.ToString()).ToList();
+            var listOfInvoiceIds = invoices.Select(x => x.InvoiceId).ToList();
             var invoiceLogs = await _invoiceSubmissionLogRepository.GetByListOfInternalIds(listOfInvoiceIds);
 
             if (invoiceLogs.Count > 0)
             {
                 foreach (var invoice in invoices)
                 {
-                    invoice.IsReviewed = invoiceLogs.Any(x => x.InternalId == invoice.InvoiceId.ToString() && x.Status >= InvoiceStatus.Submitted);
+                    invoice.IsReviewed = invoiceLogs.Any(x => x.InternalId == invoice.InvoiceId && x.Status >= InvoiceStatus.Submitted);
                 }
             }
         }

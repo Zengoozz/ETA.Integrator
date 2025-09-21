@@ -82,7 +82,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 DocumentTypeVersion = isProduction ? "1.0" : "0.9",
                 DateTimeIssued = GenericHelpers.GetCurrentUTCTime(-70).ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 TaxpayerActivityCode = "8610",
-                InternalID = viewModel.InvoiceId.ToString(),
+                InternalID = viewModel.InvoiceId,
                 InvoiceLines = viewModel.InvoiceItems.Select(item => new InvoiceLineModel
                 {
                     Description = item.Description,
