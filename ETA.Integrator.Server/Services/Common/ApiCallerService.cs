@@ -82,8 +82,8 @@ namespace ETA.Integrator.Server.Services.Common
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             List<ProviderInvoiceViewModel> processedResponse = await _responseProcessorService.ProcessResponse<List<ProviderInvoiceViewModel>>(response);
 
-            //if (processedResponse.Count() > 0)
-            //    await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
+            if (processedResponse.Count() > 0)
+                await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
 
             return processedResponse;
         }
