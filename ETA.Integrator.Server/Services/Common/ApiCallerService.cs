@@ -76,9 +76,9 @@ namespace ETA.Integrator.Server.Services.Common
             return processedResponse;
         }
 
-        public async Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
+        public async Task<List<ProviderInvoiceViewModel>> GetProviderInvoices(ProviderInvoicesSearchDTO searchModel)
         {
-            GenericRequest request = _requestFactoryService.GetProviderInvoices(fromDate, toDate, invoiceType);
+            GenericRequest request = _requestFactoryService.GetProviderInvoices(searchModel);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             List<ProviderInvoiceViewModel> processedResponse = await _responseProcessorService.ProcessResponse<List<ProviderInvoiceViewModel>>(response);
 

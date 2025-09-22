@@ -1,7 +1,7 @@
-﻿using ETA.Integrator.Server.Interface.Services.Common;
+﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace ETA.Integrator.Server.Controllers
 {
@@ -18,9 +18,16 @@ namespace ETA.Integrator.Server.Controllers
             _apiCallerService = apiCallerService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType = "")
+        public async Task<IActionResult> GetProviderInvoices(DateTime fromDate, DateTime toDate, string invoiceType, List<string> invoicesIds)
         {
-            var response = await _apiCallerService.GetProviderInvoices(fromDate, toDate, invoiceType);
+            ProviderInvoicesSearchDTO searchModel = new ProviderInvoicesSearchDTO()
+            {
+                StartDate = fromDate,
+                EndDate = toDate,
+                InvoiceType = string.IsNullOrEmpty(invoiceType) ? "I" : invoiceType,
+                InvoicesIds = invoicesIds
+            };
+            var response = await _apiCallerService.GetProviderInvoices(searchModel);
 
             return Ok(response.OrderBy(r => r.InvoiceNumber));
         }
@@ -56,6 +63,5 @@ namespace ETA.Integrator.Server.Controllers
 
             return Ok(response);
         }
-
     }
 }

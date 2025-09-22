@@ -13,7 +13,7 @@ namespace ETA.Integrator.Server.Interface.Services.Common
         Task<GenericRequest> ConnectToConsumer(ConnectionDTO? model = null);
         Task<GenericRequest> SubmitDocuments(InvoiceRequest request);
         GenericRequest GetRecentDocuments();
-        GenericRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType);
+        GenericRequest GetProviderInvoices(ProviderInvoicesSearchDTO searchModel);
         GenericRequest GetSubmission(string uuid, int pageNo, int pageSize);
         GenericRequest SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string receiverType, string direction);
     }

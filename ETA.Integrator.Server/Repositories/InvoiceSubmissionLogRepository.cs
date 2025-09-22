@@ -40,7 +40,16 @@ namespace ETA.Integrator.Server.Repositories
         {
             try
             {
-                await _context.AddAsync(entity);
+                var existed = await _dbSet.FirstOrDefaultAsync(x => x.Id == entity.Id);
+
+                if(existed != null)
+                {
+                    _context.Entry(existed).CurrentValues.SetValues(entity);
+                    _context.Entry(existed).Property(x => x.Id).IsModified = false;
+                }
+                else
+                    await _context.AddAsync(entity);
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception) {
@@ -52,7 +61,7 @@ namespace ETA.Integrator.Server.Repositories
         {
             try
             {
-                await _context.AddRangeAsync(listOfEntities);
+                _context.UpdateRange(listOfEntities);
                 await _context.SaveChangesAsync();
             }
             catch

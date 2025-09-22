@@ -151,24 +151,13 @@ namespace ETA.Integrator.Server.Services.Common
             return genericRequest;
         }
 
-        public GenericRequest GetProviderInvoices(DateTime? fromDate, DateTime? toDate, string invoiceType)
+        public GenericRequest GetProviderInvoices(ProviderInvoicesSearchDTO searchModel)
         {
             GenericRequest genericRequest = new();
 
-            genericRequest.Request = new RestRequest("/api/Invoices/GetInvoices", Method.Get);
+            genericRequest.Request = new RestRequest("/api/Invoices/GetInvoices", Method.Post);
 
-            if (fromDate != null && toDate != null && !string.IsNullOrWhiteSpace(invoiceType))
-            {
-                genericRequest.Request.AddParameter("fromDate", fromDate, ParameterType.QueryString)
-                    .AddParameter("toDate", toDate, ParameterType.QueryString)
-                    .AddParameter("invoiceType", invoiceType, ParameterType.QueryString);
-            }
-            else
-                throw new ProblemDetailsException(
-                    StatusCodes.Status400BadRequest,
-                    "INVALID_PARAMS",
-                    "Please provide fromDate, toDate and invoiceType parameters."
-                    );
+            genericRequest.Request.AddJsonBody(searchModel);
 
             genericRequest.ClientType = ClientType.Provider;
 

@@ -4,7 +4,7 @@ namespace ETA.Integrator.Server.Entities
 {
     public class InvoiceSubmissionLog
     {
-        public int Id { get; set; }
+        public int Id { get; set; } = 0;
         public string InternalId { get; set; } = "";
         public string SubmissionId { get; set; } = "";
         public string Uuid { get; set; } = "";

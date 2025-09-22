@@ -17,7 +17,14 @@ namespace ETA.Integrator.Server.Services
         {
             _invoiceSubmissionLogRepository = invoiceSubmissionLogRepository;
         }
-
+        public async Task<List<InvoiceSubmissionLog>> GetAll()
+        {
+            return await _invoiceSubmissionLogRepository.GetAll();
+        }
+        public async Task SaveList(List<InvoiceSubmissionLog> listOfEntities)
+        {
+            await _invoiceSubmissionLogRepository.SaveList(listOfEntities);
+        }
         public async Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO submitResponseDTO, List<SubmissionSummaryDTO> submissionsSummary, List<ProviderInvoiceViewModel> invoices)
         {
             string responseMessage = "";
