@@ -68,15 +68,15 @@ const SubmittedInvoiceColumns = (getColumnSearchProps) => [
    {
       title: "UUID",
       dataIndex: "uuid",
-      render: (text, record) => (
+      render: (_, record) => (
          <a
             target="_blank"
             href={record.publicUrl}
          >
-            {text}
+            {record.uuid}
          </a>
       ),
-      ...getColumnSearchProps("uuid", "search"),
+      // ...getColumnSearchProps("uuid", "search"),
    },
    {
       title: "Internal Id",
