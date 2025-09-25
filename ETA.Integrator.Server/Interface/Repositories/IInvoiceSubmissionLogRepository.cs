@@ -6,6 +6,7 @@ namespace ETA.Integrator.Server.Interface.Repositories
     public interface IInvoiceSubmissionLogRepository
     {
         Task<List<InvoiceSubmissionLog>> GetAll();
+        Task<List<InvoiceSubmissionLog>> GetAllValidWithIds(List<string> invoicesIds);
         Task<InvoiceSubmissionLog?> GetById(int id);
         Task<List<InvoiceSubmissionLog>> GetByInternalId(int id);
         Task<List<InvoiceSubmissionLog>> GetByListOfInternalIds(List<string> ids);

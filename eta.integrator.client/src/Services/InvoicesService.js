@@ -15,7 +15,7 @@ const getInvoicesAccordingToDateAsQueryParams = async (values) => {
    }
 };
 
-const submitInvoices = async (invoices, invoiceType) => {
+const submitInvoices = async (invoices, invoiceType, isResubmit = false, invoicesIds = []) => {
    try {
       const response = await GenericService.makeRequestFactory(
          "POST",
@@ -23,6 +23,8 @@ const submitInvoices = async (invoices, invoiceType) => {
          {
             Invoices: invoices,
             InvoiceType: invoiceType,
+            isResubmit: isResubmit,
+            invoicesIds: invoicesIds,
          }
       );
 

@@ -14,6 +14,7 @@ using ETA.Integrator.Server.Models.Provider.Response;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System.Net;
+using ETA.Integrator.Server.Entities;
 
 namespace ETA.Integrator.Server.Services.Common
 {
@@ -108,6 +109,30 @@ namespace ETA.Integrator.Server.Services.Common
             SubmitDocumentsResponseDTO logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, submissionResponse.DocumentSummary, invoicesRequest.Invoices);
 
             return logResponse;
+        }
+
+        public async Task<SubmitDocumentsResponseDTO> ResubmitInvoices(InvoiceRequest invoicesRequest)
+        {
+            List<InvoiceSubmissionLog> logs = await _invoiceSubmissionLogService.GetAllValidWithIds(invoicesRequest.InvoicesIds);
+            List<string> internalIds = logs.Select(l => l.InternalId).ToList();
+
+            if (logs.Count > 0)
+                return new SubmitDocumentsResponseDTO()
+                {
+                    IsError = true,
+                    ResponseMessage = $"The following invoices are already submitted: {string.Join(" / ", internalIds)}.\n Uncheck all of those submitted ones and try again."
+                };
+
+            ProviderInvoicesSearchDTO searchModel = new ProviderInvoicesSearchDTO()
+            {
+                StartDate = null,
+                EndDate = null,
+                InvoiceType = invoicesRequest.InvoiceType,
+                InvoicesIds = invoicesRequest.InvoicesIds
+            };
+
+            invoicesRequest.Invoices = await GetProviderInvoices(searchModel);
+            return await SubmitDocuments(invoicesRequest);
         }
 
         public async Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageNo = 1, int pageSize = 100)

@@ -15,6 +15,12 @@ import { ROUTES } from "../Constants/Constants";
 
 const SubmittedInvoicesPage = ({ isMobile }) => {
    const [searchKey, setSearchKey] = useState(1);
+   const [searchValues, setSearchValues] = useState({
+      dateFrom: null,
+      dateTo: null,
+      invoiceType: "I",
+      invoiceStatus: "Valid",
+   });
    const [tableData, setTableData] = useState([]); // State to hold table data
    const [messageApi, contextHolder] = message.useMessage();
    const [notificationApi, contextHolderNotification] = notification.useNotification();
@@ -26,6 +32,7 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
    const handleSearch = async (values) => {
       try {
          const response = await InvoicesService.searchDocumentsWithFilters(values);
+         setSearchValues(values);
          setTableData(response.result);
          setSearchKey(searchKey + 1);
       } catch (error) {
@@ -37,7 +44,19 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
       }
    };
 
-   // const handleSubmit =
+   const handleResubmit = async (selectedRows) => {
+      try {
+         return await InvoicesService.submitInvoices(
+            [],
+            searchValues.invoiceType,
+            true,
+            selectedRows.map((r) => r.internalId)
+         );
+      } catch (error) {
+         console.error(error.detail);
+         throw error;
+      }
+   };
 
    return (
       <>
@@ -71,8 +90,9 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
                tableType="W"
                tableColumns={tableColumns}
                isSubmittedInvoicesTable={true}
-               // onSubmit={onSubmit}
-               // submissionCallBack={() => handleSearch(searchValues)}
+               buttonName="Re-submit"
+               onSubmit={handleResubmit}
+               submissionCallBack={() => handleSearch(searchValues)}
             />
          </Card>
       </>

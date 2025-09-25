@@ -1,4 +1,5 @@
 ﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,15 @@ namespace ETA.Integrator.Server.Controllers
         [HttpPost("SubmitDocuments")]
         public async Task<IActionResult> SubmitDocuments(InvoiceRequest request)
         {
-            var response = await _apiCallerService.SubmitDocuments(request);
+            SubmitDocumentsResponseDTO response = new();
+
+            if (request.IsResubmit)
+                response = await _apiCallerService.ResubmitInvoices(request);
+            else
+                response = await _apiCallerService.SubmitDocuments(request);
+
+            if (response.IsError)
+                return BadRequest(response);
 
             return Ok(response);
         }

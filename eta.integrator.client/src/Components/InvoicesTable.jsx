@@ -12,6 +12,7 @@ const InvoicesTable = ({
    tableType,
    tableColumns,
    isSubmittedInvoicesTable = false,
+   buttonName = "Submit",
    onSubmit = null,
    submissionCallBack = null,
 }) => {
@@ -86,6 +87,7 @@ const InvoicesTable = ({
       >
          {tableType == "W" && (
             <CustomButton
+               name={buttonName}
                icon={<CloudDownloadOutlined />}
                loading={loading}
                handleClick={handleSubmitButtonClick}

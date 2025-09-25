@@ -21,6 +21,11 @@ namespace ETA.Integrator.Server.Repositories
             return await _dbSet.AsNoTracking().ToListAsync();
         }
 
+        public async Task<List<InvoiceSubmissionLog>> GetAllValidWithIds(List<string> invoicesIds)
+        {
+            return await _dbSet.AsNoTracking().Where(l => invoicesIds.Contains(l.InternalId) && l.Status >= InvoiceStatus.Submitted).ToListAsync();
+        }
+
         public async Task<InvoiceSubmissionLog?> GetById(int id)
         {
             return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);

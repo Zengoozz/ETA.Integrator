@@ -21,6 +21,10 @@ namespace ETA.Integrator.Server.Services
         {
             return await _invoiceSubmissionLogRepository.GetAll();
         }
+        public async Task<List<InvoiceSubmissionLog>> GetAllValidWithIds(List<string> invoicesIds)
+        {
+            return await _invoiceSubmissionLogRepository.GetAllValidWithIds(invoicesIds);
+        }
         public async Task SaveList(List<InvoiceSubmissionLog> listOfEntities)
         {
             await _invoiceSubmissionLogRepository.SaveList(listOfEntities);
