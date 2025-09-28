@@ -31,10 +31,16 @@ const InvoicesTable = ({
 
          setSelectedRowsToActionOn(selectedRows); // Update the selected rows state
       },
-      getCheckboxProps: (record) => ({
-         disabled: isSubmittedInvoicesTable ? record.status === "Valid" : record.isReviewed === true, // Column configuration not to be checked
-         name: record.invoiceNumber,
-      }),
+      getCheckboxProps: (record) => {
+         let disabled = false;
+         if(isSubmittedInvoicesTable && record.status === "Valid") disabled = true;
+         if(!isSubmittedInvoicesTable && record.isReviewed === true) disabled = true;
+         
+         return {
+            disabled: disabled, // Column configuration not to be checked
+            name: record.invoiceNumber,
+         };
+      },
    };
 
    const handleSubmitButtonClick = () => {
@@ -112,13 +118,14 @@ const InvoicesTable = ({
                width: isMobile ? 150 : "auto",
                responsive: ["md"],
             }))}
-            rowKey={(record) => isSubmittedInvoicesTable ? record.longId : record.invoiceNumber}
+            rowKey={(record) =>
+               isSubmittedInvoicesTable ? record.longId : record.invoiceNumber
+            }
             pagination={{
                pageSize: isMobile ? 5 : 10,
                responsive: true,
                position: ["bottomCenter"],
             }}
-            //TODO:  onChange={handleTableChange}  // For sorting/filtering
          />
       </Flex>
    );

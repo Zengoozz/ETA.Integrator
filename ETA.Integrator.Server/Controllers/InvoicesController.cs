@@ -19,14 +19,14 @@ namespace ETA.Integrator.Server.Controllers
             _apiCallerService = apiCallerService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetProviderInvoices(DateTime fromDate, DateTime toDate, string invoiceType, List<string> invoicesIds)
+        public async Task<IActionResult> GetProviderInvoices(DateTime fromDate, DateTime toDate, string invoiceType, List<string>? invoicesIds = null)
         {
             ProviderInvoicesSearchDTO searchModel = new ProviderInvoicesSearchDTO()
             {
                 StartDate = fromDate,
                 EndDate = toDate,
                 InvoiceType = string.IsNullOrEmpty(invoiceType) ? "I" : invoiceType,
-                InvoicesIds = invoicesIds
+                InvoicesIds = invoicesIds ?? new()
             };
             var response = await _apiCallerService.GetProviderInvoices(searchModel);
 
