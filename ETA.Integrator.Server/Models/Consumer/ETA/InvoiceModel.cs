@@ -71,7 +71,7 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
                 Issuer = issuer,
                 Receiver = new ReceiverModel
                 {
-                    Type = invoiceType == "I" ? "P" : "B",
+                    Type = invoiceType == "I" ? (viewModel.ReceiverAddress.Country == "EG" ? "P" : "F") : "B",
                     Id = viewModel.RegistrationNumber,
                     Name = viewModel.ReceiverName,
                     Address = viewModel.ReceiverAddress
