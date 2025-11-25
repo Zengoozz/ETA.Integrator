@@ -119,7 +119,7 @@ const InvoicesTable = ({
                responsive: ["md"],
             }))}
             rowKey={(record) =>
-               isSubmittedInvoicesTable ? record.longId : record.invoiceNumber
+               isSubmittedInvoicesTable ? record.longId : record.invoiceId
             }
             pagination={{
                pageSize: isMobile ? 5 : 10,
