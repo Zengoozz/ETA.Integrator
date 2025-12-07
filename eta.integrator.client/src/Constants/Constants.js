@@ -1312,6 +1312,16 @@ const InvoiceSearchValidationRules = {
    invoiceStatus: [{ required: true, message: "Please select the invoice status!" }],
 };
 
+const EditInvoiceRules ={
+   registrationNumber: [
+      { required: true, message: "Please input the registration number!" },
+      { whitespace: true, message: "Registration number name cannot be empty spaces" },
+   ],
+   receiverName: [
+      { required: true, message: "Please input the receiver name!" },
+      { whitespace: true, message: "Receiver name cannot be empty spaces" },
+   ],
+}
 
 
 const IssuerTypes = [
@@ -1365,6 +1375,7 @@ export {
    LoginFormValidationRules,
    SettingsValidationRules,
    InvoiceSearchValidationRules,
+   EditInvoiceRules,
    IssuerTypes,
    InvoiceTypes,
    InvoiceStatus,

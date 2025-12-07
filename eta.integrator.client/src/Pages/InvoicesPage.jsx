@@ -11,9 +11,9 @@ import { InvoicesTableColumns } from "../Constants/ConstantsComponents";
 import InvoicesService from "../Services/InvoicesService";
 import { ROUTES } from "../Constants/Constants";
 import useSearchColumn from "../Hooks/useSearchColumn";
+import ActionModal from "../Components/ActionModal";
 
 const InvoicesPage = ({ isMobile }) => {
-   // const [loading, setLoading] = useState(false);
    const [searchKey, setSearchKey] = useState(1);
 
    const [searchValues, setSearchValues] = useState({
@@ -22,12 +22,13 @@ const InvoicesPage = ({ isMobile }) => {
       invoiceType: "I",
    });
    const [tableData, setTableData] = useState([]); // State to hold table data
+   const [currentRowToEdit, setCurrentRowToEdit] = useState(null);
+   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
    const [messageApi, contextHolder] = message.useMessage();
    const [notificationApi, contextHolderNotification] = notification.useNotification();
    const { getColumnSearchProps, filteredData } = useSearchColumn(tableData || []);
-   
+
    const navigate = useNavigate();
-   const tableColumns = InvoicesTableColumns(getColumnSearchProps);
 
    const onSubmit = async (selectedRows) => {
       try {
@@ -56,6 +57,25 @@ const InvoicesPage = ({ isMobile }) => {
       }
    };
 
+   const handleOpenModal = (record) => {
+      setCurrentRowToEdit(record);
+      setIsEditModalOpen(true);
+   };
+
+   const handleEditSubmitClick = async (values) => {
+      var editedRow = currentRowToEdit;
+      handleCancel();
+      editedRow.receiverName = values.ReceiverName;
+      editedRow.registrationNumber = values.RegistrationNumber;
+      await onSubmit([editedRow]);
+   };
+
+   const handleCancel = () => {
+      setIsEditModalOpen(false);
+      setCurrentRowToEdit(null);
+   };
+
+   const tableColumns = InvoicesTableColumns(getColumnSearchProps, handleOpenModal);
    return (
       <>
          {contextHolder}
@@ -94,6 +114,15 @@ const InvoicesPage = ({ isMobile }) => {
                   submissionCallBack={() => handleSearch(searchValues)}
                />
             </Flex>
+
+            <ActionModal
+               title="Edit & Submit Invoice For"
+               isModalOpen={isEditModalOpen}
+               handleOk={handleEditSubmitClick}
+               handleCancel={handleCancel}
+               data={currentRowToEdit}
+               isMobile={isMobile}
+            />
          </Card>
       </>
    );

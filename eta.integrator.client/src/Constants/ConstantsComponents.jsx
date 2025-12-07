@@ -1,7 +1,9 @@
 import { CheckCircleTwoTone, CloseCircleTwoTone } from "@ant-design/icons";
+import { Button } from "antd";
+import { RightCircleOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
-const InvoicesTableColumns = (getColumnSearchProps) => [
+const InvoicesTableColumns = (getColumnSearchProps, handleOpenModal) => [
    {
       title: "Receipt Number",
       dataIndex: "invoiceNumber",
@@ -62,6 +64,25 @@ const InvoicesTableColumns = (getColumnSearchProps) => [
          );
       },
    },
+   {
+      title: "Actions",
+      dataIndex: "invoiceNumber",
+      render: (_, record) => {
+         var isDisabled = record.isReviewed || record.invoiceId.startsWith('C-');
+
+         return (
+            <Button 
+               type="primary"
+               icon={<RightCircleOutlined />}
+               size="large"
+               onClick={() => handleOpenModal(record)}
+               // loading={loading}
+               disabled={isDisabled}
+               // style={style}
+            > Edit & Submit </Button>
+         );
+      }
+   }
 ];
 
 const SubmittedInvoiceColumns = (getColumnSearchProps) => [
