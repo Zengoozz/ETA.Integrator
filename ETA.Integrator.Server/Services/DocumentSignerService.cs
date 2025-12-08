@@ -18,12 +18,95 @@ using System.Text;
 
 namespace ETA.Integrator.Server.Services
 {
-    public class DocumentSignerService: IDocumentSignerService
+    public class DocumentSignerService : IDocumentSignerService
     {
         private readonly CustomConfigurations _customConfig;
         public DocumentSignerService(IOptions<CustomConfigurations> customConfig)
         {
             _customConfig = customConfig.Value;
+        }
+        public List<string> SignMultipleDocumentsMock(List<ProviderInvoiceViewModel> viewModels, IssuerModel issuer, string invoiceType, string tokenPin)
+        {
+            List<string> documents = new List<string>();
+
+            var url = _customConfig.Consumer_APIBaseUrl;
+            string[] parts = url.Split('.');
+            bool isProduction = false;
+
+            if (parts.Length > 1)
+                isProduction = parts[1] != "preprod";
+
+            foreach (var model in viewModels)
+            {
+                var invoice = model.FromViewModel(issuer, invoiceType, _customConfig.ItemCode, isProduction);
+
+                invoice.Signatures = new List<SignatureModel>();
+                SignatureModel signature = new SignatureModel();
+                signature.SignatureType = "I";
+
+                var sourceDocumentJson = SerializedDocumentToJson(invoice.FromInvoiceModel());
+
+                string cades = "";
+
+                JObject? request = JsonConvert.DeserializeObject<JObject>(sourceDocumentJson, new JsonSerializerSettings()
+                {
+                    FloatFormatHandling = FloatFormatHandling.String,
+                    FloatParseHandling = FloatParseHandling.Decimal,
+                    DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                    DateParseHandling = DateParseHandling.None,
+                    ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new CamelCaseNamingStrategy()
+                        {
+                            ProcessDictionaryKeys = true,
+                            OverrideSpecifiedNames = true
+                        }
+                    }
+                });
+
+                if (request == null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SIGNING_ERR",
+                        detail: "Request can not be null"
+                        );
+
+                //Start serialize
+                string canonicalString = Canonicalize(request);
+                var documentVersion = request["documentTypeVersion"];
+
+                if (documentVersion == null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status500InternalServerError,
+                        message: "SIGNING_ERR",
+                        detail: "Document type version doesn't exist"
+                        );
+
+                // retrieve cades
+
+                cades = "ANY";
+
+                JObject signaturesObject = new JObject(
+                                    new JProperty("signatureType", "I"),
+                                    new JProperty("value", cades));
+
+                JArray signaturesArray = [signaturesObject];
+                request.Add("signatures", signaturesArray);
+
+
+                var signedDocument = JsonConvert.SerializeObject(request);
+
+                if (signedDocument == null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status404NotFound,
+                        message: "SIGNING_ERR",
+                        detail: "Invoice cannot be empty"
+                        );
+
+                documents.Add(signedDocument);
+            }
+
+            return documents;
         }
         public List<string> SignMultipleDocuments(List<ProviderInvoiceViewModel> viewModels, IssuerModel issuer, string invoiceType, string tokenPin)
         {

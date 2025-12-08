@@ -13,6 +13,7 @@ namespace ETA.Integrator.Server.Services.Common
 {
     public class RequestFactoryService : IRequestFactoryService
     {
+        private readonly CustomConfigurations _customConfig;
         private readonly ISettingsStepService _settingsStepService;
         private readonly IDocumentSignerService _documentSignerService;
         public RequestFactoryService(
@@ -21,8 +22,9 @@ namespace ETA.Integrator.Server.Services.Common
             IDocumentSignerService documentSignerService
             )
         {
+            _customConfig = customConfig.Value;
             _settingsStepService = settingsStepService ?? throw new ArgumentNullException(nameof(_settingsStepService));
-            _documentSignerService = documentSignerService;
+            _documentSignerService = documentSignerService ?? throw new ArgumentNullException(nameof(_settingsStepService));
         }
 
         public GenericRequest ConnectToProvider(ProviderLoginRequestModel model)
@@ -100,7 +102,17 @@ namespace ETA.Integrator.Server.Services.Common
 
             try
             {
-                documents = _documentSignerService.SignMultipleDocuments(request.Invoices, issuer, request.InvoiceType, connectionSettings.TokenPin);
+                var url = _customConfig.Consumer_APIBaseUrl;
+                string[] parts = url.Split('.');
+                bool isProduction = false;
+
+                if (parts.Length > 1)
+                    isProduction = parts[1] != "preprod";
+
+                if(isProduction)
+                    documents = _documentSignerService.SignMultipleDocuments(request.Invoices, issuer, request.InvoiceType, connectionSettings.TokenPin);
+                else
+                    documents = _documentSignerService.SignMultipleDocumentsMock(request.Invoices, issuer, request.InvoiceType, connectionSettings.TokenPin);
             }
             catch (Exception ex)
             {
