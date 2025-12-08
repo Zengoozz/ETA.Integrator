@@ -24,6 +24,7 @@ const InvoicesPage = ({ isMobile }) => {
    const [tableData, setTableData] = useState([]); // State to hold table data
    const [currentRowToEdit, setCurrentRowToEdit] = useState(null);
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
    const [messageApi, contextHolder] = message.useMessage();
    const [notificationApi, contextHolderNotification] = notification.useNotification();
    const { getColumnSearchProps, filteredData } = useSearchColumn(tableData || []);
@@ -64,10 +65,9 @@ const InvoicesPage = ({ isMobile }) => {
 
    const handleEditSubmitClick = async (values) => {
       var editedRow = currentRowToEdit;
-      handleCancel();
       editedRow.receiverName = values.ReceiverName;
       editedRow.registrationNumber = values.RegistrationNumber;
-      await onSubmit([editedRow]);
+      return await onSubmit([editedRow]);
    };
 
    const handleCancel = () => {
@@ -122,6 +122,8 @@ const InvoicesPage = ({ isMobile }) => {
                handleCancel={handleCancel}
                data={currentRowToEdit}
                isMobile={isMobile}
+               notificationApi={notificationApi}
+               callback={() => handleSearch(searchValues)}
             />
          </Card>
       </>

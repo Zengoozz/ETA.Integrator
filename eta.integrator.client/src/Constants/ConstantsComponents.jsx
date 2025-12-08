@@ -1,6 +1,6 @@
 import { CheckCircleTwoTone, CloseCircleTwoTone } from "@ant-design/icons";
 import { Button } from "antd";
-import { RightCircleOutlined } from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
 const InvoicesTableColumns = (getColumnSearchProps, handleOpenModal) => [
@@ -73,7 +73,7 @@ const InvoicesTableColumns = (getColumnSearchProps, handleOpenModal) => [
          return (
             <Button 
                type="primary"
-               icon={<RightCircleOutlined />}
+               icon={<EditOutlined />}
                size="large"
                onClick={() => handleOpenModal(record)}
                // loading={loading}
