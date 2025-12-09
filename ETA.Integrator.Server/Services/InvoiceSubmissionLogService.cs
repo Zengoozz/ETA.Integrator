@@ -94,5 +94,10 @@ namespace ETA.Integrator.Server.Services
                 }
             }
         }
+
+        public async Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions()
+        {
+            return await _invoiceSubmissionLogRepository.GetUnvalidatedSubmissions();
+        }
     }
 }

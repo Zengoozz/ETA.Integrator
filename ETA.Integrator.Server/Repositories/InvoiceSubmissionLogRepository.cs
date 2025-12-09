@@ -94,5 +94,10 @@ namespace ETA.Integrator.Server.Repositories
                 throw;
             }
         }
+
+        public async Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions()
+        {
+            return await _dbSet.AsNoTracking().Where(l => l.Status == InvoiceStatus.Submitted).ToListAsync();
+        }
     }
 }

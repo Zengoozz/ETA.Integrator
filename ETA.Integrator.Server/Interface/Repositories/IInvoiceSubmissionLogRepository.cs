@@ -13,5 +13,6 @@ namespace ETA.Integrator.Server.Interface.Repositories
         Task Save(InvoiceSubmissionLog entity);
         Task SaveList(List<InvoiceSubmissionLog> listOfEntities);
         Task UpdateStatus(int id, InvoiceStatus status);
+        Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions();
     }
 }

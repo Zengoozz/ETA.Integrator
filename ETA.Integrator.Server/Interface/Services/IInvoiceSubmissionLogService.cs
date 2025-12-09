@@ -12,5 +12,6 @@ namespace ETA.Integrator.Server.Interface.Services
         Task SaveList(List<InvoiceSubmissionLog> listOfEntities);
         Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO responseDTO, List<SubmissionSummaryDTO> submissions, List<ProviderInvoiceViewModel> invoices);
         Task ValidateInvoiceStatus(List<ProviderInvoiceViewModel> invoices);
+        Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions();
     }
 }
