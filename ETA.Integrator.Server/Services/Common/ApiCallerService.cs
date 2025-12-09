@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using RestSharp;
 using System.Net;
 using ETA.Integrator.Server.Entities;
+using System.Diagnostics;
 
 namespace ETA.Integrator.Server.Services.Common
 {
@@ -103,10 +104,15 @@ namespace ETA.Integrator.Server.Services.Common
             SuccessfulResponseDTO processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
 
             SubmissionResponseDTO submissionResponse = new();
-            if (!String.IsNullOrEmpty(processedResponse.SubmissionId))
-                submissionResponse = await GetSubmission(processedResponse.SubmissionId, 1, invoicesRequest.Invoices.Count);
-
             SubmitDocumentsResponseDTO logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, submissionResponse.DocumentSummary, invoicesRequest.Invoices);
+
+            if (!String.IsNullOrEmpty(processedResponse.SubmissionId))
+            {
+                await Task.Delay(2000);
+                submissionResponse = await GetSubmission(processedResponse.SubmissionId, 1, invoicesRequest.Invoices.Count);
+            }
+
+            logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, submissionResponse.DocumentSummary, invoicesRequest.Invoices);
 
             return logResponse;
         }
@@ -137,27 +143,37 @@ namespace ETA.Integrator.Server.Services.Common
 
         public async Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageNo = 1, int pageSize = 100)
         {
-            await Task.Delay(1000);
+            SubmissionResponseDTO processedResponse = new SubmissionResponseDTO();
+            processedResponse.OverallStatus = "InProgress";
+
             pageSize = pageSize > 100 ? pageSize : 100;
             GenericRequest request = _requestFactoryService.GetSubmission(submissionId, pageNo, pageSize);
-            RestResponse response = await _httpRequestSenderService.SendRequest(request);
-            int retries = 0;
-            while (response.StatusCode == HttpStatusCode.NotFound && retries < 3)
+            RestResponse restResponse = await _httpRequestSenderService.SendRequest(request);
+
+            if(restResponse.StatusCode != HttpStatusCode.NotFound)
             {
-                await Task.Delay(1000);
-                response = await _httpRequestSenderService.SendRequest(request);
-                retries++;
+                processedResponse = await _responseProcessorService.ProcessResponse<SubmissionResponseDTO>(restResponse);
             }
-            //case not found also 
-            if (response.StatusCode == HttpStatusCode.NotFound)
+
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            while (stopWatch.Elapsed < TimeSpan.FromMinutes(1) && (restResponse.StatusCode == HttpStatusCode.NotFound || processedResponse.OverallStatus == "InProgress"))
             {
-                return new SubmissionResponseDTO()
-                {
-                    Uuid = submissionId,
-                    DocumentSummary = []
-                };
+                await Task.Delay(2000);
+                restResponse = await _httpRequestSenderService.SendRequest(request);
+
+                if (restResponse.StatusCode != HttpStatusCode.NotFound)
+                    processedResponse = await _responseProcessorService.ProcessResponse<SubmissionResponseDTO>(restResponse);
             }
-            return await _responseProcessorService.ProcessResponse<SubmissionResponseDTO>(response);
+            stopWatch.Stop();
+
+            if (restResponse.StatusCode == HttpStatusCode.NotFound)
+            {
+                processedResponse.Uuid = submissionId;
+            }
+
+            return processedResponse;
         }
 
         public async Task<SearchDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string receiverType, string direction)
