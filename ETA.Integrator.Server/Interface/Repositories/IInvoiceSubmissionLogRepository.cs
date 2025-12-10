@@ -1,4 +1,5 @@
-﻿using ETA.Integrator.Server.Entities;
+﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Helpers.Enums;
 
 namespace ETA.Integrator.Server.Interface.Repositories
@@ -10,9 +11,11 @@ namespace ETA.Integrator.Server.Interface.Repositories
         Task<InvoiceSubmissionLog?> GetById(int id);
         Task<List<InvoiceSubmissionLog>> GetByInternalId(int id);
         Task<List<InvoiceSubmissionLog>> GetByListOfInternalIds(List<string> ids);
+        Task<List<InvoiceSubmissionLog>> GetByListOfUuids(List<string> uuids);
         Task Save(InvoiceSubmissionLog entity);
         Task SaveList(List<InvoiceSubmissionLog> listOfEntities);
         Task UpdateStatus(int id, InvoiceStatus status);
+        Task UpdateListOfSubmissionsStatus(List<UpdateSubmissionStatusDTO> submissionsToUpdate);
         Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions();
     }
 }

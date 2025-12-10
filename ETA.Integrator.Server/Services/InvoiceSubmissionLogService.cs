@@ -1,4 +1,5 @@
-﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.Submission;
+﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Dtos.ConsumerAPI.Submission;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Helpers;
@@ -17,33 +18,41 @@ namespace ETA.Integrator.Server.Services
         {
             _invoiceSubmissionLogRepository = invoiceSubmissionLogRepository;
         }
+        
         public async Task<List<InvoiceSubmissionLog>> GetAll()
         {
             return await _invoiceSubmissionLogRepository.GetAll();
         }
+        
         public async Task<List<InvoiceSubmissionLog>> GetAllValidWithIds(List<string> invoicesIds)
         {
             return await _invoiceSubmissionLogRepository.GetAllValidWithIds(invoicesIds);
         }
+        
+        public async Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions()
+        {
+            return await _invoiceSubmissionLogRepository.GetUnvalidatedSubmissions();
+        }
+        
         public async Task SaveList(List<InvoiceSubmissionLog> listOfEntities)
         {
             await _invoiceSubmissionLogRepository.SaveList(listOfEntities);
         }
-        public async Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO submitResponseDTO, List<SubmissionSummaryDTO> submissionsSummary, List<ProviderInvoiceViewModel> invoices)
+        
+        public async Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO submitResponseDTO, List<ProviderInvoiceViewModel> invoices)
         {
             string responseMessage = "";
             List<InvoiceSubmissionLog> invoiceSubmissionLogs = new List<InvoiceSubmissionLog>();
             var utcNow = GenericHelpers.GetCurrentUTCTime(-70);
-
 
             var listOfAccepted = submitResponseDTO.AcceptedDocuments.Select(x => new InvoiceSubmissionLog
             {
                 InternalId = x.InternalId,
                 Uuid = x.Uuid,
                 SubmissionId = submitResponseDTO.SubmissionId,
-                Status = (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), submissionsSummary.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted"),
-                StatusStringfied = submissionsSummary.FirstOrDefault(d => d.InternalId == x.InternalId)?.Status ?? "Submitted",
-                SubmissionDate = submissionsSummary.FirstOrDefault(d => d.InternalId == x.InternalId)?.DateTimeIssued ?? utcNow,
+                Status = (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), "Submitted"),
+                StatusStringfied = "Submitted",
+                SubmissionDate = utcNow,
             });
 
             responseMessage += !listOfAccepted.Any() ?
@@ -81,6 +90,21 @@ namespace ETA.Integrator.Server.Services
             return response;
         }
 
+        public async Task UpdateWithSubmissionStatus(List<DocumentAcceptedDTO> acceptedDocuments, List<SubmissionSummaryDTO> submissionStatusList)
+        {
+            List<string> uuids = acceptedDocuments.Select(s => s.Uuid).ToList();
+            var alreadyLogged = await _invoiceSubmissionLogRepository.GetByListOfUuids(uuids);
+
+            var submissionToUpdate = alreadyLogged.Select(l => new UpdateSubmissionStatusDTO()
+            {
+                LoggedId = l.Id,
+                SubmissionTime = submissionStatusList.FirstOrDefault(s => s.InternalId == l.InternalId)?.DateTimeIssued ?? null,
+                SubmissionsStatus = (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), submissionStatusList.FirstOrDefault(s => s.InternalId == l.InternalId)?.Status ?? "Submitted")
+            });
+
+            await _invoiceSubmissionLogRepository.UpdateListOfSubmissionsStatus(submissionToUpdate.ToList());
+        }
+
         public async Task ValidateInvoiceStatus(List<ProviderInvoiceViewModel> invoices)
         {
             var listOfInvoiceIds = invoices.Select(x => x.InvoiceId).ToList();
@@ -95,9 +119,5 @@ namespace ETA.Integrator.Server.Services
             }
         }
 
-        public async Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions()
-        {
-            return await _invoiceSubmissionLogRepository.GetUnvalidatedSubmissions();
-        }
     }
 }

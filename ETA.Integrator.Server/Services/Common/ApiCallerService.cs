@@ -104,15 +104,16 @@ namespace ETA.Integrator.Server.Services.Common
             SuccessfulResponseDTO processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
 
             SubmissionResponseDTO submissionResponse = new();
-            SubmitDocumentsResponseDTO logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, submissionResponse.DocumentSummary, invoicesRequest.Invoices);
+            SubmitDocumentsResponseDTO logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, invoicesRequest.Invoices);
 
             if (!String.IsNullOrEmpty(processedResponse.SubmissionId))
             {
-                await Task.Delay(2000);
+                await Task.Delay(TimeSpan.FromSeconds(2));
                 submissionResponse = await GetSubmission(processedResponse.SubmissionId, 1, invoicesRequest.Invoices.Count);
+                
+                if(submissionResponse.DocumentSummary.Count > 0)
+                    await _invoiceSubmissionLogService.UpdateWithSubmissionStatus(processedResponse.AcceptedDocuments, submissionResponse.DocumentSummary);
             }
-
-            logResponse = await _invoiceSubmissionLogService.LogInvoiceSubmission(processedResponse, submissionResponse.DocumentSummary, invoicesRequest.Invoices);
 
             return logResponse;
         }
@@ -150,7 +151,7 @@ namespace ETA.Integrator.Server.Services.Common
             GenericRequest request = _requestFactoryService.GetSubmission(submissionId, pageNo, pageSize);
             RestResponse restResponse = await _httpRequestSenderService.SendRequest(request);
 
-            if(restResponse.StatusCode != HttpStatusCode.NotFound)
+            if (restResponse.StatusCode != HttpStatusCode.NotFound)
             {
                 processedResponse = await _responseProcessorService.ProcessResponse<SubmissionResponseDTO>(restResponse);
             }
@@ -160,7 +161,7 @@ namespace ETA.Integrator.Server.Services.Common
 
             while (stopWatch.Elapsed < TimeSpan.FromMinutes(1) && (restResponse.StatusCode == HttpStatusCode.NotFound || processedResponse.OverallStatus == "InProgress"))
             {
-                await Task.Delay(2000);
+                await Task.Delay(TimeSpan.FromSeconds(10));
                 restResponse = await _httpRequestSenderService.SendRequest(request);
 
                 if (restResponse.StatusCode != HttpStatusCode.NotFound)

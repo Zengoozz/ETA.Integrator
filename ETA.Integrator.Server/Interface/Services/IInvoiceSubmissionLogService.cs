@@ -9,9 +9,10 @@ namespace ETA.Integrator.Server.Interface.Services
     {
         Task<List<InvoiceSubmissionLog>> GetAll();
         Task<List<InvoiceSubmissionLog>> GetAllValidWithIds(List<string> invoicesIds);
-        Task SaveList(List<InvoiceSubmissionLog> listOfEntities);
-        Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO responseDTO, List<SubmissionSummaryDTO> submissions, List<ProviderInvoiceViewModel> invoices);
-        Task ValidateInvoiceStatus(List<ProviderInvoiceViewModel> invoices);
         Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions();
+        Task SaveList(List<InvoiceSubmissionLog> listOfEntities);
+        Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO responseDTO, List<ProviderInvoiceViewModel> invoices);
+        Task UpdateWithSubmissionStatus(List<DocumentAcceptedDTO> acceptedDocuments, List<SubmissionSummaryDTO> submissionStatus);
+        Task ValidateInvoiceStatus(List<ProviderInvoiceViewModel> invoices);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ETA.Integrator.Server.Data;
+using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Interface.Repositories;
@@ -41,6 +42,16 @@ namespace ETA.Integrator.Server.Repositories
             return await _dbSet.AsNoTracking().Where(x => ids.Contains(x.InternalId)).ToListAsync();
         }
 
+        public async Task<List<InvoiceSubmissionLog>> GetByListOfUuids(List<string> uuids)
+        {
+            return await _dbSet.AsNoTracking().Where(i => uuids.Contains(i.Uuid)).ToListAsync();
+        }
+
+        public async Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions()
+        {
+            return await _dbSet.AsNoTracking().Where(l => l.Status == InvoiceStatus.Submitted).ToListAsync();
+        }
+        
         public async Task Save(InvoiceSubmissionLog entity)
         {
             try
@@ -95,9 +106,29 @@ namespace ETA.Integrator.Server.Repositories
             }
         }
 
-        public async Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions()
+        public async Task UpdateListOfSubmissionsStatus(List<UpdateSubmissionStatusDTO> submissionsToUpdate)
         {
-            return await _dbSet.AsNoTracking().Where(l => l.Status == InvoiceStatus.Submitted).ToListAsync();
+            try
+            {
+                foreach(var submission in submissionsToUpdate)
+                {
+                    var existed = await _dbSet.FirstOrDefaultAsync(x => x.Id == submission.LoggedId);
+
+                    if(existed is not null)
+                    {
+                        existed.Status = submission.SubmissionsStatus;
+                        existed.SubmissionDate = submission.SubmissionTime;
+                        existed.StatusStringfied = submission.SubmissionsStatus.ToString();
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
+        
     }
 }
