@@ -33,9 +33,9 @@ const InvoicesTable = ({
       },
       getCheckboxProps: (record) => {
          let disabled = false;
-         if(isSubmittedInvoicesTable && record.status === "Valid") disabled = true;
-         if(!isSubmittedInvoicesTable && record.isReviewed === true) disabled = true;
-         
+         if (isSubmittedInvoicesTable && record.status === "Valid") disabled = true;
+         if (!isSubmittedInvoicesTable && record.isReviewed === true) disabled = true;
+
          return {
             disabled: disabled, // Column configuration not to be checked
             name: record.invoiceNumber,
@@ -43,7 +43,7 @@ const InvoicesTable = ({
       },
    };
 
-   const handleSubmitButtonClick = () => {
+   const handleSubmitButtonClick = async () => {
       if (!selectedRowsToAction || selectedRowsToAction.length === 0) {
          console.warn("No rows selected.");
          messageApi.warning("Please select at least one row to submit.");
@@ -58,32 +58,20 @@ const InvoicesTable = ({
 
       // Start loading
       setLoading(true);
-      onSubmit(selectedRowsToAction)
-         .then((response) => {
-            notificationApi.open({
-               type: "success",
-               message: (
-                  <span
-                     dangerouslySetInnerHTML={{
-                        __html: response.responseMessage.replace(/\n/g, "<br/>"),
-                     }}
-                  />
-               ),
-               duration: 0,
-            });
-         })
-         .catch((error) => {
-            notificationApi.error({
-               message: error.detail,
-               duration: 0,
-            });
-            console.error(error.message);
-         })
-         .finally(async () => {
-            if (tableType == "W") await submissionCallBack();
-            loadingMessage(); // Close the loading message
-            setLoading(false); // End loading
+
+      try {
+         await onSubmit(selectedRowsToAction);
+         if (tableType == "W") await submissionCallBack();
+      } catch (error) {
+         notificationApi.error({
+            message: error.detail,
+            duration: 0,
          });
+         console.error(error.message);
+      } finally {
+         loadingMessage(); // Close the loading message
+         setLoading(false); // End loading
+      }
    };
 
    return (
