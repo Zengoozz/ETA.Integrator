@@ -7,7 +7,7 @@ import InvoicesTable from "../Components/InvoicesTable";
 import InvoiceSearchForm from "../Components/InvoiceSearchForm";
 import CustomButton from "../Components/CustomButton";
 
-import { InvoicesTableColumns } from "../Constants/ConstantsComponents";
+import { EditFormItems, InvoicesTableColumns } from "../Constants/ConstantsComponents";
 import InvoicesService from "../Services/InvoicesService";
 import { ROUTES } from "../Constants/Constants";
 import useSearchColumn from "../Hooks/useSearchColumn";
@@ -117,6 +117,7 @@ const InvoicesPage = ({ isMobile }) => {
    };
 
    const tableColumns = InvoicesTableColumns(getColumnSearchProps, handleOpenEditModal);
+   const editFormItems = EditFormItems(isMobile);
    return (
       <>
          {contextHolder}
@@ -168,6 +169,7 @@ const InvoicesPage = ({ isMobile }) => {
                   isMobile={isMobile}
                   notificationApi={notificationApi}
                   initialValues={editModalInitialValues}
+                  formItems={editFormItems}
                   handleSubmit={handleEditSubmitClick}
                   handleFormValidation={handleEditFormValidation}
                   handleSubmitCallback={handleEditFormCallback}

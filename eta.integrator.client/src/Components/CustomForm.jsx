@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { Form, Input, Button } from "antd";
-
-import { EditInvoiceRules } from "../Constants/Constants";
+import { Form, Button } from "antd";
 
 const CustomForm = ({
    name = "Custom Form",
    isMobile,
    notificationApi,
    initialValues = null,
+   formItems,
+   buttonName = "Submit",
    handleSubmit,
    handleSubmitCallback = null,
    handleSubmitFailure = null,
@@ -42,37 +42,6 @@ const CustomForm = ({
          } finally {
             setIsLoading(false);
          }
-
-         // .then(
-         //    handleSubmitCallback()
-         //     (response) => {
-         //    notificationApi.open({
-         //       type: "success",
-         //       message: (
-         //          <span
-         //             dangerouslySetInnerHTML={{
-         //                __html: response.responseMessage.replace(/\n/g, "<br/>"),
-         //             }}
-         //          />
-         //       ),
-         //       duration: 0,
-         //    });
-
-         //    onCancelClick();
-
-         // }
-         // )
-         // .catch((error) => {
-         //    notificationApi.error({
-         //       message: error.detail,
-         //       duration: 0,
-         //    });
-         //    console.error(error.message);
-         // })
-         // .finally(async () => {
-         //    //    await callback();
-         //    setIsLoading(false);
-         // });
       });
    };
 
@@ -88,30 +57,17 @@ const CustomForm = ({
          onFinishFailed={handleSubmitFailure}
          requiredMark="optional"
       >
-         <Form.Item
-            label="Receiver Name"
-            name="ReceiverName"
-            rules={EditInvoiceRules.receiverName}
-         >
-            <Input
-               size={isMobile ? "large" : "middle"}
-               autoComplete="off"
-               allowClear
-            />
-         </Form.Item>
+         {formItems.map((item, index) => (
+            <Form.Item
+               key={index}
+               label={item.label}
+               name={item.name}
+               rules={item.rules}
+            >
+               {item.element}
+            </Form.Item>
+         ))}
 
-         <Form.Item
-            label="Registration Number"
-            name="RegistrationNumber"
-            rules={EditInvoiceRules.registrationNumber}
-         >
-            <Input
-               length={12}
-               size={isMobile ? "large" : "middle"}
-               autoComplete="off"
-               allowClear
-            />
-         </Form.Item>
          <Form.Item>
             <Button
                block
@@ -120,7 +76,7 @@ const CustomForm = ({
                size={isMobile ? "large" : "middle"}
                loading={isLoading}
             >
-               Submit
+               {buttonName}
             </Button>
          </Form.Item>
       </Form>

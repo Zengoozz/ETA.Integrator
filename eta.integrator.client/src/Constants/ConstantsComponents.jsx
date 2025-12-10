@@ -1,7 +1,9 @@
 import { CheckCircleTwoTone, CloseCircleTwoTone } from "@ant-design/icons";
-import { Button } from "antd";
+import { Button, Input } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+
+import { EditInvoiceRules } from "../Constants/Constants";
 
 const InvoicesTableColumns = (getColumnSearchProps, handleOpenModal) => [
    {
@@ -68,21 +70,21 @@ const InvoicesTableColumns = (getColumnSearchProps, handleOpenModal) => [
       title: "Actions",
       dataIndex: "invoiceNumber",
       render: (_, record) => {
-         var isDisabled = record.isReviewed || record.invoiceId.startsWith('C-');
+         var isDisabled = record.isReviewed || record.invoiceId.startsWith("C-");
 
          return (
-            <Button 
+            <Button
                type="primary"
                icon={<EditOutlined />}
                size="large"
                onClick={() => handleOpenModal(record)}
-               // loading={loading}
                disabled={isDisabled}
-               // style={style}
-            > Edit & Submit </Button>
+            >
+               Edit & Submit
+            </Button>
          );
-      }
-   }
+      },
+   },
 ];
 
 const SubmittedInvoiceColumns = (getColumnSearchProps) => [
@@ -134,4 +136,34 @@ const SubmittedInvoiceColumns = (getColumnSearchProps) => [
    },
 ];
 
-export { InvoicesTableColumns, SubmittedInvoiceColumns };
+const EditFormItems = (isMobile) => [
+   {
+      label: "Receiver Name",
+      name: "ReceiverName",
+      rules: EditInvoiceRules.receiverName,
+      element: (
+         <Input
+            size={isMobile ? "large" : "middle"}
+            autoComplete="off"
+            allowClear={true}
+         />
+      ),
+   },
+   {
+      label: "Registration Number",
+      name: "RegistrationNumber",
+      rules: EditInvoiceRules.registrationNumber,
+      element: (
+         <Input
+            className="ant-input-number-no-arrows"
+            type="number"
+            maxLength={14}
+            size={isMobile ? "large" : "middle"}
+            autoComplete="off"
+            allowClear
+         />
+      ),
+   },
+];
+
+export { InvoicesTableColumns, SubmittedInvoiceColumns, EditFormItems };

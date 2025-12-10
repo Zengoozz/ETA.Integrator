@@ -1312,17 +1312,17 @@ const InvoiceSearchValidationRules = {
    invoiceStatus: [{ required: true, message: "Please select the invoice status!" }],
 };
 
-const EditInvoiceRules ={
+const EditInvoiceRules = {
    registrationNumber: [
       { required: true, message: "Please input the registration number!" },
       { whitespace: true, message: "Registration number name cannot be empty spaces" },
+      { max: 14, message: "Registration number must be 14 digits long at most" },
    ],
    receiverName: [
       { required: true, message: "Please input the receiver name!" },
       { whitespace: true, message: "Receiver name cannot be empty spaces" },
    ],
-}
-
+};
 
 const IssuerTypes = [
    {

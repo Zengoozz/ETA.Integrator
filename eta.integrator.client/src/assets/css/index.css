@@ -7,3 +7,17 @@ h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
+
+
+.ant-input-number-no-arrows input[type=number] {
+  /* Hides arrows for Firefox */
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.ant-input-number-no-arrows input[type=number]::-webkit-inner-spin-button,
+.ant-input-number-no-arrows input[type=number]::-webkit-outer-spin-button {
+  /* Hides arrows for Chrome, Safari, and Edge */
+  -webkit-appearance: none;
+  margin: 0; /* Ensures no extra space is left behind */
+}
