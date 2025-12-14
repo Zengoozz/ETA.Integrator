@@ -139,6 +139,14 @@ namespace ETA.Integrator.Server.Services.Common
             };
 
             invoicesRequest.Invoices = await GetProviderInvoices(searchModel);
+
+            if (invoicesRequest.Invoices.Count == 0)
+                return new SubmitDocumentsResponseDTO()
+                {
+                    IsError = true,
+                    ResponseMessage = $"No Invoices with the following codes: {string.Join(" / ", invoicesRequest.InvoicesIds)} was found."
+                };
+
             return await SubmitDocuments(invoicesRequest);
         }
 

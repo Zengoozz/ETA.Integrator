@@ -49,7 +49,7 @@ const handleErrorGeneric = (error) => {
       throw {
          status: error.response.status,
          message: `${error.response.data.title || "An unexpected error occurred."}`,
-         detail: `${error.response.data.detail || "No additional details available."}`,
+         detail: `${error.response.data.responseMessage || error.response.data.detail || "No additional details available."}`,
       };
    } else if (error.request) {
       throw {
