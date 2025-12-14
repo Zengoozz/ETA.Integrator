@@ -8,7 +8,7 @@ import {
    InvoiceSearchValidationRules,
    InvoiceTypes,
    InvoiceStatus,
-} from "../Constants/Constants";
+} from "./Constants";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;

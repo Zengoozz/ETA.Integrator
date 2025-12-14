@@ -6,33 +6,48 @@ import { LeftCircleOutlined } from "@ant-design/icons";
 
 import InvoicesTable from "../Components/InvoicesTable";
 import CustomButton from "../Components/CustomButton";
-import InvoiceSearchForm from "../Components/InvoiceSearchForm";
-
+import CustomForm from "../Components/CustomForm";
+import { ROUTES, InvoiceTypes, InvoiceStatus } from "../Constants/Constants";
+import { SubmittedInvoiceColumns, InvoicesSearchFormItems } from "../Constants/Shared";
 import useSearchColumn from "../Hooks/useSearchColumn";
 import InvoicesService from "../Services/InvoicesService";
-import { SubmittedInvoiceColumns } from "../Constants/ConstantsComponents";
-import { ROUTES } from "../Constants/Constants";
 
 const SubmittedInvoicesPage = ({ isMobile }) => {
    const [searchKey, setSearchKey] = useState(1);
-   const [searchValues, setSearchValues] = useState({
+   const [tableData, setTableData] = useState([]); // State to hold table data
+   const [isLoading, setIsLoading] = useState(false);
+   const [searchInvoiceFormInitialValues, setSearchInvoiceFormInitialValues] = useState({
       dateFrom: null,
       dateTo: null,
-      invoiceType: "I",
-      invoiceStatus: "Valid",
+      InvoiceType: "I",
+      InvoiceStatus: "V",
    });
-   const [tableData, setTableData] = useState([]); // State to hold table data
+
    const [messageApi, contextHolder] = message.useMessage();
    const [notificationApi, contextHolderNotification] = notification.useNotification();
    const { getColumnSearchProps, filteredData } = useSearchColumn(tableData || []);
 
    const navigate = useNavigate();
-   const tableColumns = SubmittedInvoiceColumns(getColumnSearchProps);
+
+   const handleResubmit = async (selectedRows) => {
+      try {
+         return await InvoicesService.submitInvoices(
+            [],
+            searchInvoiceFormInitialValues.invoiceType,
+            true,
+            selectedRows.map((r) => r.internalId)
+         );
+      } catch (error) {
+         console.error(error.detail);
+         throw error;
+      }
+   };
 
    const handleSearch = async (values) => {
       try {
          const response = await InvoicesService.searchDocumentsWithFilters(values);
-         setSearchValues(values);
+         // setSearchValues(values);
+         setSearchInvoiceFormInitialValues(values);
          setTableData(response.result);
          setSearchKey(searchKey + 1);
       } catch (error) {
@@ -44,19 +59,93 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
       }
    };
 
-   const handleResubmit = async (selectedRows) => {
+   //#region Invoice Search Form Handlers
+   const disabledDate = (current) => {
+      // Disable dates after today
+      return current && current > new Date().setHours(0, 0, 0, 0);
+   };
+
+   const handleInvoiceSearchFormValidation = (values) => {
+      const [dateFrom, dateTo] = values.DateRange || [];
+      const invoiceTypeValue = values.InvoiceType;
+      const invoiceTypeLabel =
+         InvoiceTypes.find((i) => i.value === invoiceTypeValue)?.label ?? "";
+
+      if (dateFrom && dateTo && dateFrom.isAfter(dateTo)) {
+         throw {
+            type: "validation",
+            message: "Start date must be earlier than or equal to the end date.",
+         };
+      }
+
+      const invoiceStatusLabel =
+         InvoiceStatus.find((i) => i.value === values.InvoiceStatus)?.label ?? "all";
+
+      var formattedValues = {
+         dateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
+         dateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
+         invoiceType: invoiceTypeValue,
+         invoiceStatus: values.InvoiceStatus,
+      };
+
+      var notificationObject = {
+         type: "success",
+         message: `Showing ${invoiceTypeLabel} of ${invoiceStatusLabel} status`,
+         description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+         duration: 3,
+      };
+      return { formattedValues, notificationObject };
+   };
+
+   const handleInvoiceSearchClick = async (values) => {
+      setIsLoading(true);
+      const loadingMessage = messageApi.open({
+         type: "loading",
+         content: "Action in progress..",
+         duration: 0,
+      });
+
       try {
-         return await InvoicesService.submitInvoices(
-            [],
-            searchValues.invoiceType,
-            true,
-            selectedRows.map((r) => r.internalId)
-         );
+         const { formattedValues, notificationObject } =
+            handleInvoiceSearchFormValidation(values);
+
+         try {
+            await handleSearch(formattedValues);
+
+            notificationApi.open(notificationObject);
+            setSearchInvoiceFormInitialValues({
+               InvoiceType: values.InvoiceType,
+               InvoiceStatus: values.InvoiceStatus,
+            });
+         } catch (error) {
+            notificationApi.error({
+               message: error.detail,
+               duration: 0,
+            });
+            console.error(error.message);
+         }
       } catch (error) {
-         console.error(error.detail);
-         throw error;
+         if (error.type === "validation") {
+            messageApi.error(error.message);
+            console.error(error.detail);
+         } else {
+            messageApi.error("Failed to fetch data. Please try again.");
+            console.error(error.detail);
+         }
+      } finally {
+         loadingMessage(); // Close the loading message
+         setIsLoading(false); // End loading
       }
    };
+   //#endregion
+
+   const tableColumns = SubmittedInvoiceColumns(getColumnSearchProps);
+   const invoicesSearchFormItems = InvoicesSearchFormItems(
+      isMobile,
+      isLoading,
+      disabledDate, 
+      true
+   );
 
    return (
       <>
@@ -64,12 +153,13 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
          {contextHolderNotification}
          <Card style={{ width: "100%" }}>
             <Flex justify="space-between">
-               <InvoiceSearchForm
-                  isMobile={isMobile}
-                  handleSearch={handleSearch}
-                  messageApi={messageApi}
-                  notificationApi={notificationApi}
-                  isStatusIncluded={true}
+               <CustomForm
+                  key={"InvoiceSearchForm"}
+                  name="invoiceSearchForm"
+                  layout={isMobile ? "vertical" : "inline"}
+                  initialValues={searchInvoiceFormInitialValues}
+                  formItems={invoicesSearchFormItems}
+                  handleSubmit={handleInvoiceSearchClick}
                />
 
                <CustomButton
@@ -92,7 +182,7 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
                isSubmittedInvoicesTable={true}
                buttonName="Re-submit"
                onSubmit={handleResubmit}
-               submissionCallBack={() => handleSearch(searchValues)}
+               submissionCallBack={() => handleSearch(searchInvoiceFormInitialValues)}
             />
          </Card>
       </>

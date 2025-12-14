@@ -10,7 +10,7 @@ import {
    EditFormItems,
    InvoicesSearchFormItems,
    InvoicesTableColumns,
-} from "../Constants/ConstantsComponents";
+} from "../Constants/Shared";
 import InvoicesService from "../Services/InvoicesService";
 import { ROUTES, InvoiceTypes, InvoiceStatus } from "../Constants/Constants";
 import useSearchColumn from "../Hooks/useSearchColumn";
