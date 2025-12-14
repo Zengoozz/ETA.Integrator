@@ -1,19 +1,15 @@
-import { useState, useEffect } from "react";
-import { Form, Button } from "antd";
+import { useEffect, cloneElement } from "react";
+import { Form } from "antd";
 
 const CustomForm = ({
-   name = "Custom Form",
+   name = null,
+   layout = "vertical",
    isMobile,
-   notificationApi,
    initialValues = null,
    formItems,
-   buttonName = "Submit",
    handleSubmit,
-   handleSubmitCallback = null,
    handleSubmitFailure = null,
-   handleFormValidation = null,
 }) => {
-   const [isLoading, setIsLoading] = useState(false);
    const [form] = Form.useForm();
 
    useEffect(() => {
@@ -22,63 +18,43 @@ const CustomForm = ({
       }
    }, [form, initialValues]);
 
-   const onSubmitClick = () => {
-      setIsLoading(true); // Start loading
+   const onButtonClick = async () => {
+      var values = form.getFieldsValue();
+      await handleSubmit(values);
+   }
+   
+   const items = formItems.Elements.map((item, index) => {
+      const labelProps = item.label ? { label: item.label } : {};
+      const rules = item.rules ? { rules: item.rules } : {};
+      return item.showItem && (
+         <Form.Item
+            key={index}
+            name={item.name}
+            {...labelProps}
+            {...rules}
+         >
+            {item.element}
+         </Form.Item>
+      );
+   });
 
-      form.validateFields().then(async (values) => {
-         var isValid = true;
-         if (handleFormValidation) isValid = handleFormValidation(values);
+   const wrapper = formItems.WrapperElement;
 
-         if (!isValid) return setIsLoading(false);
-
-         try {
-            await handleSubmit(values);
-            if (handleSubmitCallback) await handleSubmitCallback();
-         } catch (error) {
-            notificationApi.error({
-               message: error.detail,
-               duration: 0,
-            });
-         } finally {
-            setIsLoading(false);
-         }
-      });
-   };
+   const wrappedContent = wrapper ? cloneElement(wrapper, {}, items) : items;
 
    return (
       <Form
          form={form}
-         layout="vertical"
+         layout={layout}
          name={name}
          labelCol={{ span: isMobile ? 24 : 10 }}
          wrapperCol={{ span: isMobile ? 24 : 100 }}
          style={{ width: "100%" }}
-         onFinish={onSubmitClick}
+         onFinish={onButtonClick}
          onFinishFailed={handleSubmitFailure}
          requiredMark="optional"
       >
-         {formItems.map((item, index) => (
-            <Form.Item
-               key={index}
-               label={item.label}
-               name={item.name}
-               rules={item.rules}
-            >
-               {item.element}
-            </Form.Item>
-         ))}
-
-         <Form.Item>
-            <Button
-               block
-               type="primary"
-               htmlType="submit"
-               size={isMobile ? "large" : "middle"}
-               loading={isLoading}
-            >
-               {buttonName}
-            </Button>
-         </Form.Item>
+         {wrappedContent}
       </Form>
    );
 };

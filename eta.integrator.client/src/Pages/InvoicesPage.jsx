@@ -4,30 +4,36 @@ import { Flex, Card, message, notification } from "antd";
 import { RightCircleOutlined } from "@ant-design/icons";
 
 import InvoicesTable from "../Components/InvoicesTable";
-import InvoiceSearchForm from "../Components/InvoiceSearchForm";
 import CustomButton from "../Components/CustomButton";
 
-import { EditFormItems, InvoicesTableColumns } from "../Constants/ConstantsComponents";
+import {
+   EditFormItems,
+   InvoicesSearchFormItems,
+   InvoicesTableColumns,
+} from "../Constants/ConstantsComponents";
 import InvoicesService from "../Services/InvoicesService";
-import { ROUTES } from "../Constants/Constants";
+import { ROUTES, InvoiceTypes, InvoiceStatus } from "../Constants/Constants";
 import useSearchColumn from "../Hooks/useSearchColumn";
 import CustomModal from "../Components/CustomModal";
 import CustomForm from "../Components/CustomForm";
 
 const InvoicesPage = ({ isMobile }) => {
    const [searchKey, setSearchKey] = useState(1);
-
    const [searchValues, setSearchValues] = useState({
       dateFrom: null,
       dateTo: null,
       invoiceType: "I",
    });
+   const [isLoading, setIsLoading] = useState(false);
    const [tableData, setTableData] = useState([]); // State to hold table data
    const [currentRowToEdit, setCurrentRowToEdit] = useState(null);
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-   const [editModalInitialValues, setEditModalInitialValues] = useState({
+   const [editFormInitialValues, setEditFormInitialValues] = useState({
       ReceiverName: "",
       RegistrationNumber: "",
+   });
+   const [searchInvoiceFormInitialValues, setSearchInvoiceFormInitialValues] = useState({
+      InvoiceType: "I",
    });
 
    const [messageApi, contextHolder] = message.useMessage();
@@ -36,7 +42,7 @@ const InvoicesPage = ({ isMobile }) => {
    const navigate = useNavigate();
 
    useEffect(() => {
-      setEditModalInitialValues({
+      setEditFormInitialValues({
          ReceiverName: currentRowToEdit?.receiverName || "",
          RegistrationNumber: currentRowToEdit?.registrationNumber || "",
       });
@@ -81,19 +87,20 @@ const InvoicesPage = ({ isMobile }) => {
       }
    };
 
+   //#region Edit Modal Handlers
    const handleOpenEditModal = (record) => {
       setCurrentRowToEdit(record);
       setIsEditModalOpen(true);
    };
 
-   const handleEditSubmitClick = async (values) => {
-      var editedRow = currentRowToEdit;
-      editedRow.receiverName = values.ReceiverName;
-      editedRow.registrationNumber = values.RegistrationNumber;
-      return await handleInvoiceSubmission([editedRow]);
+   const handleEditModalCancel = () => {
+      setIsEditModalOpen(false);
+      setCurrentRowToEdit(null);
    };
 
    const handleEditFormValidation = (values) => {
+      setIsLoading(true);
+
       if (isNaN(values.RegistrationNumber)) {
          notificationApi.error({
             message: "Registeration Number must be numeric.",
@@ -106,18 +113,111 @@ const InvoicesPage = ({ isMobile }) => {
       return true;
    };
 
-   const handleEditFormCallback = () => {
-      handleSearch(searchValues);
-      handleEditModalCancel();
+   const handleEditSubmitClick = async (values) => {
+      var isValid = handleEditFormValidation(values);
+
+      if (!isValid) return setIsLoading(false);
+
+      var editedRow = currentRowToEdit;
+      editedRow.receiverName = values.ReceiverName;
+      editedRow.registrationNumber = values.RegistrationNumber;
+      try {
+         await handleInvoiceSubmission([editedRow]);
+         await handleSearch(searchValues);
+         handleEditModalCancel();
+      } catch (error) {
+         notificationApi.error({
+            message: error.detail,
+            duration: 0,
+         });
+      } finally {
+         setIsLoading(false);
+      }
    };
 
-   const handleEditModalCancel = () => {
-      setIsEditModalOpen(false);
-      setCurrentRowToEdit(null);
+   //#endregion
+
+   //#region Invoice Search Form Handlers
+   const disabledDate = (current) => {
+      // Disable dates after today
+      return current && current > new Date().setHours(0, 0, 0, 0);
    };
+
+   const handleInvoiceSearchFormValidation = (values) => {
+      const [dateFrom, dateTo] = values.DateRange || [];
+      const invoiceTypeValue = values.InvoiceType;
+      const invoiceTypeLabel =
+         InvoiceTypes.find((i) => i.value === invoiceTypeValue)?.label ?? "";
+
+      if (dateFrom && dateTo && dateFrom.isAfter(dateTo)) {
+         throw {
+            type: "validation",
+            message: "Start date must be earlier than or equal to the end date.",
+         };
+      }
+
+      var formattedValues = {
+         dateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
+         dateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
+         invoiceType: invoiceTypeValue,
+      };
+
+      var notificationMessage = `Showing ${invoiceTypeLabel}`;
+
+      var notificationObject = {
+         type: "success",
+         message: notificationMessage,
+         description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+         duration: 3,
+      };
+      return { formattedValues, notificationObject };
+   };
+
+   const handleInvoiceSearchClick = async (values) => {
+      setIsLoading(true);
+      const loadingMessage = messageApi.open({
+         type: "loading",
+         content: "Action in progress..",
+         duration: 0,
+      });
+
+      try {
+         const { formattedValues, notificationObject } =
+            handleInvoiceSearchFormValidation(values);
+
+         try {
+            await handleSearch(formattedValues);
+            notificationApi.open(notificationObject);
+            setSearchInvoiceFormInitialValues({ InvoiceType: values.InvoiceType });
+         } catch (error) {
+            notificationApi.error({
+               message: error.detail,
+               duration: 0,
+            });
+            console.error(error.message);
+         }
+      } catch (error) {
+         if (error.type === "validation") {
+            messageApi.error(error.message);
+            console.error(error.detail);
+         } else {
+            messageApi.error("Failed to fetch data. Please try again.");
+            console.error(error.detail);
+         }
+      } finally {
+         loadingMessage(); // Close the loading message
+         setIsLoading(false); // End loading
+      }
+   };
+   //#endregion
 
    const tableColumns = InvoicesTableColumns(getColumnSearchProps, handleOpenEditModal);
-   const editFormItems = EditFormItems(isMobile);
+   const editFormItems = EditFormItems(isMobile, isLoading);
+   const invoicesSearchFormItems = InvoicesSearchFormItems(
+      isMobile,
+      isLoading,
+      disabledDate
+   );
    return (
       <>
          {contextHolder}
@@ -128,11 +228,13 @@ const InvoicesPage = ({ isMobile }) => {
                gap="middle"
             >
                <Flex justify="space-between">
-                  <InvoiceSearchForm
-                     isMobile={isMobile}
-                     handleSearch={handleSearch}
-                     messageApi={messageApi}
-                     notificationApi={notificationApi}
+                  <CustomForm
+                     key={"InvoiceSearchForm"}
+                     name="invoiceSearchForm"
+                     layout={isMobile ? "vertical" : "inline"}
+                     initialValues={searchInvoiceFormInitialValues}
+                     formItems={invoicesSearchFormItems}
+                     handleSubmit={handleInvoiceSearchClick}
                   />
 
                   <CustomButton
@@ -158,6 +260,7 @@ const InvoicesPage = ({ isMobile }) => {
             </Flex>
 
             <CustomModal
+               key={"EditModal"}
                title={`Edit & Submit Invoice For ${
                   currentRowToEdit?.invoiceNumber ?? ""
                }`}
@@ -165,14 +268,12 @@ const InvoicesPage = ({ isMobile }) => {
                handleCancel={handleEditModalCancel}
             >
                <CustomForm
+                  key={"EditForm"}
                   name="editSubmitForm"
                   isMobile={isMobile}
-                  notificationApi={notificationApi}
-                  initialValues={editModalInitialValues}
+                  initialValues={editFormInitialValues}
                   formItems={editFormItems}
                   handleSubmit={handleEditSubmitClick}
-                  handleFormValidation={handleEditFormValidation}
-                  handleSubmitCallback={handleEditFormCallback}
                />
             </CustomModal>
          </Card>

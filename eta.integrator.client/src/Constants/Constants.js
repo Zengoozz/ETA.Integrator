@@ -1310,6 +1310,7 @@ const SettingsValidationRules = {
 const InvoiceSearchValidationRules = {
    invoiceType: [{ required: true, message: "Please select the invoice type!" }],
    invoiceStatus: [{ required: true, message: "Please select the invoice status!" }],
+   dateRange: [{ required: true, message: "Please select a valid date range" }],
 };
 
 const EditInvoiceRules = {

@@ -1,9 +1,17 @@
 import { CheckCircleTwoTone, CloseCircleTwoTone } from "@ant-design/icons";
-import { Button, Input } from "antd";
+import { Button, Input, DatePicker, Select, Flex } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
-import { EditInvoiceRules } from "../Constants/Constants";
+import {
+   EditInvoiceRules,
+   InvoiceSearchValidationRules,
+   InvoiceTypes,
+   InvoiceStatus,
+} from "../Constants/Constants";
+
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 const InvoicesTableColumns = (getColumnSearchProps, handleOpenModal) => [
    {
@@ -136,34 +144,157 @@ const SubmittedInvoiceColumns = (getColumnSearchProps) => [
    },
 ];
 
-const EditFormItems = (isMobile) => [
-   {
-      label: "Receiver Name",
-      name: "ReceiverName",
-      rules: EditInvoiceRules.receiverName,
-      element: (
-         <Input
-            size={isMobile ? "large" : "middle"}
-            autoComplete="off"
-            allowClear={true}
-         />
-      ),
-   },
-   {
-      label: "Registration Number",
-      name: "RegistrationNumber",
-      rules: EditInvoiceRules.registrationNumber,
-      element: (
-         <Input
-            className="ant-input-number-no-arrows"
-            type="number"
-            maxLength={14}
-            size={isMobile ? "large" : "middle"}
-            autoComplete="off"
-            allowClear
-         />
-      ),
-   },
-];
+const EditFormItems = (isMobile, isLoading) => {
+   return {
+      WrapperElement: null,
+      Elements: [
+         {
+            showItem: true,
+            label: "Receiver Name",
+            name: "ReceiverName",
+            rules: EditInvoiceRules.receiverName,
+            style: null,
+            element: (
+               <Input
+                  size={isMobile ? "large" : "middle"}
+                  autoComplete="off"
+                  allowClear={true}
+               />
+            ),
+         },
+         {
+            showItem: true,
+            label: "Registration Number",
+            name: "RegistrationNumber",
+            rules: EditInvoiceRules.registrationNumber,
+            style: null,
+            element: (
+               <Input
+                  className="ant-input-number-no-arrows"
+                  type="number"
+                  maxLength={14}
+                  size={isMobile ? "large" : "middle"}
+                  autoComplete="off"
+                  allowClear
+               />
+            ),
+         },
+         {
+            showItem: true,
+            label: null,
+            name: "SubmissionButton",
+            rules: null,
+            style: null,
+            element: (
+               <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={isLoading}
+                  block={isMobile}
+                  disabled={isLoading}
+                  size={isMobile ? "large" : "middle"}
+               >
+                  Submit
+               </Button>
+            ),
+         },
+      ],
+   };
+};
 
-export { InvoicesTableColumns, SubmittedInvoiceColumns, EditFormItems };
+const InvoicesSearchFormItems = (
+   isMobile,
+   isLoading,
+   disabledDate,
+   isStatusIncluded = false
+) => {
+   return {
+      WrapperElement: (
+         <Flex
+            vertical={true}
+            gap="small"
+            wrap
+         />
+      ),
+      Elements: [
+         {
+            showItem: true,
+            label: null,
+            name: "DateRange",
+            rules: InvoiceSearchValidationRules.dateRange,
+            style: null,
+            element: (
+               <RangePicker
+                  placeholder={["Start Date", "End Date"]}
+                  style={{ width: "100%" }}
+                  disabledDate={disabledDate}
+                  autoComplete="off"
+               />
+            ),
+         },
+         {
+            showItem: true,
+            label: null,
+            name: "InvoiceType",
+            rules: InvoiceSearchValidationRules.invoiceType,
+            style: null,
+            element: (
+               <Select placeholder="Please select invoice type">
+                  {InvoiceTypes.map((type) => (
+                     <Option
+                        key={type.value}
+                        value={type.value}
+                     >
+                        {type.label}
+                     </Option>
+                  ))}
+               </Select>
+            ),
+         },
+         {
+            showItem: isStatusIncluded,
+            label: null,
+            name: "InvoiceStatus",
+            rules: InvoiceSearchValidationRules.invoiceStatus,
+            style: null,
+            element: (
+               <Select placeholder="Please select invoice status">
+                  {InvoiceStatus.map((type) => (
+                     <Option
+                        key={type.value}
+                        value={type.value}
+                     >
+                        {type.label}
+                     </Option>
+                  ))}
+               </Select>
+            ),
+         },
+         {
+            showItem: true,
+            label: null,
+            name: "SubmissionButton",
+            rules: null,
+            style: null,
+            element: (
+               <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={isLoading}
+                  block={isMobile} // Full width on mobile
+                  disabled={isLoading}
+               >
+                  Search
+               </Button>
+            ),
+         },
+      ],
+   };
+};
+
+export {
+   InvoicesTableColumns,
+   SubmittedInvoiceColumns,
+   EditFormItems,
+   InvoicesSearchFormItems,
+};
