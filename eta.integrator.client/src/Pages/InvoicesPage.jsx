@@ -1,23 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flex, Card, message, notification } from "antd";
-import { RightCircleOutlined } from "@ant-design/icons";
+import {
+   FileTextOutlined,
+   LeftCircleOutlined,
+   RightCircleOutlined,
+} from "@ant-design/icons";
 
 import InvoicesTable from "../Components/InvoicesTable";
 import CustomButton from "../Components/CustomButton";
-
+import CustomModal from "../Components/CustomModal";
+import CustomForm from "../Components/CustomForm";
+import CustomCardTitle from "../Components/CustomCardTitle";
 import {
    EditFormItems,
    InvoicesSearchFormItems,
    InvoicesTableColumns,
 } from "../Constants/Shared";
+import { ROUTES, InvoiceTypes } from "../Constants/Constants";
 import InvoicesService from "../Services/InvoicesService";
-import { ROUTES, InvoiceTypes, InvoiceStatus } from "../Constants/Constants";
 import useSearchColumn from "../Hooks/useSearchColumn";
-import CustomModal from "../Components/CustomModal";
-import CustomForm from "../Components/CustomForm";
 
-const InvoicesPage = ({ isMobile }) => {
+const InvoicesPage = ({ isMobile, forNotes = false }) => {
    const [searchKey, setSearchKey] = useState(1);
    const [searchValues, setSearchValues] = useState({
       dateFrom: null,
@@ -75,16 +79,13 @@ const InvoicesPage = ({ isMobile }) => {
    const handleSearch = async (values) => {
       try {
          var response = null;
-         if (values.InvoiceType == "CN") {
-            response = await InvoicesService.getNotesAccodingToDateAsQueryParams(
-               values
-            );
+         if (forNotes) {
+            response = await InvoicesService.getNotesAccodingToDateAsQueryParams(values);
          } else {
             response = await InvoicesService.getInvoicesAccordingToDateAsQueryParams(
                values
             );
          }
-
 
          setSearchValues(values);
          setTableData(response); // Update table data with the response
@@ -219,7 +220,7 @@ const InvoicesPage = ({ isMobile }) => {
       }
    };
    //#endregion
-
+   const cardTitle = forNotes ? "Notes" : "Invoices";
    const tableColumns = InvoicesTableColumns(getColumnSearchProps, handleOpenEditModal);
    const editFormItems = EditFormItems(isMobile, isLoading);
    const invoicesSearchFormItems = InvoicesSearchFormItems(
@@ -231,7 +232,15 @@ const InvoicesPage = ({ isMobile }) => {
       <>
          {contextHolder}
          {contextHolderNotification}
-         <Card style={{ width: "100%" }}>
+         <Card
+            title={
+               <CustomCardTitle
+                  title={cardTitle}
+                  icon={<FileTextOutlined />}
+               />
+            }
+            style={{ width: "100%" }}
+         >
             <Flex
                vertical
                gap="middle"
@@ -246,13 +255,25 @@ const InvoicesPage = ({ isMobile }) => {
                      handleSubmit={handleInvoiceSearchClick}
                   />
 
-                  <CustomButton
-                     name="Submitted Invoices"
-                     icon={<RightCircleOutlined />}
-                     handleClick={() => navigate(ROUTES.SUBMITTED)}
-                     type="link"
-                     style={{ padding: 0 }}
-                  />
+                  <Flex vertical>
+                     <CustomButton
+                        name={forNotes ? "Back to Invoices" : "Go to Notes"}
+                        icon={forNotes ? <LeftCircleOutlined /> : <RightCircleOutlined />}
+                        handleClick={() =>
+                           forNotes ? navigate(ROUTES.COMPLETED) : navigate(ROUTES.NOTES)
+                        }
+                        type="link"
+                        style={{ padding: 0 }}
+                     />
+
+                     <CustomButton
+                        name="Go to Submitted Invoices"
+                        icon={<RightCircleOutlined />}
+                        handleClick={() => navigate(ROUTES.SUBMITTED)}
+                        type="link"
+                        style={{ padding: 0 }}
+                     />
+                  </Flex>
                </Flex>
 
                <InvoicesTable

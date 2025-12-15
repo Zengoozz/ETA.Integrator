@@ -209,6 +209,19 @@ const MainRoutedApp = ({ mode, setMode, isMobile }) => {
                   }
                />
                <Route
+                  path={ROUTES.NOTES}
+                  element={
+                     userProgress === "completed" ? (
+                        <InvoicesPage isMobile={isMobile} forNotes={true} />
+                     ) : (
+                        <Navigate
+                           to="/"
+                           replace
+                        />
+                     )
+                  }
+               />
+               <Route
                   path="*"
                   element={<NotFoundPage isMobile={isMobile} />}
                />

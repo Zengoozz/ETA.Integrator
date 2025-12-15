@@ -10,7 +10,7 @@ const CustomButton = ({
 }) => {
    return (
       <>
-         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 5 }}>
             <Button
                type={type}
                icon={icon}

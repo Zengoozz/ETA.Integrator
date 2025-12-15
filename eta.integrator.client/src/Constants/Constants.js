@@ -1348,10 +1348,6 @@ const InvoiceTypes = [
    {
       value: "I",
       label: "Invoice",
-   },
-   {
-      value: "CN",
-      label: "Credit Note"
    }
 ];
 
@@ -1373,6 +1369,7 @@ const ROUTES = {
    SECOND_STEP: "/issuer-settings",
    COMPLETED: "/home/invoices",
    SUBMITTED: "/home/submitted-invoices",
+   NOTES: "/home/notes",
 };
 
 export {

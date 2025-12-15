@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Card, message, notification, Flex } from "antd";
-import { LeftCircleOutlined } from "@ant-design/icons";
+import { LeftCircleOutlined, FileDoneOutlined } from "@ant-design/icons";
 
 import InvoicesTable from "../Components/InvoicesTable";
 import CustomButton from "../Components/CustomButton";
 import CustomForm from "../Components/CustomForm";
+import CustomCardTitle from "../Components/CustomCardTitle";
 import { ROUTES, InvoiceTypes, InvoiceStatus } from "../Constants/Constants";
 import { SubmittedInvoiceColumns, InvoicesSearchFormItems } from "../Constants/Shared";
 import useSearchColumn from "../Hooks/useSearchColumn";
@@ -143,7 +144,7 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
    const invoicesSearchFormItems = InvoicesSearchFormItems(
       isMobile,
       isLoading,
-      disabledDate, 
+      disabledDate,
       true
    );
 
@@ -151,7 +152,15 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
       <>
          {contextHolder}
          {contextHolderNotification}
-         <Card style={{ width: "100%" }}>
+         <Card
+            title={
+               <CustomCardTitle
+                  title={"Submitted Invoices"}
+                  icon={<FileDoneOutlined />}
+               />
+            }
+            style={{ width: "100%" }}
+         >
             <Flex justify="space-between">
                <CustomForm
                   key={"InvoiceSearchForm"}
@@ -162,13 +171,23 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
                   handleSubmit={handleInvoiceSearchClick}
                />
 
-               <CustomButton
-                  name="Invoices"
-                  icon={<LeftCircleOutlined />}
-                  handleClick={() => navigate(ROUTES.COMPLETED)}
-                  type="link"
-                  style={{ padding: 0 }}
-               />
+               <Flex vertical>
+                  <CustomButton
+                     name="Back to Notes"
+                     icon={<LeftCircleOutlined />}
+                     handleClick={() => navigate(ROUTES.NOTES)}
+                     type="link"
+                     style={{ padding: 0 }}
+                  />
+
+                  <CustomButton
+                     name="Back to Invoices"
+                     icon={<LeftCircleOutlined />}
+                     handleClick={() => navigate(ROUTES.COMPLETED)}
+                     type="link"
+                     style={{ padding: 0 }}
+                  />
+               </Flex>
             </Flex>
 
             <InvoicesTable
