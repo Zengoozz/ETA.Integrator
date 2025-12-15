@@ -18,7 +18,7 @@ namespace ETA.Integrator.Server.Controllers
         {
             _apiCallerService = apiCallerService;
         }
-        [HttpGet]
+        [HttpGet("GetProviderInvoices")]
         public async Task<IActionResult> GetProviderInvoices(DateTime fromDate, DateTime toDate, string invoiceType, List<string>? invoicesIds = null)
         {
             ProviderInvoicesSearchDTO searchModel = new ProviderInvoicesSearchDTO()
@@ -32,7 +32,7 @@ namespace ETA.Integrator.Server.Controllers
 
             return Ok(response.OrderBy(r => r.InvoiceNumber));
         }
-
+        [HttpGet("GetProviderNotes")]
         public async Task<IActionResult> GetProviderNotes(DateTime fromDate, DateTime toDate, string invoiceType, List<string>? invoicesIds = null)
         {
             ProviderInvoicesSearchDTO searchModel = new ProviderInvoicesSearchDTO()

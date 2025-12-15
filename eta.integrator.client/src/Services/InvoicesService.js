@@ -5,7 +5,7 @@ const getInvoicesAccordingToDateAsQueryParams = async (values) => {
    try {
       const response = await GenericService.makeRequestFactory(
          "GET",
-         `/Invoices?fromDate=${values.dateFrom}&toDate=${values.dateTo}&invoiceType=${values.invoiceType}`
+         `/Invoices/GetProviderInvoices?fromDate=${values.DateFrom}&toDate=${values.DateTo}&invoiceType=${values.InvoiceType}`
       );
 
       return response;
@@ -15,7 +15,26 @@ const getInvoicesAccordingToDateAsQueryParams = async (values) => {
    }
 };
 
-const submitInvoices = async (invoices, invoiceType, isResubmit = false, invoicesIds = []) => {
+const getNotesAccodingToDateAsQueryParams = async (values) => {
+   try {
+      const response = await GenericService.makeRequestFactory(
+         "GET",
+         `/Invoices/GetProviderNotes?fromDate=${values.DateFrom}&toDate=${values.DateTo}&invoiceType=${values.InvoiceType}`
+      );
+
+      return response;
+   } catch (error) {
+      console.error(error.message);
+      throw error;
+   }
+};
+
+const submitInvoices = async (
+   invoices,
+   invoiceType,
+   isResubmit = false,
+   invoicesIds = []
+) => {
    try {
       const response = await GenericService.makeRequestFactory(
          "POST",
@@ -51,11 +70,11 @@ const getSubmittedInvoices = async () => {
 
 const searchDocumentsWithFilters = async (values) => {
    try {
-      const status = InvoiceStatus.find((r) => r.value === values.invoiceStatus).label;
+      const status = InvoiceStatus.find((r) => r.value === values.InvoiceStatus).label;
       const url = `/Invoices/SearchDocuments?submissionDateFrom=${
-         values.dateFrom
-      }&submissionDateTo=${values.dateTo}&status=${status}&receiverType=${
-         values.invoiceType == "I" ? "P" : "B"
+         values.DateFrom
+      }&submissionDateTo=${values.DateTo}&status=${status}&receiverType=${
+         values.InvoiceType == "I" ? "P" : "B"
       }`;
 
       const response = await GenericService.makeRequestFactory("GET", url);
@@ -69,6 +88,7 @@ const searchDocumentsWithFilters = async (values) => {
 
 export default {
    getInvoicesAccordingToDateAsQueryParams,
+   getNotesAccodingToDateAsQueryParams,
    submitInvoices,
    getSubmittedInvoices,
    searchDocumentsWithFilters,

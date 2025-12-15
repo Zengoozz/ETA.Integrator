@@ -82,16 +82,16 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
          InvoiceStatus.find((i) => i.value === values.InvoiceStatus)?.label ?? "all";
 
       var formattedValues = {
-         dateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
-         dateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
-         invoiceType: invoiceTypeValue,
-         invoiceStatus: values.InvoiceStatus,
+         DateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
+         DateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
+         InvoiceType: invoiceTypeValue,
+         InvoiceStatus: values.InvoiceStatus,
       };
 
       var notificationObject = {
          type: "success",
          message: `Showing ${invoiceTypeLabel} of ${invoiceStatusLabel} status`,
-         description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+         description: `from ${formattedValues.DateFrom} to ${formattedValues.DateTo}`,
          duration: 3,
       };
       return { formattedValues, notificationObject };

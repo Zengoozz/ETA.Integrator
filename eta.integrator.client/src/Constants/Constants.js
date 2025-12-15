@@ -1349,6 +1349,10 @@ const InvoiceTypes = [
       value: "I",
       label: "Invoice",
    },
+   {
+      value: "CN",
+      label: "Credit Note"
+   }
 ];
 
 const InvoiceStatus = [

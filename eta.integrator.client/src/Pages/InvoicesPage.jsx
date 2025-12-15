@@ -74,9 +74,18 @@ const InvoicesPage = ({ isMobile }) => {
 
    const handleSearch = async (values) => {
       try {
-         const response = await InvoicesService.getInvoicesAccordingToDateAsQueryParams(
-            values
-         );
+         var response = null;
+         if (values.InvoiceType == "CN") {
+            response = await InvoicesService.getNotesAccodingToDateAsQueryParams(
+               values
+            );
+         } else {
+            response = await InvoicesService.getInvoicesAccordingToDateAsQueryParams(
+               values
+            );
+         }
+
+
          setSearchValues(values);
          setTableData(response); // Update table data with the response
 
@@ -157,9 +166,9 @@ const InvoicesPage = ({ isMobile }) => {
       }
 
       var formattedValues = {
-         dateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
-         dateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
-         invoiceType: invoiceTypeValue,
+         DateFrom: dateFrom ? dateFrom.format("YYYY-MM-DD") : null,
+         DateTo: dateTo ? dateTo.format("YYYY-MM-DD") : null,
+         InvoiceType: invoiceTypeValue,
       };
 
       var notificationMessage = `Showing ${invoiceTypeLabel}`;
@@ -167,7 +176,7 @@ const InvoicesPage = ({ isMobile }) => {
       var notificationObject = {
          type: "success",
          message: notificationMessage,
-         description: `from ${formattedValues.dateFrom} to ${formattedValues.dateTo}`,
+         description: `from ${formattedValues.DateFrom} to ${formattedValues.DateTo}`,
          duration: 3,
       };
       return { formattedValues, notificationObject };
