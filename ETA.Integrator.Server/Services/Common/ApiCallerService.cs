@@ -90,6 +90,15 @@ namespace ETA.Integrator.Server.Services.Common
             return processedResponse;
         }
 
+        public async Task<List<ProviderInvoiceViewModel>> GetProviderNotes(ProviderInvoicesSearchDTO searchModel)
+        {
+            GenericRequest request = _requestFactoryService.GetProviderNotes(searchModel);
+            RestResponse response = await _httpRequestSenderService.SendRequest(request);
+            List<ProviderInvoiceViewModel> processedResponse = await _responseProcessorService.ProcessResponse<List<ProviderInvoiceViewModel>>(response);
+            //if (processedResponse.Count() > 0)
+            //    await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
+            return processedResponse;
+        }
         public async Task<RecentDocumentsResponseDTO> GetRecentDocuments()
         {
             GenericRequest request = _requestFactoryService.GetRecentDocuments();

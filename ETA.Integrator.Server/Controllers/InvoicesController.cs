@@ -33,6 +33,20 @@ namespace ETA.Integrator.Server.Controllers
             return Ok(response.OrderBy(r => r.InvoiceNumber));
         }
 
+        public async Task<IActionResult> GetProviderNotes(DateTime fromDate, DateTime toDate, string invoiceType, List<string>? invoicesIds = null)
+        {
+            ProviderInvoicesSearchDTO searchModel = new ProviderInvoicesSearchDTO()
+            {
+                StartDate = fromDate,
+                EndDate = toDate,
+                InvoiceType = string.IsNullOrEmpty(invoiceType) ? "I" : invoiceType,
+                InvoicesIds = invoicesIds ?? new()
+            };
+            var response = await _apiCallerService.GetProviderNotes(searchModel);
+
+            return Ok(response.OrderBy(r => r.InvoiceNumber));
+        }
+
         [HttpPost("SubmitDocuments")]
         public async Task<IActionResult> SubmitDocuments(InvoiceRequest request)
         {

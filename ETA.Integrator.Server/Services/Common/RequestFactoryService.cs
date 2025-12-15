@@ -176,6 +176,19 @@ namespace ETA.Integrator.Server.Services.Common
             return genericRequest;
         }
 
+        public GenericRequest GetProviderNotes(ProviderInvoicesSearchDTO searchModel)
+        {
+            GenericRequest genericRequest = new();
+
+            genericRequest.Request = new RestRequest("/api/Invoices/GetNotes", Method.Post);
+
+            genericRequest.Request.AddJsonBody(searchModel);
+
+            genericRequest.ClientType = ClientType.Provider;
+
+            return genericRequest;
+        }
+
         public GenericRequest GetSubmission(string uuid, int pageNo, int pageSize)
         {
             GenericRequest genericRequest = new();

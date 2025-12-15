@@ -14,6 +14,7 @@ namespace ETA.Integrator.Server.Interface.Services.Common
         Task<GenericRequest> SubmitDocuments(InvoiceRequest request);
         GenericRequest GetRecentDocuments();
         GenericRequest GetProviderInvoices(ProviderInvoicesSearchDTO searchModel);
+        GenericRequest GetProviderNotes(ProviderInvoicesSearchDTO searchModel);
         GenericRequest GetSubmission(string uuid, int pageNo, int pageSize);
         GenericRequest SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string receiverType, string direction);
     }
