@@ -1,9 +1,8 @@
 ﻿using ETA.Integrator.Server.Dtos;
 using ETA.Integrator.Server.Interface.Services;
+using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Core;
-using ETA.Integrator.Server.Models.Provider;
-using Microsoft.Extensions.Options;
 using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
 using Newtonsoft.Json;
@@ -20,25 +19,43 @@ namespace ETA.Integrator.Server.Services
 {
     public class DocumentSignerService : IDocumentSignerService
     {
-        private readonly CustomConfigurations _customConfig;
-        public DocumentSignerService(IOptions<CustomConfigurations> customConfig)
+        private readonly IInvoiceSubmissionLogService _InvoiceSubmissionLogService;
+        public DocumentSignerService(IInvoiceSubmissionLogService InvoiceSubmissionLogService)
         {
-            _customConfig = customConfig.Value;
+            _InvoiceSubmissionLogService = InvoiceSubmissionLogService;
         }
-        public List<string> SignMultipleDocumentsMock(List<ProviderInvoiceViewModel> viewModels, IssuerModel issuer, string invoiceType, string tokenPin)
+
+        private InvoiceModel PrepareDocument(DocumentMappIngPropertiesModel mappingProperties)
+        {
+            InvoiceModel model = new InvoiceModel();
+            IDocumentMapper mapper; 
+
+            if (mappingProperties.ForNote)
+            {
+                mapper = new CreditNoteModelMapper();
+                //string uuidReference = _InvoiceSubmissionLogService.
+                //mappingProperties.References = _I
+            }
+            else
+                mapper = new InvoiceModelMapper();
+
+            return mapper.BaseMap(mappingProperties);
+        }
+        public List<string> SignMultipleDocumentsMock(SigningPropertiesModel signingProperties)
         {
             List<string> documents = new List<string>();
 
-            var url = _customConfig.Consumer_APIBaseUrl;
-            string[] parts = url.Split('.');
-            bool isProduction = false;
-
-            if (parts.Length > 1)
-                isProduction = parts[1] != "preprod";
-
-            foreach (var model in viewModels)
+            foreach (var model in signingProperties.Documents)
             {
-                var invoice = model.FromViewModel(issuer, invoiceType, _customConfig.ItemCode, isProduction);
+                var invoice = PrepareDocument(new DocumentMappIngPropertiesModel()
+                {
+                    Document = model,
+                    Issuer = signingProperties.Issuer,
+                    ItemCode = signingProperties.ItemCode,
+                    InvoiceType = signingProperties.InvoiceType,
+                    IsProduction = signingProperties.IsProduction,
+                    ForNote = signingProperties.ForNote
+                });
 
                 invoice.Signatures = new List<SignatureModel>();
                 SignatureModel signature = new SignatureModel();
@@ -108,15 +125,8 @@ namespace ETA.Integrator.Server.Services
 
             return documents;
         }
-        public List<string> SignMultipleDocuments(List<ProviderInvoiceViewModel> viewModels, IssuerModel issuer, string invoiceType, string tokenPin)
+        public List<string> SignMultipleDocuments(SigningPropertiesModel signingProperties)
         {
-            var url = _customConfig.Consumer_APIBaseUrl;
-            string[] parts = url.Split('.');
-            bool isProduction = false;
-
-            if (parts.Length > 1)
-                isProduction = parts[1] != "preprod";
-
             List<string> documents = new List<string>();
 
             var DllLibPath = @"C:\Windows\System32\eps2003csp11.dll";
@@ -140,7 +150,7 @@ namespace ETA.Integrator.Server.Services
 
                 using (var session = slot.OpenSession(SessionType.ReadWrite))
                 {
-                    session.Login(CKU.CKU_USER, Encoding.UTF8.GetBytes(tokenPin));
+                    session.Login(CKU.CKU_USER, Encoding.UTF8.GetBytes(signingProperties.TokenPin));
 
                     var certificateSearchAttributes = new List<IObjectAttribute>()
                 {
@@ -176,9 +186,17 @@ namespace ETA.Integrator.Server.Services
                     var certForSigning = foundCerts[0];
                     store.Close();
 
-                    foreach (var model in viewModels)
+                    foreach (var model in signingProperties.Documents)
                     {
-                        var invoice = model.FromViewModel(issuer, invoiceType, _customConfig.ItemCode, isProduction);
+                        var invoice = PrepareDocument(new DocumentMappIngPropertiesModel()
+                        {
+                            Document = model,
+                            Issuer = signingProperties.Issuer,
+                            ItemCode = signingProperties.ItemCode,
+                            InvoiceType = signingProperties.InvoiceType,
+                            IsProduction = signingProperties.IsProduction,
+                            ForNote = signingProperties.ForNote
+                        });
 
                         invoice.Signatures = new List<SignatureModel>();
                         SignatureModel signature = new SignatureModel();
@@ -256,6 +274,10 @@ namespace ETA.Integrator.Server.Services
 
             return documents;
         }
+        //private static List<InvoiceModel> PrepareDocumentsToBeSigned()
+        //{
+
+        //}
         private static string SignWithCMS(string serializedText, X509Certificate2 signingCert)
         {
             byte[] data = Encoding.UTF8.GetBytes(serializedText);

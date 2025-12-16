@@ -106,9 +106,9 @@ namespace ETA.Integrator.Server.Services.Common
             return await _responseProcessorService.ProcessResponse<RecentDocumentsResponseDTO>(response);
         }
 
-        public async Task<SubmitDocumentsResponseDTO> SubmitDocuments(InvoiceRequest invoicesRequest)
+        public async Task<SubmitDocumentsResponseDTO> SubmitInvoices(InvoiceRequest invoicesRequest)
         {
-            GenericRequest request = await _requestFactoryService.SubmitDocuments(invoicesRequest);
+            GenericRequest request = await _requestFactoryService.SubmitInvoices(invoicesRequest);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             SuccessfulResponseDTO processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
 
@@ -119,8 +119,8 @@ namespace ETA.Integrator.Server.Services.Common
             {
                 await Task.Delay(TimeSpan.FromSeconds(2));
                 submissionResponse = await GetSubmission(processedResponse.SubmissionId, 1, invoicesRequest.Invoices.Count);
-                
-                if(submissionResponse.DocumentSummary.Count > 0)
+
+                if (submissionResponse.DocumentSummary.Count > 0)
                     await _invoiceSubmissionLogService.UpdateWithSubmissionStatus(processedResponse.AcceptedDocuments, submissionResponse.DocumentSummary);
             }
 
@@ -156,7 +156,7 @@ namespace ETA.Integrator.Server.Services.Common
                     ResponseMessage = $"No Invoices with the following codes: {string.Join(" / ", invoicesRequest.InvoicesIds)} was found."
                 };
 
-            return await SubmitDocuments(invoicesRequest);
+            return await SubmitInvoices(invoicesRequest);
         }
 
         public async Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageNo = 1, int pageSize = 100)

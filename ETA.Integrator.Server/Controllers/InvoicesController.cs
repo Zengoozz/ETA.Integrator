@@ -55,7 +55,7 @@ namespace ETA.Integrator.Server.Controllers
             if (request.IsResubmit)
                 response = await _apiCallerService.ResubmitInvoices(request);
             else
-                response = await _apiCallerService.SubmitDocuments(request);
+                response = await _apiCallerService.SubmitInvoices(request);
 
             if (response.IsError)
                 return BadRequest(response);

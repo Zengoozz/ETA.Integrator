@@ -68,7 +68,7 @@ namespace ETA.Integrator.Server.Services.Common
             return genericRequest;
         }
 
-        public async Task<GenericRequest> SubmitDocuments(InvoiceRequest request)
+        public async Task<GenericRequest> SubmitInvoices(InvoiceRequest request)
         {
             GenericRequest genericRequest = new();
             List<string> documents = new List<string>();
@@ -109,10 +109,21 @@ namespace ETA.Integrator.Server.Services.Common
                 if (parts.Length > 1)
                     isProduction = parts[1] != "preprod";
 
-                if(isProduction)
-                    documents = _documentSignerService.SignMultipleDocuments(request.Invoices, issuer, request.InvoiceType, connectionSettings.TokenPin);
+                SigningPropertiesModel signingProperties = new SigningPropertiesModel
+                {
+                    Documents = request.Invoices,
+                    Issuer = issuer,
+                    ItemCode = _customConfig.ItemCode,
+                    InvoiceType = request.InvoiceType,
+                    TokenPin = connectionSettings.TokenPin,
+                    IsProduction = isProduction,
+                    ForNote = request.ForNote
+                };
+
+                if (isProduction)
+                    documents = _documentSignerService.SignMultipleDocuments(signingProperties);
                 else
-                    documents = _documentSignerService.SignMultipleDocumentsMock(request.Invoices, issuer, request.InvoiceType, connectionSettings.TokenPin);
+                    documents = _documentSignerService.SignMultipleDocumentsMock(signingProperties);
             }
             catch (Exception ex)
             {
