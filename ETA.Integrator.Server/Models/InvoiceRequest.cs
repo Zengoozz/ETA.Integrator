@@ -8,7 +8,7 @@ namespace ETA.Integrator.Server.Models
         public List<ProviderInvoiceViewModel> Invoices { get; set; } = new();
         public string InvoiceType { get; set; } = string.Empty;
         public bool IsResubmit { get; set; } = false;
-        public bool ForNote { get; set; } = false;
+        public bool ForNotes { get; set; } = false;
         public List<string> InvoicesIds { get; set; } = new();
     }
 }

@@ -119,5 +119,9 @@ namespace ETA.Integrator.Server.Services
             }
         }
 
+        public async Task<InvoiceSubmissionLog?> GetValidByInternalId(string internalId)
+        {
+            return await _invoiceSubmissionLogRepository.GetValidByInternalId(internalId);
+        }
     }
 }

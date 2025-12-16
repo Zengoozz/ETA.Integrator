@@ -32,9 +32,14 @@ namespace ETA.Integrator.Server.Repositories
             return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<List<InvoiceSubmissionLog>> GetByInternalId(int id)
+        public async Task<List<InvoiceSubmissionLog>> GetByInternalId(string internalId)
         {
-            return await _dbSet.AsNoTracking().Where(x => x.InternalId == id.ToString()).ToListAsync();
+            return await _dbSet.AsNoTracking().Where(x => x.InternalId == internalId.ToString()).ToListAsync();
+        }
+
+        public async Task<InvoiceSubmissionLog?> GetValidByInternalId(string internalId)
+        {
+            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.InternalId == internalId && x.Status == InvoiceStatus.Valid);
         }
 
         public async Task<List<InvoiceSubmissionLog>> GetByListOfInternalIds(List<string> ids)

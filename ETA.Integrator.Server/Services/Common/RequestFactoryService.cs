@@ -117,13 +117,13 @@ namespace ETA.Integrator.Server.Services.Common
                     InvoiceType = request.InvoiceType,
                     TokenPin = connectionSettings.TokenPin,
                     IsProduction = isProduction,
-                    ForNote = request.ForNote
+                    ForNotes = request.ForNotes
                 };
 
                 if (isProduction)
-                    documents = _documentSignerService.SignMultipleDocuments(signingProperties);
+                    documents = await _documentSignerService.SignMultipleDocuments(signingProperties);
                 else
-                    documents = _documentSignerService.SignMultipleDocumentsMock(signingProperties);
+                    documents = await _documentSignerService.SignMultipleDocumentsMock(signingProperties);
             }
             catch (Exception ex)
             {

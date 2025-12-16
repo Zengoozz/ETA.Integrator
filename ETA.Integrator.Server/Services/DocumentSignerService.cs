@@ -1,4 +1,5 @@
 ﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Entities;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Consumer.ETA;
@@ -25,36 +26,46 @@ namespace ETA.Integrator.Server.Services
             _InvoiceSubmissionLogService = InvoiceSubmissionLogService;
         }
 
-        private InvoiceModel PrepareDocument(DocumentMappIngPropertiesModel mappingProperties)
+        private async Task<InvoiceModel> PrepareDocument(DocumentMappIngPropertiesModel mappingProperties)
         {
             InvoiceModel model = new InvoiceModel();
-            IDocumentMapper mapper; 
+            List<string> references = new List<string>();
+            IDocumentMapper mapper;
 
-            if (mappingProperties.ForNote)
+            if (mappingProperties.ForNotes)
             {
                 mapper = new CreditNoteModelMapper();
-                //string uuidReference = _InvoiceSubmissionLogService.
-                //mappingProperties.References = _I
+                InvoiceSubmissionLog? log = await _InvoiceSubmissionLogService.GetValidByInternalId(mappingProperties.Document.ReferenceId);
+
+                if (log is null)
+                    throw new ProblemDetailsException(
+                        statusCode: StatusCodes.Status404NotFound,
+                        message: "INVALID",
+                        detail: "Referenced invoice not found"
+                        );
+
+                references.Add(log.Uuid);
+                mappingProperties.References = references;
             }
             else
                 mapper = new InvoiceModelMapper();
 
             return mapper.BaseMap(mappingProperties);
         }
-        public List<string> SignMultipleDocumentsMock(SigningPropertiesModel signingProperties)
+        public async Task<List<string>> SignMultipleDocumentsMock(SigningPropertiesModel signingProperties)
         {
             List<string> documents = new List<string>();
 
             foreach (var model in signingProperties.Documents)
             {
-                var invoice = PrepareDocument(new DocumentMappIngPropertiesModel()
+                var invoice = await PrepareDocument(new DocumentMappIngPropertiesModel()
                 {
                     Document = model,
                     Issuer = signingProperties.Issuer,
                     ItemCode = signingProperties.ItemCode,
                     InvoiceType = signingProperties.InvoiceType,
                     IsProduction = signingProperties.IsProduction,
-                    ForNote = signingProperties.ForNote
+                    ForNotes = signingProperties.ForNotes
                 });
 
                 invoice.Signatures = new List<SignatureModel>();
@@ -125,7 +136,7 @@ namespace ETA.Integrator.Server.Services
 
             return documents;
         }
-        public List<string> SignMultipleDocuments(SigningPropertiesModel signingProperties)
+        public async Task<List<string>> SignMultipleDocuments(SigningPropertiesModel signingProperties)
         {
             List<string> documents = new List<string>();
 
@@ -188,14 +199,14 @@ namespace ETA.Integrator.Server.Services
 
                     foreach (var model in signingProperties.Documents)
                     {
-                        var invoice = PrepareDocument(new DocumentMappIngPropertiesModel()
+                        var invoice = await PrepareDocument(new DocumentMappIngPropertiesModel()
                         {
                             Document = model,
                             Issuer = signingProperties.Issuer,
                             ItemCode = signingProperties.ItemCode,
                             InvoiceType = signingProperties.InvoiceType,
                             IsProduction = signingProperties.IsProduction,
-                            ForNote = signingProperties.ForNote
+                            ForNotes = signingProperties.ForNotes
                         });
 
                         invoice.Signatures = new List<SignatureModel>();

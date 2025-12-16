@@ -9,8 +9,9 @@ namespace ETA.Integrator.Server.Interface.Repositories
         Task<List<InvoiceSubmissionLog>> GetAll();
         Task<List<InvoiceSubmissionLog>> GetAllValidWithIds(List<string> invoicesIds);
         Task<InvoiceSubmissionLog?> GetById(int id);
-        Task<List<InvoiceSubmissionLog>> GetByInternalId(int id);
+        Task<List<InvoiceSubmissionLog>> GetByInternalId(string id);
         Task<List<InvoiceSubmissionLog>> GetByListOfInternalIds(List<string> ids);
+        Task<InvoiceSubmissionLog?> GetValidByInternalId(string internalId);
         Task<List<InvoiceSubmissionLog>> GetByListOfUuids(List<string> uuids);
         Task Save(InvoiceSubmissionLog entity);
         Task SaveList(List<InvoiceSubmissionLog> listOfEntities);
