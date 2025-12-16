@@ -32,6 +32,7 @@ const getNotesAccodingToDateAsQueryParams = async (values) => {
 const submitInvoices = async (
    invoices,
    invoiceType,
+   forNotes = false,
    isResubmit = false,
    invoicesIds = []
 ) => {
@@ -42,8 +43,9 @@ const submitInvoices = async (
          {
             Invoices: invoices,
             InvoiceType: invoiceType,
-            isResubmit: isResubmit,
-            invoicesIds: invoicesIds,
+            IsResubmit: isResubmit,
+            InvoicesIds: invoicesIds,
+            ForNotes: forNotes,
          }
       );
 

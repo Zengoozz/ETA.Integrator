@@ -56,7 +56,8 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
       try {
          var response = await InvoicesService.submitInvoices(
             selectedRows,
-            searchValues.invoiceType
+            searchValues.invoiceType,
+            forNotes
          );
 
          notificationApi.open({
