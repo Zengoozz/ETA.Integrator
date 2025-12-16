@@ -18,5 +18,6 @@ namespace ETA.Integrator.Server.Interface.Repositories
         Task UpdateStatus(int id, InvoiceStatus status);
         Task UpdateListOfSubmissionsStatus(List<UpdateSubmissionStatusDTO> submissionsToUpdate);
         Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions();
+        Task<(List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid)> GetValidAndSubmittedByInternalId(List<string> internalIds);
     }
 }

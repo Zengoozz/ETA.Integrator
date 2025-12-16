@@ -135,5 +135,15 @@ namespace ETA.Integrator.Server.Repositories
             }
         }
         
+        public async Task<(List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid)> GetValidAndSubmittedByInternalId(List<string> internalIds)
+        {
+            var logs = _dbSet.AsNoTracking()
+                .Where(l => internalIds.Contains(l.InternalId) && (l.Status == InvoiceStatus.Valid || l.Status == InvoiceStatus.Submitted));
+
+            var submitted = await logs.Where(l => l.Status == InvoiceStatus.Submitted).ToListAsync();
+            var valid = await logs.Where(l => l.Status == InvoiceStatus.Valid).ToListAsync();
+
+            return (submitted, valid);
+        }
     }
 }

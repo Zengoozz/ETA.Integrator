@@ -99,6 +99,7 @@ namespace ETA.Integrator.Server.Services.Common
             //    await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
             return processedResponse;
         }
+        
         public async Task<RecentDocumentsResponseDTO> GetRecentDocuments()
         {
             GenericRequest request = _requestFactoryService.GetRecentDocuments();
@@ -199,6 +200,38 @@ namespace ETA.Integrator.Server.Services.Common
             GenericRequest request = _requestFactoryService.SearchDocuments(submissionDateFrom, submissionDateTo, status, receiverType, direction);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             return await _responseProcessorService.ProcessResponse<SearchDocumentsResponseDTO>(response);
+        }
+
+        public async Task<List<KeyValuePair<string, string>>> ValidateReferences(List<string> references)
+        {
+            List<KeyValuePair<string, string>> validReferences = new();
+
+            (List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid) = await _invoiceSubmissionLogService.GetValidAndSubmittedByInternalId(references);
+
+            validReferences.AddRange(valid.Select(v => new KeyValuePair<string, string>(v.InternalId, v.Uuid)));
+
+            if (submitted.Count > 0)
+            {
+                foreach (var record in submitted)
+                {
+                    // Get Document
+                }
+            }
+
+            if (validReferences.Count != references.Count)
+            {
+                var invalidRefs = references.Except(validReferences.Select(v => v.Key)).ToList();
+                var errMessage = $"The following references are invalid or not submitted yet: {string.Join(" / ", invalidRefs)}";
+
+                throw new ProblemDetailsException(
+                    StatusCodes.Status400BadRequest,
+                    "INVALID",
+                    errMessage
+                    );
+            }
+
+            return validReferences;
+
         }
     }
 }
