@@ -56,7 +56,7 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
       try {
          var response = await InvoicesService.submitInvoices(
             selectedRows,
-            searchValues.invoiceType,
+            currentRowToEdit ? "C" : searchValues.InvoiceType,   // Set invoice type to claim when editing before submission
             forNotes
          );
 

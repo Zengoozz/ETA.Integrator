@@ -1317,7 +1317,11 @@ const EditInvoiceRules = {
    registrationNumber: [
       { required: true, message: "Please input the registration number!" },
       { whitespace: true, message: "Registration number name cannot be empty spaces" },
-      { max: 14, message: "Registration number must be 14 digits long at most" },
+      {
+         pattern: /^\d{9}$/,
+         message: "Registration number must be exactly 9 digits",
+      },
+      // { max: 9, message: "Registration number must be 9 digits long at most" },
    ],
    receiverName: [
       { required: true, message: "Please input the receiver name!" },
@@ -1348,7 +1352,7 @@ const InvoiceTypes = [
    {
       value: "I",
       label: "Invoice",
-   }
+   },
 ];
 
 const InvoiceStatus = [
