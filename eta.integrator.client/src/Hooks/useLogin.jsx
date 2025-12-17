@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 import AuthService from "../Services/AuthService";
-import { handleErrorNotification } from "../Services/GenericService";
+import GenericService from "../Services/GenericService";
 
 export const useLogin = (
    setLogIn,
@@ -10,6 +10,8 @@ export const useLogin = (
    setCredentialsIncorrect
 ) => {
    const navigate = useNavigate();
+
+   const { handleErrorNotification } = GenericService;
 
    const handleLogin = async (values) => {
       setLoading(true);

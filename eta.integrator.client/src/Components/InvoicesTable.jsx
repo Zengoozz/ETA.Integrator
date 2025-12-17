@@ -3,7 +3,7 @@ import { Divider, Table, Flex } from "antd";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 
 import CustomButton from "../Components/CustomButton";
-import { handleErrorNotification } from "../Services/GenericService";
+import GenericService from "../Services/GenericService";
 
 const InvoicesTable = ({
    isMobile,
@@ -20,6 +20,8 @@ const InvoicesTable = ({
    const [loading, setLoading] = useState(false);
    const [selectedRowsToAction, setSelectedRowsToActionOn] = useState([]);
    // rowSelection object indicates the need for row selection
+
+   const { handleErrorNotification } = GenericService;
 
    const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {

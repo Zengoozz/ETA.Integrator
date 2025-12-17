@@ -4,7 +4,7 @@ import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Flex, notification } from "antd";
 
 import { LoginFormValidationRules } from "../Constants/Constants";
-import { handleErrorNotification } from "../Services/GenericService";
+import GenericService from "../Services/GenericService";
 import { useLogin } from "../Hooks/useLogin";
 
 const LoginFormPage = ({ setLogIn, isMobile }) => {
@@ -17,6 +17,8 @@ const LoginFormPage = ({ setLogIn, isMobile }) => {
       setLoading,
       setCredentialsIncorrect
    );
+
+   const { handleErrorNotification } = GenericService;
 
    const onLoginFailed = (errorInfo) => {
       var error = {

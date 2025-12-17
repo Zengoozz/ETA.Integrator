@@ -2,12 +2,14 @@ import { useEffect } from "react";
 import { Button, Form, Input, Flex, notification } from "antd";
 
 import AuthService from "../Services/AuthService";
-import { handleErrorNotification } from "../Services/GenericService";
+import GenericService from "../Services/GenericService";
 import { SettingsValidationRules } from "../Constants/Constants.js";
 
 const ConnectionSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    const [form] = Form.useForm();
    const [notificationApi, contextHolderNotification] = notification.useNotification();
+
+   const { handleErrorNotification } = GenericService;
 
    useEffect(() => {
       const fetchSettings = async () => {

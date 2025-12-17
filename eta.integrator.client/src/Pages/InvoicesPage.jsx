@@ -19,7 +19,7 @@ import {
 } from "../Constants/Shared";
 import { ROUTES, InvoiceTypes } from "../Constants/Constants";
 import InvoicesService from "../Services/InvoicesService";
-import { handleErrorNotification } from "../Services/GenericService";
+import GenericService from "../Services/GenericService";
 import useSearchColumn from "../Hooks/useSearchColumn";
 
 const InvoicesPage = ({ isMobile, forNotes = false }) => {
@@ -45,6 +45,8 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
    const [notificationApi, contextHolderNotification] = notification.useNotification();
    const { getColumnSearchProps, filteredData } = useSearchColumn(tableData || []);
    const navigate = useNavigate();
+
+   const { handleErrorNotification } = GenericService;
 
    useEffect(() => {
       setEditFormInitialValues({

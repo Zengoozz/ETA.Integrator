@@ -12,7 +12,7 @@ import { ROUTES, InvoiceTypes, InvoiceStatus } from "../Constants/Constants";
 import { SubmittedInvoiceColumns, InvoicesSearchFormItems } from "../Constants/Shared";
 import useSearchColumn from "../Hooks/useSearchColumn";
 import InvoicesService from "../Services/InvoicesService";
-import { handleErrorNotification } from "../Services/GenericService";
+import GenericService from "../Services/GenericService";
 
 const SubmittedInvoicesPage = ({ isMobile }) => {
    const [searchKey, setSearchKey] = useState(1);
@@ -30,6 +30,8 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
    const { getColumnSearchProps, filteredData } = useSearchColumn(tableData || []);
 
    const navigate = useNavigate();
+
+   const { handleErrorNotification } = GenericService;
 
    const handleResubmit = async (selectedRows) => {
       try {

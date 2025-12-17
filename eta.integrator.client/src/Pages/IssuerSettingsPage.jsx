@@ -3,7 +3,7 @@ import { Button, Form, Input, Flex, Select, notification } from "antd";
 
 import AddressForm from "../Components/AddressForm";
 import AuthService from "../Services/AuthService";
-import { handleErrorNotification } from "../Services/GenericService";
+import GenericService from "../Services/GenericService";
 import { IssuerTypes, SettingsValidationRules } from "../Constants/Constants";
 
 const { Option } = Select;
@@ -12,6 +12,8 @@ const IssuerSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    const [form] = Form.useForm();
    const [isBusinessType, setIsBusinessType] = React.useState(false);
    const [notificationApi, contextHolderNotification] = notification.useNotification();
+
+   const { handleErrorNotification } = GenericService;
 
    useEffect(() => {
       const fetchSettings = async () => {
