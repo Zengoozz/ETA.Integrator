@@ -1,8 +1,11 @@
 ﻿using ETA.Integrator.Server.Dtos;
+using ETA.Integrator.Server.Dtos.ConsumerAPI;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.RecentDocuments;
-using ETA.Integrator.Server.Dtos.ConsumerAPI.Submission;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SearchDocuments;
+using ETA.Integrator.Server.Dtos.ConsumerAPI.Submission;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
+using ETA.Integrator.Server.Entities;
+using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
 using ETA.Integrator.Server.Models;
@@ -13,9 +16,8 @@ using ETA.Integrator.Server.Models.Provider.Requests;
 using ETA.Integrator.Server.Models.Provider.Response;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using System.Net;
-using ETA.Integrator.Server.Entities;
 using System.Diagnostics;
+using System.Net;
 
 namespace ETA.Integrator.Server.Services.Common
 {
@@ -99,7 +101,7 @@ namespace ETA.Integrator.Server.Services.Common
             //    await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
             return processedResponse;
         }
-        
+
         public async Task<RecentDocumentsResponseDTO> GetRecentDocuments()
         {
             GenericRequest request = _requestFactoryService.GetRecentDocuments();
@@ -109,6 +111,11 @@ namespace ETA.Integrator.Server.Services.Common
 
         public async Task<SubmitDocumentsResponseDTO> SubmitInvoices(InvoiceRequest invoicesRequest)
         {
+            if (invoicesRequest.ForNotes)
+            {
+                invoicesRequest.InternalIdsWithUUIDs = await ValidateReferences(invoicesRequest.Invoices);
+            }
+
             GenericRequest request = await _requestFactoryService.SubmitInvoices(invoicesRequest);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             SuccessfulResponseDTO processedResponse = await _responseProcessorService.ProcessResponse<SuccessfulResponseDTO>(response);
@@ -202,8 +209,36 @@ namespace ETA.Integrator.Server.Services.Common
             return await _responseProcessorService.ProcessResponse<SearchDocumentsResponseDTO>(response);
         }
 
-        public async Task<List<KeyValuePair<string, string>>> ValidateReferences(List<string> references)
+        public async Task<DocumentExtendedDTO> GetDocument(string uuid)
         {
+            GenericRequest request = _requestFactoryService.GetDocument(uuid);
+            RestResponse response = await _httpRequestSenderService.SendRequest(request);
+            return await _responseProcessorService.ProcessResponse<DocumentExtendedDTO>(response);
+        }
+
+        private async Task<List<KeyValuePair<string, string>>> ValidateReferences(List<ProviderInvoiceViewModel> notes)
+        {
+            List<string> references = [.. notes.Where(i => i.ReferenceId != null).Select(i => i.ReferenceId)];
+
+            if (references is null || references.Count <= 0 || references.Count != notes.Count)
+                throw new ProblemDetailsException(
+                    StatusCodes.Status400BadRequest,
+                    "INVALID",
+                    "No references found with the notes"
+                    );
+
+            if (references.Count != notes.Count)
+            {
+                List<string> withoutRefs = notes.Where(i => i.ReferenceId is null).Select(i => i.InvoiceNumber).ToList();
+                string errMessage = $"The following notes got no references for previous submitted invoices: {string.Join(" / ", withoutRefs)}";
+
+                throw new ProblemDetailsException(
+                    StatusCodes.Status400BadRequest,
+                    "INVALID",
+                    "No references found with the notes"
+                    );
+            }
+
             List<KeyValuePair<string, string>> validReferences = new();
 
             (List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid) = await _invoiceSubmissionLogService.GetValidAndSubmittedByInternalId(references);
@@ -214,7 +249,16 @@ namespace ETA.Integrator.Server.Services.Common
             {
                 foreach (var record in submitted)
                 {
-                    // Get Document
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+
+                    DocumentExtendedDTO document = await GetDocument(record.Uuid);
+
+                    await _invoiceSubmissionLogService.UpdateStatus(record.Id, (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), document.Status, true));
+
+                    if (document != null && document.Status.ToLower() == "valid")
+                    {
+                        validReferences.Add(new KeyValuePair<string, string>(record.InternalId, record.Uuid));
+                    }
                 }
             }
 

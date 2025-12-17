@@ -8,6 +8,7 @@ using ETA.Integrator.Server.Models.Consumer.Response;
 using ETA.Integrator.Server.Models.Provider;
 using ETA.Integrator.Server.Models.Provider.Requests;
 using ETA.Integrator.Server.Models.Provider.Response;
+using ETA.Integrator.Server.Dtos.ConsumerAPI;
 
 namespace ETA.Integrator.Server.Interface.Services.Common
 {
@@ -22,6 +23,7 @@ namespace ETA.Integrator.Server.Interface.Services.Common
         Task<List<ProviderInvoiceViewModel>> GetProviderNotes(ProviderInvoicesSearchDTO searchModel);
         Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageNo = 1, int pageSize = 100);
         Task<SearchDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string receiverType, string direction);
+        Task<DocumentExtendedDTO> GetDocument(string uuid);
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ETA.Integrator.Server.Dtos.ConsumerAPI.Submission;
 using ETA.Integrator.Server.Dtos.ConsumerAPI.SubmitDocuments;
 using ETA.Integrator.Server.Entities;
+using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Models.Provider;
 
 namespace ETA.Integrator.Server.Interface.Services
@@ -16,5 +17,6 @@ namespace ETA.Integrator.Server.Interface.Services
         Task ValidateInvoiceStatus(List<ProviderInvoiceViewModel> invoices);
         Task<InvoiceSubmissionLog?> GetValidByInternalId(string internalId);
         Task<(List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid)> GetValidAndSubmittedByInternalId(List<string> internalIds);
+        Task UpdateStatus(int id, InvoiceStatus status);
     }
 }

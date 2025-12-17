@@ -17,5 +17,6 @@ namespace ETA.Integrator.Server.Interface.Services.Common
         GenericRequest GetProviderNotes(ProviderInvoicesSearchDTO searchModel);
         GenericRequest GetSubmission(string uuid, int pageNo, int pageSize);
         GenericRequest SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string receiverType, string direction);
+        GenericRequest GetDocument(string uuid);
     }
 }

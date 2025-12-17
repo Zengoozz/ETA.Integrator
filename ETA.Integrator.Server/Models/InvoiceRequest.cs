@@ -4,11 +4,11 @@ namespace ETA.Integrator.Server.Models
 {
     public class InvoiceRequest
     {
-
         public List<ProviderInvoiceViewModel> Invoices { get; set; } = new();
         public string InvoiceType { get; set; } = string.Empty;
         public bool IsResubmit { get; set; } = false;
         public bool ForNotes { get; set; } = false;
         public List<string> InvoicesIds { get; set; } = new();
+        public List<KeyValuePair<string, string>> InternalIdsWithUUIDs { get; set; } = new();
     }
 }

@@ -86,5 +86,13 @@ namespace ETA.Integrator.Server.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("GetDocument")]
+        public async Task<IActionResult> GetDocument(string uuid)
+        {
+            var response = await _apiCallerService.GetDocument(uuid);
+
+            return Ok(response);
+        }
     }
 }

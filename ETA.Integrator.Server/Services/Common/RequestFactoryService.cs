@@ -227,5 +227,15 @@ namespace ETA.Integrator.Server.Services.Common
 
             return genericRequest;
         }
+
+        public GenericRequest GetDocument(string uuid)
+        {
+            GenericRequest genericRequest = new();
+            genericRequest.Request = new RestRequest("/api/v1/documents/{documentUUID}/raw", Method.Get)
+                .AddUrlSegment("documentUUID", uuid);
+            genericRequest.ClientType = ClientType.Consumer;
+
+            return genericRequest;
+        }
     }
 }

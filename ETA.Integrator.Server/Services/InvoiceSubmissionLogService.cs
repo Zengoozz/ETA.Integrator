@@ -128,5 +128,10 @@ namespace ETA.Integrator.Server.Services
         {
             return await _invoiceSubmissionLogRepository.GetValidAndSubmittedByInternalId(internalIds);
         }
+
+        public async Task UpdateStatus(int id, InvoiceStatus status)
+        {
+            await _invoiceSubmissionLogRepository.UpdateStatus(id, status);
+        }
     }
 }
