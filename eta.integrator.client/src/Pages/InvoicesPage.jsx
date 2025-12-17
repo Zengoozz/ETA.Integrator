@@ -217,6 +217,12 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
       }
    };
    //#endregion
+
+   const navigateToRoute = (route) => {
+      setTableData([]);
+      navigate(route);
+   };
+
    const cardTitle = forNotes ? "Notes" : "Invoices";
    const tableColumns = InvoicesTableColumns(getColumnSearchProps, handleOpenEditModal);
    const editFormItems = EditFormItems(isMobile, isLoading);
@@ -257,7 +263,9 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
                         name={forNotes ? "Back to Invoices" : "Go to Notes"}
                         icon={forNotes ? <LeftCircleOutlined /> : <RightCircleOutlined />}
                         handleClick={() =>
-                           forNotes ? navigate(ROUTES.COMPLETED) : navigate(ROUTES.NOTES)
+                           forNotes
+                              ? navigateToRoute(ROUTES.COMPLETED)
+                              : navigateToRoute(ROUTES.NOTES)
                         }
                         type="link"
                         style={{ padding: 0 }}
