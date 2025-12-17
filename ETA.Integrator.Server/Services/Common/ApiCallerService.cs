@@ -220,10 +220,10 @@ namespace ETA.Integrator.Server.Services.Common
         {
             List<string> references = [.. notes.Where(i => i.ReferenceId != null).Select(i => i.ReferenceId)];
 
-            if (references is null || references.Count <= 0 || references.Count != notes.Count)
+            if (references is null || references.Count <= 0)
                 throw new ProblemDetailsException(
                     StatusCodes.Status400BadRequest,
-                    "INVALID",
+                    "NO_REFS",
                     "No references found with the notes"
                     );
 
@@ -234,8 +234,8 @@ namespace ETA.Integrator.Server.Services.Common
 
                 throw new ProblemDetailsException(
                     StatusCodes.Status400BadRequest,
-                    "INVALID",
-                    "No references found with the notes"
+                    "INVALID_NOTES",
+                    errMessage
                     );
             }
 
@@ -269,7 +269,7 @@ namespace ETA.Integrator.Server.Services.Common
 
                 throw new ProblemDetailsException(
                     StatusCodes.Status400BadRequest,
-                    "INVALID",
+                    "INVALID_REFS",
                     errMessage
                     );
             }
