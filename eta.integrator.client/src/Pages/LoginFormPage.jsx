@@ -4,6 +4,7 @@ import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Flex, notification } from "antd";
 
 import { LoginFormValidationRules } from "../Constants/Constants";
+import { handleErrorNotification } from "../Services/GenericService";
 import { useLogin } from "../Hooks/useLogin";
 
 const LoginFormPage = ({ setLogIn, isMobile }) => {
@@ -18,7 +19,11 @@ const LoginFormPage = ({ setLogIn, isMobile }) => {
    );
 
    const onLoginFailed = (errorInfo) => {
-      console.log("Failed:", errorInfo);
+      var error = {
+         message: "Login failed. Try again.",
+         detail: errorInfo,
+      };
+      handleErrorNotification(notificationApi, error);
    };
 
    return (

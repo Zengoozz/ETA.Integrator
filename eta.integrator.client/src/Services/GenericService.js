@@ -49,7 +49,11 @@ const handleErrorGeneric = (error) => {
       throw {
          status: error.response.status,
          message: `${error.response.data.title || "An unexpected error occurred."}`,
-         detail: `${error.response.data.responseMessage || error.response.data.detail || "No additional details available."}`,
+         detail: `${
+            error.response.data.responseMessage ||
+            error.response.data.detail ||
+            "No additional details available."
+         }`,
       };
    } else if (error.request) {
       throw {
@@ -66,4 +70,12 @@ const handleErrorGeneric = (error) => {
    }
 };
 
-export default { makeRequestFactory, updateStepFactory, handleErrorGeneric };
+const handleErrorNotification = (notificationApi, error) => {
+   notificationApi.error({
+      message: error.message,
+      duration: 0,
+   });
+   console.error(error.detail);
+};
+
+export default { makeRequestFactory, updateStepFactory, handleErrorGeneric, handleErrorNotification };

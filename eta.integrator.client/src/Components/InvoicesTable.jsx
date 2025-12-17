@@ -3,6 +3,7 @@ import { Divider, Table, Flex } from "antd";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 
 import CustomButton from "../Components/CustomButton";
+import { handleErrorNotification } from "../Services/GenericService";
 
 const InvoicesTable = ({
    isMobile,
@@ -62,11 +63,7 @@ const InvoicesTable = ({
          await onSubmit(selectedRowsToAction);
          if (tableType == "W") await submissionCallBack();
       } catch (error) {
-         notificationApi.error({
-            message: error.detail,
-            duration: 0,
-         });
-         console.error(error.message);
+         handleErrorNotification(notificationApi, error);
       } finally {
          loadingMessage(); // Close the loading message
          setLoading(false); // End loading

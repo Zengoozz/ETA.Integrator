@@ -12,6 +12,7 @@ import { ROUTES, InvoiceTypes, InvoiceStatus } from "../Constants/Constants";
 import { SubmittedInvoiceColumns, InvoicesSearchFormItems } from "../Constants/Shared";
 import useSearchColumn from "../Hooks/useSearchColumn";
 import InvoicesService from "../Services/InvoicesService";
+import { handleErrorNotification } from "../Services/GenericService";
 
 const SubmittedInvoicesPage = ({ isMobile }) => {
    const [searchKey, setSearchKey] = useState(1);
@@ -52,11 +53,7 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
          setTableData(response.result);
          setSearchKey(searchKey + 1);
       } catch (error) {
-         notificationApi.error({
-            message: error.detail,
-            duration: 0,
-         });
-         console.error(error.message);
+         handleErrorNotification(notificationApi, error);
       }
    };
 
@@ -119,11 +116,7 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
                InvoiceStatus: values.InvoiceStatus,
             });
          } catch (error) {
-            notificationApi.error({
-               message: error.detail,
-               duration: 0,
-            });
-            console.error(error.message);
+           handleErrorNotification(notificationApi, error);
          }
       } catch (error) {
          if (error.type === "validation") {

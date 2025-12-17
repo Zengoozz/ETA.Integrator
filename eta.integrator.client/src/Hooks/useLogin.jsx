@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
+
 import AuthService from "../Services/AuthService";
+import { handleErrorNotification } from "../Services/GenericService";
 
 export const useLogin = (
    setLogIn,
@@ -20,10 +22,7 @@ export const useLogin = (
             navigate("/", { replace: true });
          }
       } catch (error) {
-         notificationApi.error({
-            message: error.detail,
-            duration: 0,
-         });
+         handleErrorNotification(notificationApi, error);
          setCredentialsIncorrect(true);
       } finally {
          setLoading(false);

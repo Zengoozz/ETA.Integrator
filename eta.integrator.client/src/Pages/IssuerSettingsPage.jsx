@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import { Button, Form, Input, Flex, Select } from "antd";
+import { Button, Form, Input, Flex, Select, notification } from "antd";
 
 import AddressForm from "../Components/AddressForm";
-
 import AuthService from "../Services/AuthService";
+import { handleErrorNotification } from "../Services/GenericService";
 import { IssuerTypes, SettingsValidationRules } from "../Constants/Constants";
 
 const { Option } = Select;
@@ -11,6 +11,7 @@ const { Option } = Select;
 const IssuerSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    const [form] = Form.useForm();
    const [isBusinessType, setIsBusinessType] = React.useState(false);
+   const [notificationApi, contextHolderNotification] = notification.useNotification();
 
    useEffect(() => {
       const fetchSettings = async () => {
@@ -40,6 +41,11 @@ const IssuerSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    const onSave = async (values) => {
       var response = await AuthService.updateStep(values, 2);
       if (response == "UPDATED") {
+         notificationApi.open({
+            type: "success",
+            message: "Issuer settings saved successfully",
+            duration: 5,
+         });
          setSuccessfulSave(true);
       } else {
          setSuccessfulSave(false);
@@ -47,7 +53,11 @@ const IssuerSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    };
 
    const onSaveFailed = (errorInfo) => {
-      console.log("Failed:", errorInfo);
+      var error = {
+         message: "Issuer settings saving failed",
+         detail: errorInfo,
+      };
+      handleErrorNotification(notificationApi, error);
    };
 
    const onIssuerTypeChange = (value) => {
@@ -59,95 +69,98 @@ const IssuerSettingsPage = ({ isMobile, setSuccessfulSave }) => {
    };
 
    return (
-      <Flex
-         align="center"
-         justify="center"
-         style={{
-            width: "100%",
-         }}
-      >
-         <Form
-            name="issuer-settings"
-            form={form}
-            layout={"vertical"}
-            labelCol={{ span: isMobile ? 24 : 10 }}
-            wrapperCol={{ span: isMobile ? 24 : 100 }}
-            style={{ width: "100%" }}
-            onFinish={onSave}
-            onFinishFailed={onSaveFailed}
-            requiredMark="optional"
-            initialValues={{
-               Address: {
-                  Country: "EG", // Default country
-                  // Governate: "cairo", // Default governorate
-                  // RegionCity: "cairo", // Default region
-               },
+      <>
+         {contextHolderNotification}
+         <Flex
+            align="center"
+            justify="center"
+            style={{
+               width: "100%",
             }}
          >
-            <Form.Item
-               label="Issuer Type"
-               name="IssuerType"
-               rules={SettingsValidationRules.issuerType}
-            >
-               <Select
-                  placeholder="Please select a type"
-                  onChange={onIssuerTypeChange}
-               >
-                  {IssuerTypes.map((type) => (
-                     <Option
-                        key={type.value}
-                        value={type.value}
-                     >
-                        {type.label}
-                     </Option>
-                  ))}
-               </Select>
-            </Form.Item>
-
-            <Form.Item
-               label="Issuer Name"
-               name="IssuerName"
-               rules={SettingsValidationRules.issuerName}
-            >
-               <Input
-                  size={isMobile ? "large" : "middle"}
-                  autoComplete="off"
-               />
-            </Form.Item>
-
-            <Form.Item
-               label="Registration Number"
-               name="RegistrationNumber"
-               rules={[
-                  { required: true, message: "Please input the registration number!" },
-                  { whitespace: true, message: "Username cannot be empty spaces" },
-               ]}
-            >
-               <Input
-                  // formatter={(value) => value.replace(/\D/g, "")}
-                  length={12}
-                  size={isMobile ? "large" : "middle"}
-                  autoComplete="off"
-               />
-            </Form.Item>
-
-            <AddressForm
-               isBusinessType={isBusinessType}
+            <Form
+               name="issuer-settings"
                form={form}
-            />
-
-            <Form.Item>
-               <Button
-                  block
-                  type="primary"
-                  htmlType="submit"
-                  size={isMobile ? "large" : "middle"}
+               layout={"vertical"}
+               labelCol={{ span: isMobile ? 24 : 10 }}
+               wrapperCol={{ span: isMobile ? 24 : 100 }}
+               style={{ width: "100%" }}
+               onFinish={onSave}
+               onFinishFailed={onSaveFailed}
+               requiredMark="optional"
+               initialValues={{
+                  Address: {
+                     Country: "EG", // Default country
+                     // Governate: "cairo", // Default governorate
+                     // RegionCity: "cairo", // Default region
+                  },
+               }}
+            >
+               <Form.Item
+                  label="Issuer Type"
+                  name="IssuerType"
+                  rules={SettingsValidationRules.issuerType}
                >
-                  Save
-               </Button>
-            </Form.Item>
-         </Form>
-      </Flex>
+                  <Select
+                     placeholder="Please select a type"
+                     onChange={onIssuerTypeChange}
+                  >
+                     {IssuerTypes.map((type) => (
+                        <Option
+                           key={type.value}
+                           value={type.value}
+                        >
+                           {type.label}
+                        </Option>
+                     ))}
+                  </Select>
+               </Form.Item>
+
+               <Form.Item
+                  label="Issuer Name"
+                  name="IssuerName"
+                  rules={SettingsValidationRules.issuerName}
+               >
+                  <Input
+                     size={isMobile ? "large" : "middle"}
+                     autoComplete="off"
+                  />
+               </Form.Item>
+
+               <Form.Item
+                  label="Registration Number"
+                  name="RegistrationNumber"
+                  rules={[
+                     { required: true, message: "Please input the registration number!" },
+                     { whitespace: true, message: "Username cannot be empty spaces" },
+                  ]}
+               >
+                  <Input
+                     // formatter={(value) => value.replace(/\D/g, "")}
+                     length={12}
+                     size={isMobile ? "large" : "middle"}
+                     autoComplete="off"
+                  />
+               </Form.Item>
+
+               <AddressForm
+                  isBusinessType={isBusinessType}
+                  form={form}
+               />
+
+               <Form.Item>
+                  <Button
+                     block
+                     type="primary"
+                     htmlType="submit"
+                     size={isMobile ? "large" : "middle"}
+                  >
+                     Save
+                  </Button>
+               </Form.Item>
+            </Form>
+         </Flex>
+      </>
    );
 };
 

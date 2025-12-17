@@ -19,6 +19,7 @@ import {
 } from "../Constants/Shared";
 import { ROUTES, InvoiceTypes } from "../Constants/Constants";
 import InvoicesService from "../Services/InvoicesService";
+import { handleErrorNotification } from "../Services/GenericService";
 import useSearchColumn from "../Hooks/useSearchColumn";
 
 const InvoicesPage = ({ isMobile, forNotes = false }) => {
@@ -56,7 +57,7 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
       try {
          var response = await InvoicesService.submitInvoices(
             selectedRows,
-            currentRowToEdit ? "C" : searchValues.InvoiceType,   // Set invoice type to claim when editing before submission
+            currentRowToEdit ? "C" : searchValues.InvoiceType, // Set invoice type to claim when editing before submission
             forNotes
          );
 
@@ -113,7 +114,7 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
       setIsLoading(true);
 
       if (isNaN(values.RegistrationNumber)) {
-         notificationApi.error({
+         notificationApi.warning({
             message: "Registeration Number must be numeric.",
             duration: 0,
          });
@@ -137,10 +138,7 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
          await handleSearch(searchValues);
          handleEditModalCancel();
       } catch (error) {
-         notificationApi.error({
-            message: error.detail,
-            duration: 0,
-         });
+         handleErrorNotification(notificationApi, error);
       } finally {
          setIsLoading(false);
       }
@@ -201,11 +199,7 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
             notificationApi.open(notificationObject);
             setSearchInvoiceFormInitialValues({ InvoiceType: values.InvoiceType });
          } catch (error) {
-            notificationApi.error({
-               message: error.detail,
-               duration: 0,
-            });
-            console.error(error.message);
+            handleErrorNotification(notificationApi, error);
          }
       } catch (error) {
          if (error.type === "validation") {
