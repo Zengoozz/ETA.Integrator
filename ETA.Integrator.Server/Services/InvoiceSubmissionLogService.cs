@@ -7,6 +7,7 @@ using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Models.Provider;
+using System.Linq;
 using System.Text.Json;
 
 namespace ETA.Integrator.Server.Services
@@ -18,27 +19,27 @@ namespace ETA.Integrator.Server.Services
         {
             _invoiceSubmissionLogRepository = invoiceSubmissionLogRepository;
         }
-        
+
         public async Task<List<InvoiceSubmissionLog>> GetAll()
         {
             return await _invoiceSubmissionLogRepository.GetAll();
         }
-        
+
         public async Task<List<InvoiceSubmissionLog>> GetAllValidWithIds(List<string> invoicesIds)
         {
             return await _invoiceSubmissionLogRepository.GetAllValidWithIds(invoicesIds);
         }
-        
+
         public async Task<List<InvoiceSubmissionLog>> GetUnvalidatedSubmissions()
         {
             return await _invoiceSubmissionLogRepository.GetUnvalidatedSubmissions();
         }
-        
+
         public async Task SaveList(List<InvoiceSubmissionLog> listOfEntities)
         {
             await _invoiceSubmissionLogRepository.SaveList(listOfEntities);
         }
-        
+
         public async Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO submitResponseDTO, List<ProviderInvoiceViewModel> invoices)
         {
             string responseMessage = "";
@@ -114,7 +115,13 @@ namespace ETA.Integrator.Server.Services
             {
                 foreach (var invoice in invoices)
                 {
-                    invoice.IsReviewed = invoiceLogs.Any(x => x.InternalId == invoice.InvoiceId && x.Status >= InvoiceStatus.Submitted);
+                    var invoiceLog = invoiceLogs.FirstOrDefault(x => x.InternalId == invoice.InvoiceId);
+
+                    if (invoiceLog is not null)
+                    {
+                        invoice.IsReviewed = invoiceLog.Status >= InvoiceStatus.Submitted;
+                        invoice.ReviewStatus = invoiceLog.StatusStringfied;
+                    }
                 }
             }
         }

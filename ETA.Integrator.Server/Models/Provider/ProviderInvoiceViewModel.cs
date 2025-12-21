@@ -17,5 +17,6 @@ namespace ETA.Integrator.Server.Models.Provider
         public decimal NetPrice { set; get; }
         public List<InvoiceLineModel> InvoiceItems { set; get; } = new();
         public string? ReferenceId { set; get; } = string.Empty;
+        public string? ReviewStatus { set; get; } = "Not Submitted";
     }
 }

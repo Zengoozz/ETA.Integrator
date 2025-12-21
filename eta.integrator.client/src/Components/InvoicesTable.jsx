@@ -36,7 +36,7 @@ const InvoicesTable = ({
       getCheckboxProps: (record) => {
          let disabled = false;
          if (isSubmittedInvoicesTable && record.status === "Valid") disabled = true;
-         if (!isSubmittedInvoicesTable && record.isReviewed === true) disabled = true;
+         if (!isSubmittedInvoicesTable && record.reviewStatus === "Valid") disabled = true;
 
          return {
             disabled: disabled, // Column configuration not to be checked
