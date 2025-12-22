@@ -54,6 +54,8 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
          setSearchInvoiceFormInitialValues(values);
          setTableData(response.result);
          setSearchKey(searchKey + 1);
+
+         return true;
       } catch (error) {
          handleErrorNotification(notificationApi, error);
       }
@@ -110,15 +112,16 @@ const SubmittedInvoicesPage = ({ isMobile }) => {
             handleInvoiceSearchFormValidation(values);
 
          try {
-            await handleSearch(formattedValues);
+            var searchResponse = await handleSearch(formattedValues);
 
-            notificationApi.open(notificationObject);
+            if (searchResponse) notificationApi.open(notificationObject);
+
             setSearchInvoiceFormInitialValues({
                InvoiceType: values.InvoiceType,
                InvoiceStatus: values.InvoiceStatus,
             });
          } catch (error) {
-           handleErrorNotification(notificationApi, error);
+            handleErrorNotification(notificationApi, error);
          }
       } catch (error) {
          if (error.type === "validation") {

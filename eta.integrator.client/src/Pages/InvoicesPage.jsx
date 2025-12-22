@@ -95,23 +95,30 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
          setTableData(response); // Update table data with the response
 
          setSearchKey(searchKey + 1); // Force re-render of InvoicesTable by changing key
+
+         return true;
       } catch (error) {
-         console.error("Failed to fetch invoices", error);
+         console.error("Failed to fetch documents", error);
          throw error;
       }
    };
 
    const handleRevalidateSubmission = async (record) => {
-      try{
+      try {
          var response = await InvoicesService.revalidateSubmission(record.invoiceId);
 
-         if(response)
+         if (response) {
             await handleSearch(searchValues);
-      }
-      catch(error){
+            notificationApi.open({
+               type: "success",
+               message: `Status updated succussefully for document ${record.invoiceNumber}`,
+               duration: 3,
+            });
+         }
+      } catch (error) {
          handleErrorNotification(notificationApi, error);
       }
-   }
+   };
 
    //#region Edit Modal Handlers
    const handleOpenEditModal = (record) => {
@@ -209,8 +216,9 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
             handleInvoiceSearchFormValidation(values);
 
          try {
-            await handleSearch(formattedValues);
-            notificationApi.open(notificationObject);
+            var searchResponse = await handleSearch(formattedValues);
+            if (searchResponse) notificationApi.open(notificationObject);
+
             setSearchInvoiceFormInitialValues({ InvoiceType: values.InvoiceType });
          } catch (error) {
             handleErrorNotification(notificationApi, error);
@@ -236,7 +244,11 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
    };
 
    const cardTitle = forNotes ? "Notes" : "Invoices";
-   const tableColumns = InvoicesTableColumns(getColumnSearchProps, handleOpenEditModal, handleRevalidateSubmission);
+   const tableColumns = InvoicesTableColumns(
+      getColumnSearchProps,
+      handleOpenEditModal,
+      handleRevalidateSubmission
+   );
    const editFormItems = EditFormItems(isMobile, isLoading);
    const invoicesSearchFormItems = InvoicesSearchFormItems(
       isMobile,
