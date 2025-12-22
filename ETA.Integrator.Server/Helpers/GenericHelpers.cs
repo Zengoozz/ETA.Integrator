@@ -1,3 +1,4 @@
+using ETA.Integrator.Server.Dtos.SerializationDTOs;
 using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Core;
@@ -142,6 +143,38 @@ namespace ETA.Integrator.Server.Helpers
                                               //document.payment = ; // OPTIONAL
                                               //document.delivery = ; // OPTIONAL
                                               //document.ServiceDeliveryDate = ; //OPTIONAL
+            };
+        }
+
+        public static InvoiceToSerializeDTO MapBaseSerialized(InvoiceModel baseModel)
+        {
+            if (baseModel is null)
+                return new InvoiceToSerializeDTO();
+
+            return new InvoiceToSerializeDTO
+            {
+                Issuer = baseModel.Issuer,
+                Receiver = baseModel.Receiver,
+                DocumentType = baseModel.DocumentType,
+                DocumentTypeVersion = baseModel.DocumentTypeVersion,
+                DateTimeIssued = baseModel.DateTimeIssued,
+                TaxpayerActivityCode = baseModel.TaxpayerActivityCode,
+                InternalID = baseModel.InternalID,
+                PurchaseOrderReference = baseModel.PurchaseOrderReference,
+                PurchaseOrderDescription = baseModel.PurchaseOrderDescription,
+                SalesOrderReference = baseModel.SalesOrderReference,
+                SalesOrderDescription = baseModel.SalesOrderDescription,
+                ProformaInvoiceNumber = baseModel.ProformaInvoiceNumber,
+                Payment = baseModel.Payment,
+                Delivery = baseModel.Delivery,
+                InvoiceLines = baseModel.InvoiceLines,
+                TotalDiscountAmount = baseModel.TotalDiscountAmount,
+                TotalSalesAmount = baseModel.TotalSalesAmount,
+                NetAmount = baseModel.NetAmount,
+                TaxTotals = baseModel.TaxTotals,
+                TotalAmount = baseModel.TotalAmount,
+                ExtraDiscountAmount = baseModel.ExtraDiscountAmount,
+                TotalItemsDiscountAmount = baseModel.TotalItemsDiscountAmount,
             };
         }
     }

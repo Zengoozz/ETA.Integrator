@@ -1,13 +1,11 @@
-﻿using ETA.Integrator.Server.Helpers;
-using ETA.Integrator.Server.Interface.Services;
-using ETA.Integrator.Server.Models.Core;
+﻿using ETA.Integrator.Server.Models.Consumer.ETA;
 
-namespace ETA.Integrator.Server.Models.Consumer.ETA
+namespace ETA.Integrator.Server.Dtos.SerializationDTOs
 {
-    public class CreditNoteModel : InvoiceModel
+    public class CreditNoteToSerializeDTO : InvoiceToSerializeDTO
     {
-        public CreditNoteModel() { }
-        public CreditNoteModel(InvoiceModel baseModel)
+        public CreditNoteToSerializeDTO() { }
+        public CreditNoteToSerializeDTO(InvoiceToSerializeDTO baseModel)
         {
             this.Issuer = baseModel.Issuer;
             this.Receiver = baseModel.Receiver;
@@ -31,8 +29,6 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
             this.ExtraDiscountAmount = baseModel.ExtraDiscountAmount;
             this.TotalItemsDiscountAmount = baseModel.TotalItemsDiscountAmount;
             this.TotalAmount = baseModel.TotalAmount;
-            this.Signatures = baseModel.Signatures;
-            this.ServiceDeliveryDate = baseModel.ServiceDeliveryDate;
         }
         public List<string> References { get; set; } = new();
     }

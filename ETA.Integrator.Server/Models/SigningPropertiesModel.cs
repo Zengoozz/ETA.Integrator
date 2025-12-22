@@ -6,6 +6,7 @@ namespace ETA.Integrator.Server.Models
     public class SigningPropertiesModel
     {
         public List<ProviderInvoiceViewModel> Documents { get; set; } = new();
+        public List<KeyValuePair<string, string>> InternalIdsWithUUIDs { get; set; } = new();
         public IssuerModel Issuer { get; set; } = new();
         public string ItemCode { get; set; } = string.Empty;
         public string InvoiceType { get; set; } = string.Empty;

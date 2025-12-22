@@ -97,8 +97,8 @@ namespace ETA.Integrator.Server.Services.Common
             GenericRequest request = _requestFactoryService.GetProviderNotes(searchModel);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             List<ProviderInvoiceViewModel> processedResponse = await _responseProcessorService.ProcessResponse<List<ProviderInvoiceViewModel>>(response);
-            //if (processedResponse.Count() > 0)
-            //    await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
+            if (processedResponse.Count() > 0)
+                await _invoiceSubmissionLogService.ValidateInvoiceStatus(processedResponse);
             return processedResponse;
         }
 
@@ -218,7 +218,7 @@ namespace ETA.Integrator.Server.Services.Common
 
         private async Task<List<KeyValuePair<string, string>>> ValidateReferences(List<ProviderInvoiceViewModel> notes)
         {
-            List<string> references = [.. notes.Where(i => i.ReferenceId != null).Select(i => i.ReferenceId)];
+            List<string> references = notes.Where(i => !string.IsNullOrEmpty(i.ReferenceId)).Select(i => i.ReferenceId!).ToList();
 
             if (references is null || references.Count <= 0)
                 throw new ProblemDetailsException(
@@ -229,7 +229,7 @@ namespace ETA.Integrator.Server.Services.Common
 
             if (references.Count != notes.Count)
             {
-                List<string> withoutRefs = notes.Where(i => i.ReferenceId is null).Select(i => i.InvoiceNumber).ToList();
+                List<string> withoutRefs = notes.Where(i => string.IsNullOrEmpty(i.ReferenceId)).Select(i => i.InvoiceNumber).ToList();
                 string errMessage = $"The following notes got no references for previous submitted invoices: {string.Join(" / ", withoutRefs)}";
 
                 throw new ProblemDetailsException(

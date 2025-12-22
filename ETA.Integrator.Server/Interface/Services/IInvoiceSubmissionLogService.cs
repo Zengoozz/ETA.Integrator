@@ -15,7 +15,7 @@ namespace ETA.Integrator.Server.Interface.Services
         Task<SubmitDocumentsResponseDTO> LogInvoiceSubmission(SuccessfulResponseDTO responseDTO, List<ProviderInvoiceViewModel> invoices);
         Task UpdateWithSubmissionStatus(List<DocumentAcceptedDTO> acceptedDocuments, List<SubmissionSummaryDTO> submissionStatus);
         Task ValidateInvoiceStatus(List<ProviderInvoiceViewModel> invoices);
-        Task<InvoiceSubmissionLog?> GetValidByInternalId(string internalId);
+        Task<InvoiceSubmissionLog> GetValidByInternalId(string internalId);
         Task<(List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid)> GetValidAndSubmittedByInternalId(List<string> internalIds);
         Task UpdateStatus(int id, InvoiceStatus status);
     }

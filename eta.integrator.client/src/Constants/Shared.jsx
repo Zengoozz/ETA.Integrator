@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import {
    EditInvoiceRules,
    InvoiceSearchValidationRules,
+   DocumentTypes,
    InvoiceTypes,
    InvoiceStatus,
 } from "./Constants";
@@ -114,6 +115,18 @@ const SubmittedInvoiceColumns = (getColumnSearchProps) => [
       dataIndex: "internalId",
       render: (text) => <>{text}</>,
       ...getColumnSearchProps("internalId", "search"),
+   },
+   {
+      title: "Document type",
+      dataIndex: "typeName",
+      ...getColumnSearchProps("typeName", "search"),
+      render: (typeName, record) => {
+         var documentType = DocumentTypes(record.receiverType).find(
+            (d) => d.value.toLowerCase() == typeName
+         );
+
+         return <>{documentType.label}</>;
+      },
    },
    {
       title: "Date Time Received",

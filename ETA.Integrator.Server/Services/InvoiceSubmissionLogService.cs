@@ -6,6 +6,7 @@ using ETA.Integrator.Server.Helpers;
 using ETA.Integrator.Server.Helpers.Enums;
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Interface.Services;
+using ETA.Integrator.Server.Models.Core;
 using ETA.Integrator.Server.Models.Provider;
 using System.Linq;
 using System.Text.Json;
@@ -126,8 +127,17 @@ namespace ETA.Integrator.Server.Services
             }
         }
 
-        public async Task<InvoiceSubmissionLog?> GetValidByInternalId(string internalId)
+        public async Task<InvoiceSubmissionLog> GetValidByInternalId(string internalId)
         {
+            if (string.IsNullOrEmpty(internalId))
+            {
+                throw new ProblemDetailsException(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    message: "INVALID_INTERNAL_ID",
+                    detail: "InternalId cannot be null or empty."
+                );
+            }
+
             return await _invoiceSubmissionLogRepository.GetValidByInternalId(internalId);
         }
 

@@ -1,7 +1,4 @@
-﻿using ETA.Integrator.Server.Helpers;
-using ETA.Integrator.Server.Interface.Services;
-using ETA.Integrator.Server.Models.Core;
-
+﻿
 namespace ETA.Integrator.Server.Models.Consumer.ETA
 {
     public class InvoiceModel
@@ -30,97 +27,5 @@ namespace ETA.Integrator.Server.Models.Consumer.ETA
         public decimal TotalAmount { get; set; }
         public List<SignatureModel> Signatures { get; set; } = new List<SignatureModel>();
         public DateTime? ServiceDeliveryDate { get; set; }
-    }
-
-    public class InvoiceModelMapper : IDocumentMapper
-    {
-        public InvoiceModel BaseMap(DocumentMappIngPropertiesModel mappingProperties)
-        {
-            InvoiceModel invoiceModel = GenericHelpers.MapBaseDocument(mappingProperties);
-
-            return invoiceModel;
-        }
-
-        //public static InvoiceModel MapBaseInvoice(this ProviderInvoiceViewModel viewModel, IssuerModel issuer, string invoiceType, string itemCode, bool isProduction = false)
-        //{
-        //if (viewModel is null)
-        //    throw new ProblemDetailsException(
-        //        statusCode: StatusCodes.Status400BadRequest,
-        //        message: "PROVIDER_INVOICE_NULL",
-        //        detail: "Mapping provider invoice to the consumer invoice failed!"
-        //        );
-
-        //if (viewModel.RegistrationNumber == "NOT_FOUND" || string.IsNullOrEmpty(viewModel.RegistrationNumber))
-        //    throw new ProblemDetailsException(
-        //       statusCode: StatusCodes.Status400BadRequest,
-        //       message: "NOT_FOUND",
-        //       detail: $"Invoice #{viewModel.InvoiceNumber}: Reciever ({viewModel.ReceiverName}) has no registeration number."
-        //       );
-
-        //var listOfNeededProps = new List<string> { "Country", "Governate", "RegionCity", "Street", "BuildingNumber" };
-
-        //var receiverAddressObjDict = viewModel.ReceiverAddress.GetType()
-        //     .GetProperties()
-        //     .ToDictionary(p => p.Name, p => p.GetValue(viewModel.ReceiverAddress));
-
-        //var isAddressCorrupt = receiverAddressObjDict.Any(d => listOfNeededProps.Contains(d.Key) && d.Value is null);
-
-        //if (isAddressCorrupt)
-        //    throw new ProblemDetailsException(
-        //           statusCode: StatusCodes.Status400BadRequest,
-        //           message: "INVALID",
-        //           detail: $"Invoice #{viewModel.InvoiceNumber}: Reciever ({viewModel.ReceiverName}) has invalid address."
-        //           );
-
-        //return new InvoiceModel
-        //{
-        //    Issuer = issuer,
-        //    Receiver = new ReceiverModel
-        //    {
-        //        Type = invoiceType == "I" ? (viewModel.ReceiverAddress.Country == "EG" ? "P" : "F") : "B",
-        //        Id = viewModel.RegistrationNumber,
-        //        Name = viewModel.ReceiverName,
-        //        Address = viewModel.ReceiverAddress
-        //    },
-        //    TaxTotals = new List<TaxTotalModel>(),
-        //    Signatures = new List<SignatureModel>(),
-        //    DocumentType = "i",
-        //    DocumentTypeVersion = isProduction ? "1.0" : "0.9",
-        //    DateTimeIssued = GenericHelpers.GetCurrentUTCTime(-70).ToString("yyyy-MM-ddTHH:mm:ssZ"),
-        //    TaxpayerActivityCode = "8610",
-        //    InternalID = viewModel.InvoiceId,
-        //    InvoiceLines = viewModel.InvoiceItems.Select(item => new InvoiceLineModel
-        //    {
-        //        Description = item.Description,
-        //        ItemType = item.ItemType,
-        //        ItemCode = itemCode,
-        //        UnitType = item.UnitType,
-        //        Quantity = item.Quantity,
-        //        UnitValue = item.UnitValue,
-        //        SalesTotal = item.NetTotal,
-        //        NetTotal = item.NetTotal,
-        //        Total = item.NetTotal,
-        //        ItemsDiscount = item.ItemsDiscount,
-        //        ValueDifference = item.ValueDifference,
-        //        TotalTaxableFees = item.TotalTaxableFees,
-        //        InternalCode = item.InternalCode,
-        //        Discount = item.Discount,
-        //    }).ToList(),
-        //    NetAmount = viewModel.NetPrice,
-        //    TotalSalesAmount = viewModel.InvoiceItems.Sum(i => i.NetTotal),
-        //    TotalAmount = viewModel.NetPrice + 0, // Based on the Sum of TaxTotals.Amount
-        //    TotalDiscountAmount = 0, // Based on the Sum of InvoiceLines Discount.Amount
-        //    ExtraDiscountAmount = 0,
-        //    TotalItemsDiscountAmount = 0, // Based on the Sum of TotalDiscountAmount and ExtraDiscountAmount
-        //                                  //document.purchaseOrderReference = ; // OPTIONAL
-        //                                  //document.purchaseOrderDescription = ; // OPTIONAL
-        //                                  //document.salesOrderReference = ; // OPTIONAL
-        //                                  //document.salesOrderDescription = ; // OPTIONAL
-        //                                  //document.proformaInvoiceNumber = ; // OPTIONAL
-        //                                  //document.payment = ; // OPTIONAL
-        //                                  //document.delivery = ; // OPTIONAL
-        //                                  //document.ServiceDeliveryDate = ; //OPTIONAL
-        //};
-        //}
     }
 }

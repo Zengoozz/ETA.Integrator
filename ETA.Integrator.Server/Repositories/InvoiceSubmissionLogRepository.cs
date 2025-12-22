@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ETA.Integrator.Server.Repositories
 {
-    public class InvoiceSubmissionLogRepository: IInvoiceSubmissionLogRepository
+    public class InvoiceSubmissionLogRepository : IInvoiceSubmissionLogRepository
     {
         private readonly AppDbContext _context;
         private readonly DbSet<InvoiceSubmissionLog> _dbSet;
@@ -37,9 +37,10 @@ namespace ETA.Integrator.Server.Repositories
             return await _dbSet.AsNoTracking().Where(x => x.InternalId == internalId.ToString()).ToListAsync();
         }
 
-        public async Task<InvoiceSubmissionLog?> GetValidByInternalId(string internalId)
+        public async Task<InvoiceSubmissionLog> GetValidByInternalId(string internalId)
         {
-            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.InternalId == internalId && x.Status == InvoiceStatus.Valid);
+            var log = await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.InternalId == internalId && x.Status == InvoiceStatus.Valid) ?? new InvoiceSubmissionLog();
+            return log;
         }
 
         public async Task<List<InvoiceSubmissionLog>> GetByListOfInternalIds(List<string> ids)
@@ -56,14 +57,14 @@ namespace ETA.Integrator.Server.Repositories
         {
             return await _dbSet.AsNoTracking().Where(l => l.Status == InvoiceStatus.Submitted).ToListAsync();
         }
-        
+
         public async Task Save(InvoiceSubmissionLog entity)
         {
             try
             {
                 var existed = await _dbSet.FirstOrDefaultAsync(x => x.Id == entity.Id);
 
-                if(existed != null)
+                if (existed != null)
                 {
                     _context.Entry(existed).CurrentValues.SetValues(entity);
                     _context.Entry(existed).Property(x => x.Id).IsModified = false;
@@ -73,7 +74,8 @@ namespace ETA.Integrator.Server.Repositories
 
                 await _context.SaveChangesAsync();
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 throw;
             }
         }
@@ -106,7 +108,8 @@ namespace ETA.Integrator.Server.Repositories
                 else
                     throw new Exception("NOT_FOUND");
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 throw;
             }
         }
@@ -115,11 +118,11 @@ namespace ETA.Integrator.Server.Repositories
         {
             try
             {
-                foreach(var submission in submissionsToUpdate)
+                foreach (var submission in submissionsToUpdate)
                 {
                     var existed = await _dbSet.FirstOrDefaultAsync(x => x.Id == submission.LoggedId);
 
-                    if(existed is not null)
+                    if (existed is not null)
                     {
                         existed.Status = submission.SubmissionsStatus;
                         existed.SubmissionDate = submission.SubmissionTime;
@@ -134,7 +137,7 @@ namespace ETA.Integrator.Server.Repositories
                 throw;
             }
         }
-        
+
         public async Task<(List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid)> GetValidAndSubmittedByInternalId(List<string> internalIds)
         {
             var logs = _dbSet.AsNoTracking()

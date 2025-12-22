@@ -112,6 +112,7 @@ namespace ETA.Integrator.Server.Services.Common
                 SigningPropertiesModel signingProperties = new SigningPropertiesModel
                 {
                     Documents = request.Invoices,
+                    InternalIdsWithUUIDs = request.InternalIdsWithUUIDs,
                     Issuer = issuer,
                     ItemCode = _customConfig.ItemCode,
                     InvoiceType = request.InvoiceType,
@@ -121,9 +122,9 @@ namespace ETA.Integrator.Server.Services.Common
                 };
 
                 if (isProduction)
-                    documents = await _documentSignerService.SignMultipleDocuments(signingProperties);
+                    documents = _documentSignerService.SignMultipleDocuments(signingProperties);
                 else
-                    documents = await _documentSignerService.SignMultipleDocumentsMock(signingProperties);
+                    documents = _documentSignerService.SignMultipleDocumentsMock(signingProperties);
             }
             catch (Exception ex)
             {
@@ -217,7 +218,7 @@ namespace ETA.Integrator.Server.Services.Common
 
             GenericRequest genericRequest = new();
             genericRequest.Request = new RestRequest("/api/v1/documents/search", Method.Get)
-                .AddQueryParameter("documentType", "i")
+                //.AddQueryParameter("documentType", "i")
                 .AddQueryParameter("submissionDateFrom", submissionDateFrom)
                 .AddQueryParameter("submissionDateTo", submissionDateTo)
                 .AddQueryParameter("status", status)

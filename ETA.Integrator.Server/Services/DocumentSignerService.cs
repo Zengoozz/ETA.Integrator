@@ -1,6 +1,6 @@
-﻿using ETA.Integrator.Server.Dtos;
-using ETA.Integrator.Server.Entities;
+﻿using ETA.Integrator.Server.Dtos.SerializationDTOs;
 using ETA.Integrator.Server.Interface.Services;
+using ETA.Integrator.Server.Mapping;
 using ETA.Integrator.Server.Models;
 using ETA.Integrator.Server.Models.Consumer.ETA;
 using ETA.Integrator.Server.Models.Core;
@@ -20,59 +20,34 @@ namespace ETA.Integrator.Server.Services
 {
     public class DocumentSignerService : IDocumentSignerService
     {
-        private readonly IInvoiceSubmissionLogService _InvoiceSubmissionLogService;
-        public DocumentSignerService(IInvoiceSubmissionLogService InvoiceSubmissionLogService)
-        {
-            _InvoiceSubmissionLogService = InvoiceSubmissionLogService;
+        private readonly DocumentMappingProcessor _documentMappingProcessor;
+        public DocumentSignerService(DocumentMappingProcessor documentMappingProcessor) {
+            _documentMappingProcessor = documentMappingProcessor;
         }
 
-        private async Task<InvoiceModel> PrepareDocument(DocumentMappIngPropertiesModel mappingProperties)
-        {
-            InvoiceModel model = new InvoiceModel();
-            List<string> references = new List<string>();
-            IDocumentMapper mapper;
-
-            if (mappingProperties.ForNotes)
-            {
-                mapper = new CreditNoteModelMapper();
-                InvoiceSubmissionLog? log = await _InvoiceSubmissionLogService.GetValidByInternalId(mappingProperties.Document.ReferenceId);
-
-                if (log is null)
-                    throw new ProblemDetailsException(
-                        statusCode: StatusCodes.Status404NotFound,
-                        message: "INVALID",
-                        detail: "Referenced invoice not found"
-                        );
-
-                references.Add(log.Uuid);
-                mappingProperties.References = references;
-            }
-            else
-                mapper = new InvoiceModelMapper();
-
-            return mapper.BaseMap(mappingProperties);
-        }
-        public async Task<List<string>> SignMultipleDocumentsMock(SigningPropertiesModel signingProperties)
+        
+        public List<string> SignMultipleDocumentsMock(SigningPropertiesModel signingProperties)
         {
             List<string> documents = new List<string>();
 
             foreach (var model in signingProperties.Documents)
             {
-                var invoice = await PrepareDocument(new DocumentMappIngPropertiesModel()
+                var (document, serializedDocument) = PrepareDocument(new DocumentMappIngPropertiesModel()
                 {
                     Document = model,
                     Issuer = signingProperties.Issuer,
                     ItemCode = signingProperties.ItemCode,
                     InvoiceType = signingProperties.InvoiceType,
                     IsProduction = signingProperties.IsProduction,
-                    ForNotes = signingProperties.ForNotes
+                    ForNotes = signingProperties.ForNotes,
+                    References = signingProperties.InternalIdsWithUUIDs.Where(i => i.Key == model.ReferenceId).Select(i => i.Value).ToList()
                 });
 
-                invoice.Signatures = new List<SignatureModel>();
+                document.Signatures = new List<SignatureModel>();
                 SignatureModel signature = new SignatureModel();
                 signature.SignatureType = "I";
 
-                var sourceDocumentJson = SerializedDocumentToJson(invoice.FromInvoiceModel());
+                var sourceDocumentJson = SerializedDocumentToJson(serializedDocument);
 
                 string cades = "";
 
@@ -136,7 +111,8 @@ namespace ETA.Integrator.Server.Services
 
             return documents;
         }
-        public async Task<List<string>> SignMultipleDocuments(SigningPropertiesModel signingProperties)
+       
+        public List<string> SignMultipleDocuments(SigningPropertiesModel signingProperties)
         {
             List<string> documents = new List<string>();
 
@@ -199,21 +175,22 @@ namespace ETA.Integrator.Server.Services
 
                     foreach (var model in signingProperties.Documents)
                     {
-                        var invoice = await PrepareDocument(new DocumentMappIngPropertiesModel()
+                        var (document, serializedDocument) = PrepareDocument(new DocumentMappIngPropertiesModel()
                         {
                             Document = model,
                             Issuer = signingProperties.Issuer,
                             ItemCode = signingProperties.ItemCode,
                             InvoiceType = signingProperties.InvoiceType,
                             IsProduction = signingProperties.IsProduction,
-                            ForNotes = signingProperties.ForNotes
+                            ForNotes = signingProperties.ForNotes,
+                            References = signingProperties.InternalIdsWithUUIDs.Where(i => i.Key == model.InvoiceId).Select(i => i.Value).ToList()
                         });
 
-                        invoice.Signatures = new List<SignatureModel>();
+                        document.Signatures = new List<SignatureModel>();
                         SignatureModel signature = new SignatureModel();
                         signature.SignatureType = "I";
 
-                        var sourceDocumentJson = SerializedDocumentToJson(invoice.FromInvoiceModel());
+                        var sourceDocumentJson = SerializedDocumentToJson(serializedDocument);
 
                         string cades = "";
 
@@ -285,10 +262,16 @@ namespace ETA.Integrator.Server.Services
 
             return documents;
         }
-        //private static List<InvoiceModel> PrepareDocumentsToBeSigned()
-        //{
 
-        //}
+        private (InvoiceModel, InvoiceToSerializeDTO) PrepareDocument(DocumentMappIngPropertiesModel mappingProperties)
+        {
+            var document = _documentMappingProcessor.ProcessDocumentMap(mappingProperties);
+
+            var serializedDocument = _documentMappingProcessor.ProcessSerializedVersionMap(mappingProperties.DocumentType, document, mappingProperties.References);
+
+            return (document, serializedDocument);
+        }
+
         private static string SignWithCMS(string serializedText, X509Certificate2 signingCert)
         {
             byte[] data = Encoding.UTF8.GetBytes(serializedText);
@@ -312,6 +295,7 @@ namespace ETA.Integrator.Server.Services
 
             return Convert.ToBase64String(output);
         }
+        
         private static byte[] HashBytes(byte[] input)
         {
             try
@@ -331,6 +315,7 @@ namespace ETA.Integrator.Server.Services
                     );
             }
         }
+        
         private static string SerializedDocumentToJson(InvoiceToSerializeDTO dto)
         {
             var settings = new JsonSerializerSettings
@@ -350,6 +335,7 @@ namespace ETA.Integrator.Server.Services
 
             return jsonString;
         }
+       
         private static string Canonicalize(JToken request)
         {
             string serialized = "";
@@ -422,6 +408,5 @@ namespace ETA.Integrator.Server.Services
 
             return serialized;
         }
-
     }
 }

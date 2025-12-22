@@ -1344,6 +1344,17 @@ const IssuerTypes = [
    },
 ];
 
+const DocumentTypes = (receiverType)  => [
+   {
+      value: "C",
+      label: "Credit Note",
+   },
+   {
+      value: "I",
+      label: receiverType == "B" ? "Invoice (Claim)" : "Invoice",
+   },
+];
+
 const InvoiceTypes = [
    {
       value: "C",
@@ -1383,6 +1394,7 @@ export {
    InvoiceSearchValidationRules,
    EditInvoiceRules,
    IssuerTypes,
+   DocumentTypes,
    InvoiceTypes,
    InvoiceStatus,
    ROUTES,

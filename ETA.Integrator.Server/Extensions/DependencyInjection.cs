@@ -2,6 +2,8 @@
 using ETA.Integrator.Server.Interface.Repositories;
 using ETA.Integrator.Server.Interface.Services;
 using ETA.Integrator.Server.Interface.Services.Common;
+using ETA.Integrator.Server.Interface.Strategies;
+using ETA.Integrator.Server.Mapping;
 using ETA.Integrator.Server.Repositories;
 using ETA.Integrator.Server.Services;
 using ETA.Integrator.Server.Services.Common;
@@ -20,7 +22,10 @@ namespace ETA.Integrator.Server.Extensions
             services.AddTransient<IApiCallerService, ApiCallerService>();
             services.AddTransient<IHttpRequestSenderService, HttpRequestSenderService>();
             services.AddTransient<IDocumentSignerService, DocumentSignerService>();
-            
+            services.AddKeyedScoped<IDocumentMappingStrategy, InvoiceMapper>("Invoice");
+            services.AddKeyedScoped<IDocumentMappingStrategy, CreditNoteMapper>("CreditNote");
+            services.AddScoped<DocumentMappingProcessor>();
+
             return services;
         }
 

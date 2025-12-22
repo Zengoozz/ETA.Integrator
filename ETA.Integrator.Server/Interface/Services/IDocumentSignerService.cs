@@ -4,7 +4,7 @@ namespace ETA.Integrator.Server.Interface.Services
 {
     public interface IDocumentSignerService
     {
-        Task<List<string>> SignMultipleDocuments(SigningPropertiesModel signingProperties);
-        Task<List<string>> SignMultipleDocumentsMock(SigningPropertiesModel signingProperties);
+        List<string> SignMultipleDocuments(SigningPropertiesModel signingProperties);
+        List<string> SignMultipleDocumentsMock(SigningPropertiesModel signingProperties);
     }
 }
