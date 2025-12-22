@@ -4,7 +4,7 @@ import {
    IssuesCloseOutlined,
 } from "@ant-design/icons";
 import { Button, Input, DatePicker, Select, Flex } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { EditOutlined, RedoOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
 import {
@@ -18,7 +18,11 @@ import {
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const InvoicesTableColumns = (getColumnSearchProps, handleOpenModal) => [
+const InvoicesTableColumns = (
+   getColumnSearchProps,
+   handleOpenModal,
+   handleRevalidateSubmission
+) => [
    {
       title: "Receipt Number",
       dataIndex: "invoiceNumber",
@@ -92,15 +96,27 @@ const InvoicesTableColumns = (getColumnSearchProps, handleOpenModal) => [
          var isDisabled = record.isReviewed || record.invoiceId.startsWith("C-");
 
          return (
-            <Button
-               type="primary"
-               icon={<EditOutlined />}
-               size="large"
-               onClick={() => handleOpenModal(record)}
-               disabled={isDisabled}
-            >
-               Edit & Submit
-            </Button>
+            <Flex gap="small">
+               <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  size="large"
+                  onClick={() => handleOpenModal(record)}
+                  disabled={isDisabled}
+               >
+                  Edit & Submit
+               </Button>
+
+               <Button
+                  type="primary"
+                  icon={<RedoOutlined />}
+                  size="large"
+                  onClick={() => handleRevalidateSubmission(record)}
+                  disabled={record.reviewStatus != "Submitted"}
+               >
+                  Re-validate
+               </Button>
+            </Flex>
          );
       },
    },

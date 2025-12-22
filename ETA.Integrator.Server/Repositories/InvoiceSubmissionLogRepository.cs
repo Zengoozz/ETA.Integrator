@@ -148,5 +148,33 @@ namespace ETA.Integrator.Server.Repositories
 
             return (submitted, valid);
         }
+
+        public async Task UpdateStatusWithListOfIds(List<int> listOfIds, InvoiceStatus status)
+        {
+            try
+            {
+                foreach (int id in listOfIds)
+                {
+                    var existed = await _dbSet.FirstOrDefaultAsync(x => x.Id == id);
+
+                    if (existed is not null)
+                    {
+                        existed.Status = status;
+                        existed.StatusStringfied = status.ToString();
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<InvoiceSubmissionLog>> GetForOnlySubmittedByInternalIdDescOrdered(string internalId)
+        {
+            return await _dbSet.AsNoTracking().Where(l => l.InternalId == internalId && l.Status == InvoiceStatus.Submitted).OrderByDescending(l => l.Id).ToListAsync();
+        }
     }
 }

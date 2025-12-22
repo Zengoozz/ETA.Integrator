@@ -88,10 +88,25 @@ const searchDocumentsWithFilters = async (values) => {
    }
 };
 
+const revalidateSubmission = async (internalId) => {
+   try{
+      const url = `/Invoices/RevalidateSubmission?internalId=${internalId}`;
+      
+      await GenericService.makeRequestFactory("GET", url);
+
+      return true;
+   }
+   catch(error){
+      console.error(error.message);
+      throw error;
+   }
+}
+
 export default {
    getInvoicesAccordingToDateAsQueryParams,
    getNotesAccodingToDateAsQueryParams,
    submitInvoices,
    getSubmittedInvoices,
    searchDocumentsWithFilters,
+   revalidateSubmission
 };

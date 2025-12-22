@@ -16,8 +16,10 @@ using ETA.Integrator.Server.Models.Provider.Requests;
 using ETA.Integrator.Server.Models.Provider.Response;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System.Data;
 using System.Diagnostics;
 using System.Net;
+using System.Reflection.Metadata;
 
 namespace ETA.Integrator.Server.Services.Common
 {
@@ -214,6 +216,35 @@ namespace ETA.Integrator.Server.Services.Common
             GenericRequest request = _requestFactoryService.GetDocument(uuid);
             RestResponse response = await _httpRequestSenderService.SendRequest(request);
             return await _responseProcessorService.ProcessResponse<DocumentExtendedDTO>(response);
+        }
+
+        public async Task RevalidateSubmission(string internalId)
+        {
+            List<InvoiceSubmissionLog> logs = await _invoiceSubmissionLogService.GetForOnlySubmittedByInternalIdDescOrdered(internalId);
+            List<int> alreadyUpdatedLogs = new();
+
+            if (logs.Count <= 0)
+                return;
+
+            foreach (InvoiceSubmissionLog log in logs)
+            {
+                DocumentExtendedDTO documentResponse = await GetDocument(log.Uuid);
+
+                if (documentResponse.Status == "Valid")
+                {
+                    await _invoiceSubmissionLogService.UpdateStatus(log.Id, InvoiceStatus.Valid);
+
+                    List<int> invalidLogsIds = logs.Where(l => l.Id != log.Id && !alreadyUpdatedLogs.Contains(l.Id)).Select(l => l.Id).ToList();
+
+                    if (invalidLogsIds.Count > 0)
+                        await _invoiceSubmissionLogService.UpdateStatusWithListOfIds(invalidLogsIds, InvoiceStatus.Invalid);
+
+                    break;
+                }
+
+                await _invoiceSubmissionLogService.UpdateStatus(log.Id, (InvoiceStatus)Enum.Parse(typeof(InvoiceStatus), documentResponse.Status, true));
+                alreadyUpdatedLogs.Add(log.Id);
+            }
         }
 
         private async Task<List<KeyValuePair<string, string>>> ValidateReferences(List<ProviderInvoiceViewModel> notes)

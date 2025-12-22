@@ -18,5 +18,7 @@ namespace ETA.Integrator.Server.Interface.Services
         Task<InvoiceSubmissionLog> GetValidByInternalId(string internalId);
         Task<(List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid)> GetValidAndSubmittedByInternalId(List<string> internalIds);
         Task UpdateStatus(int id, InvoiceStatus status);
+        Task UpdateStatusWithListOfIds(List<int> listOfIds, InvoiceStatus status);
+        Task<List<InvoiceSubmissionLog>> GetForOnlySubmittedByInternalIdDescOrdered(string internalId);
     }
 }

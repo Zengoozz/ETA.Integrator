@@ -150,5 +150,15 @@ namespace ETA.Integrator.Server.Services
         {
             await _invoiceSubmissionLogRepository.UpdateStatus(id, status);
         }
+
+        public async Task UpdateStatusWithListOfIds(List<int> listOfIds, InvoiceStatus status)
+        {
+            await UpdateStatusWithListOfIds(listOfIds, status);
+        }
+
+        public async Task<List<InvoiceSubmissionLog>> GetForOnlySubmittedByInternalIdDescOrdered(string internalId)
+        {
+            return await _invoiceSubmissionLogRepository.GetForOnlySubmittedByInternalIdDescOrdered(internalId);
+        }
     }
 }

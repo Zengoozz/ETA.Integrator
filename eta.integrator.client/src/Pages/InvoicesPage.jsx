@@ -101,6 +101,18 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
       }
    };
 
+   const handleRevalidateSubmission = async (record) => {
+      try{
+         var response = await InvoicesService.revalidateSubmission(record.invoiceId);
+
+         if(response)
+            await handleSearch(searchValues);
+      }
+      catch(error){
+         handleErrorNotification(notificationApi, error);
+      }
+   }
+
    //#region Edit Modal Handlers
    const handleOpenEditModal = (record) => {
       setCurrentRowToEdit(record);
@@ -224,7 +236,7 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
    };
 
    const cardTitle = forNotes ? "Notes" : "Invoices";
-   const tableColumns = InvoicesTableColumns(getColumnSearchProps, handleOpenEditModal);
+   const tableColumns = InvoicesTableColumns(getColumnSearchProps, handleOpenEditModal, handleRevalidateSubmission);
    const editFormItems = EditFormItems(isMobile, isLoading);
    const invoicesSearchFormItems = InvoicesSearchFormItems(
       isMobile,

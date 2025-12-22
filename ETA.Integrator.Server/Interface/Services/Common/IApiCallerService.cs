@@ -24,6 +24,7 @@ namespace ETA.Integrator.Server.Interface.Services.Common
         Task<SubmissionResponseDTO> GetSubmission(string submissionId, int pageNo = 1, int pageSize = 100);
         Task<SearchDocumentsResponseDTO> SearchDocuments(DateTime submissionDateFrom, DateTime submissionDateTo, string status, string receiverType, string direction);
         Task<DocumentExtendedDTO> GetDocument(string uuid);
+        Task RevalidateSubmission(string internalId);
 
     }
 }
