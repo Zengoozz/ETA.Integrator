@@ -116,12 +116,12 @@ namespace ETA.Integrator.Server.Services
             {
                 foreach (var invoice in invoices)
                 {
-                    var invoiceLog = invoiceLogs.FirstOrDefault(x => x.InternalId == invoice.InvoiceId);
+                    var invoiceLog = invoiceLogs.Where(x => x.InternalId == invoice.InvoiceId).ToList();
 
-                    if (invoiceLog is not null)
+                    if (invoiceLog.Count > 0)
                     {
-                        invoice.IsReviewed = invoiceLog.Status >= InvoiceStatus.Submitted;
-                        invoice.ReviewStatus = invoiceLog.StatusStringfied;
+                        invoice.IsReviewed = invoiceLog.Any(l => l.Status >= InvoiceStatus.Submitted);
+                        invoice.ReviewStatus = invoiceLog.Any(l => l.Status == InvoiceStatus.Valid) ? "Valid" : (invoiceLog.Any(l => l.Status == InvoiceStatus.Submitted) ? "Submitted" : "Invalid");
                     }
                 }
             }

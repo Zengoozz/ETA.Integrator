@@ -111,7 +111,7 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
             await handleSearch(searchValues);
             notificationApi.open({
                type: "success",
-               message: `Status updated succussefully for document ${record.invoiceNumber}`,
+               message: `Status updated succussefully for document #${record.invoiceNumber}`,
                duration: 3,
             });
          }
