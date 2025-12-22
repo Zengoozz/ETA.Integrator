@@ -127,7 +127,7 @@ namespace ETA.Integrator.Server.Services.Common
 
             if (!String.IsNullOrEmpty(processedResponse.SubmissionId))
             {
-                await Task.Delay(TimeSpan.FromSeconds(2));
+                await Task.Delay(TimeSpan.FromSeconds(5));
                 submissionResponse = await GetSubmission(processedResponse.SubmissionId, 1, invoicesRequest.Invoices.Count);
 
                 if (submissionResponse.DocumentSummary.Count > 0)
