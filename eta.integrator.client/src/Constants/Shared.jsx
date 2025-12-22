@@ -1,4 +1,8 @@
-import { CheckCircleTwoTone, CloseCircleTwoTone } from "@ant-design/icons";
+import {
+   CheckCircleTwoTone,
+   CloseCircleTwoTone,
+   IssuesCloseOutlined,
+} from "@ant-design/icons";
 import { Button, Input, DatePicker, Select, Flex } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -57,14 +61,20 @@ const InvoicesTableColumns = (getColumnSearchProps, handleOpenModal) => [
    {
       title: "Status",
       dataIndex: "isReviewed",
-      render: (value) => {
+      render: (value, record) => {
          return (
             <span style={{ display: "flex", width: "100%", justifyContent: "center" }}>
                {value ? (
-                  <CheckCircleTwoTone
-                     style={{ fontSize: 30 }}
-                     twoToneColor={["green", "transparent"]}
-                  />
+                  record.reviewStatus == "Valid" ? (
+                     <CheckCircleTwoTone
+                        style={{ fontSize: 30 }}
+                        twoToneColor={["green", "transparent"]}
+                     />
+                  ) : (
+                     <IssuesCloseOutlined
+                        style={{ fontSize: 30, color: "greenyellow" }}
+                     />
+                  )
                ) : (
                   <CloseCircleTwoTone
                      style={{ fontSize: 30 }}
