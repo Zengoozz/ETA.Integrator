@@ -19,7 +19,6 @@ using RestSharp;
 using System.Data;
 using System.Diagnostics;
 using System.Net;
-using System.Reflection.Metadata;
 
 namespace ETA.Integrator.Server.Services.Common
 {
