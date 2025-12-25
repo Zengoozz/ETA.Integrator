@@ -84,6 +84,8 @@ namespace ETA.Integrator.Server.Services
 
             SubmitDocumentsResponseDTO response = new SubmitDocumentsResponseDTO()
             {
+                AcceptedInvoices = invoices.Where(i => listOfAccepted.Select(n => n.InternalId).Contains(i.InvoiceId)).Select(i => i.InvoiceNumber).ToList(),
+                RejectedInvoices = invoices.Where(i => listOfRejected.Select(n => n.InternalId).Contains(i.InvoiceId)).Select(i => i.InvoiceNumber).ToList(),
                 IsAllSuccess = !listOfRejected.Any(),
                 IsAllFailure = !listOfAccepted.Any(),
                 ResponseMessage = responseMessage

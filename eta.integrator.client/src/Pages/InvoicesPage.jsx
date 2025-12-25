@@ -21,6 +21,7 @@ import { ROUTES, InvoiceTypes } from "../Constants/Constants";
 import InvoicesService from "../Services/InvoicesService";
 import GenericService from "../Services/GenericService";
 import useSearchColumn from "../Hooks/useSearchColumn";
+import TagsWrapper from "../Components/TagsWrapper";
 
 const InvoicesPage = ({ isMobile, forNotes = false }) => {
    const [searchKey, setSearchKey] = useState(1);
@@ -63,17 +64,14 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
             forNotes
          );
 
-         notificationApi.open({
-            type: "success",
-            message: (
-               <span
-                  dangerouslySetInnerHTML={{
-                     __html: response.responseMessage.replace(/\n/g, "<br/>"),
-                  }}
-               />
-            ),
-            duration: 0,
-         });
+         // Handle new version of response for better view
+         if (!response.isError) {
+            notificationApi.open({
+               type: "success",
+               message: <SubmissionNotification response={response} />,
+               duration: 0,
+            });
+         }
       } catch (error) {
          console.error(error.detail);
          throw error;
@@ -341,3 +339,20 @@ const InvoicesPage = ({ isMobile, forNotes = false }) => {
 };
 
 export default InvoicesPage;
+
+const SubmissionNotification = ({ response }) => {
+   return (
+      <Flex vertical>
+         <p style={{ fontWeight: "bold", fontSize: "17px" }}>Submitted:</p>
+         <TagsWrapper
+            listOfElements={response.acceptedInvoices}
+            color="green"
+         />
+         <p style={{ fontWeight: "bold", fontSize: "17px" }}>Rejected:</p>
+         <TagsWrapper
+            listOfElements={response.rejectedInvoices}
+            color="red"
+         />
+      </Flex>
+   );
+};
