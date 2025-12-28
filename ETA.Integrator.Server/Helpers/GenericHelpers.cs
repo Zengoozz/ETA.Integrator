@@ -91,7 +91,7 @@ namespace ETA.Integrator.Server.Helpers
             if (isAddressCorrupt)
                 throw new ProblemDetailsException(
                        statusCode: StatusCodes.Status400BadRequest,
-                       message: "INVALID",
+                       message: "INVALID_ADDRESS",
                        detail: $"Invoice #{mappingProperties.Document.InvoiceNumber}: Reciever ({mappingProperties.Document.ReceiverName}) has invalid address."
                        );
 

@@ -14,7 +14,7 @@ namespace ETA.Integrator.Server.Mapping
             if (String.IsNullOrEmpty(mappingProperties.Document.ReferenceId))
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status400BadRequest,
-                    message: "INVALID",
+                    message: "INVALID_MAPPING",
                     detail: "Credit notes should have references (Document Map)"
                     );
 
@@ -35,7 +35,7 @@ namespace ETA.Integrator.Server.Mapping
             if (references is null || references.Count == 0)
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status400BadRequest,
-                    message: "INVALID",
+                    message: "INVALID_MAPPING",
                     detail: "Credit notes should have references (Serialized Map)"
                     );
 

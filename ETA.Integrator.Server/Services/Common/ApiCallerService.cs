@@ -273,23 +273,34 @@ namespace ETA.Integrator.Server.Services.Common
 
             (List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid) = await _invoiceSubmissionLogService.GetValidAndSubmittedByInternalId(references);
 
-            foreach (var record in valid)
+            if (valid.Count > 0)
             {
-                if (String.IsNullOrEmpty(record.Uuid))
+                foreach (var record in valid)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(3));
-                    // To update old data where uuid where set into submissionId column
-                    DocumentExtendedDTO document = await GetDocument(record.SubmissionId);
+                    if (String.IsNullOrEmpty(record.Uuid))
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(3));
+                        // To update old data where uuid where set into submissionId column
+                        DocumentExtendedDTO document = await GetDocument(record.SubmissionId);
 
-                    record.SubmissionId = document.SubmissionUUID;
-                    record.Uuid = document.Uuid;
-                    record.StatusStringfied = "Valid";
+                        if (String.IsNullOrEmpty(document.Uuid))
+                        {
+                            throw new ProblemDetailsException(
+                                statusCode: StatusCodes.Status400BadRequest,
+                                message: "INVALID_UUID",
+                                detail: $"Could not retrieve reference (UUID) from the gateway! logId: {record.Id}"
+                                );
+                        }
 
+                        record.SubmissionId = document.SubmissionUUID;
+                        record.Uuid = document.Uuid;
+                        record.StatusStringfied = "Valid";
 
-                    await _invoiceSubmissionLogService.UpdateLog(record);
+                        await _invoiceSubmissionLogService.UpdateLog(record);
+                    }
+
+                    validReferences.Add(new KeyValuePair<string, string>(record.InternalId, record.Uuid));
                 }
-
-                validReferences.Add(new KeyValuePair<string, string>(record.InternalId, record.Uuid));
             }
 
             if (submitted.Count > 0)
@@ -316,7 +327,7 @@ namespace ETA.Integrator.Server.Services.Common
 
                 throw new ProblemDetailsException(
                     StatusCodes.Status400BadRequest,
-                    "INVALID_REFS",
+                    "MISSING_REFS",
                     errMessage
                     );
             }
