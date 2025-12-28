@@ -28,7 +28,7 @@ namespace ETA.Integrator.Server.Services.Common
         {
             RestClient client = request.ClientType switch
             {
-                ClientType.Consumer => CreateConsumerClient(),
+                ClientType.Consumer => await CreateConsumerClient(),
                 ClientType.ConsumerAuth => CreateConsumerAuthClient(),
                 ClientType.Provider => CreateProviderClient(),
                 _ => throw new ProblemDetailsException(
@@ -37,11 +37,13 @@ namespace ETA.Integrator.Server.Services.Common
                     detail: "Unknown client type detected"
                     ),
             };
-            await Task.Delay(TimeSpan.FromSeconds(2));
+
             var response = await client.ExecuteAsync<RestResponse>(request.Request);
 
             if (request.DoRetry && response.StatusCode == HttpStatusCode.Unauthorized) // Retry
             {
+                await Task.Delay(TimeSpan.FromSeconds(2));
+
                 var authToken = await AuthorizeConsumer();
 
                 if (string.IsNullOrWhiteSpace(authToken))
@@ -51,7 +53,10 @@ namespace ETA.Integrator.Server.Services.Common
                             detail: "Consumer auth token has no value"
                             );
                 //TODO: Need to figure out better way to re-create dynamic clients as in the start of the function (maybe by recurssion but we need to modify the retry)
-                client = CreateConsumerClient();
+                client = await CreateConsumerClient();
+
+                await Task.Delay(TimeSpan.FromSeconds(2));
+
                 var retryResponse = await client.ExecuteAsync<RestResponse>(request.Request);
 
                 return retryResponse;
@@ -109,8 +114,14 @@ namespace ETA.Integrator.Server.Services.Common
 
             return token;
         }
-        private RestClient CreateConsumerClient()
+        private async Task<RestClient> CreateConsumerClient()
         {
+            if (String.IsNullOrEmpty(_customConfig.Consumer_Token))
+            {
+                await AuthorizeConsumer();
+                await Task.Delay(TimeSpan.FromSeconds(2));
+            }
+
             if (_customConfig.Consumer_APIBaseUrl is null)
                 throw new ProblemDetailsException(
                     StatusCodes.Status500InternalServerError,
