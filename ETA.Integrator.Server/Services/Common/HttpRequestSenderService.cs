@@ -37,7 +37,7 @@ namespace ETA.Integrator.Server.Services.Common
                     detail: "Unknown client type detected"
                     ),
             };
-
+            await Task.Delay(TimeSpan.FromSeconds(2));
             var response = await client.ExecuteAsync<RestResponse>(request.Request);
 
             if (request.DoRetry && response.StatusCode == HttpStatusCode.Unauthorized) // Retry
