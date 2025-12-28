@@ -148,7 +148,7 @@ const SubmittedInvoiceColumns = (getColumnSearchProps) => [
       ...getColumnSearchProps("typeName", "search"),
       render: (typeName, record) => {
          var documentType = DocumentTypes(record.receiverType).find(
-            (d) => d.value.toLowerCase() == typeName
+            (d) => d.value.toLowerCase() == typeName.toLowerCase()
          );
 
          return <>{documentType.label}</>;

@@ -1350,6 +1350,10 @@ const DocumentTypes = (receiverType)  => [
       label: "Credit Note",
    },
    {
+      value: "D",
+      label: "Debit Note",
+   },
+   {
       value: "I",
       label: receiverType == "B" ? "Invoice (Claim)" : "Invoice",
    },
