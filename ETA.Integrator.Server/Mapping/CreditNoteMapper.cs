@@ -15,7 +15,7 @@ namespace ETA.Integrator.Server.Mapping
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status400BadRequest,
                     message: "INVALID",
-                    detail: "Credit notes should have references"
+                    detail: "Credit notes should have references (Document Map)"
                     );
 
 
@@ -36,7 +36,7 @@ namespace ETA.Integrator.Server.Mapping
                 throw new ProblemDetailsException(
                     statusCode: StatusCodes.Status400BadRequest,
                     message: "INVALID",
-                    detail: "Credit notes should have references"
+                    detail: "Credit notes should have references (Serialized Map)"
                     );
 
             InvoiceToSerializeDTO serialized = GenericHelpers.MapBaseSerialized(model);

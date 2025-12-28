@@ -361,6 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/ETA.Integrator.Server/Data/*
 /ETA.Integrator.Server/Data/ETA_DB.db
 /ETA.Integrator.Server/Data/ETA_DB.db-shm
 /ETA.Integrator.Server/Data/ETA_DB.db-wal

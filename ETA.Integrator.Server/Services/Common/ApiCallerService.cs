@@ -273,7 +273,24 @@ namespace ETA.Integrator.Server.Services.Common
 
             (List<InvoiceSubmissionLog> submitted, List<InvoiceSubmissionLog> valid) = await _invoiceSubmissionLogService.GetValidAndSubmittedByInternalId(references);
 
-            validReferences.AddRange(valid.Select(v => new KeyValuePair<string, string>(v.InternalId, v.Uuid)));
+            foreach (var record in valid)
+            {
+                if (String.IsNullOrEmpty(record.Uuid))
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+                    // To update old data where uuid where set into submissionId column
+                    DocumentExtendedDTO document = await GetDocument(record.SubmissionId);
+
+                    record.SubmissionId = document.SubmissionUUID;
+                    record.Uuid = document.Uuid;
+                    record.StatusStringfied = "Valid";
+
+
+                    await _invoiceSubmissionLogService.UpdateLog(record);
+                }
+
+                validReferences.Add(new KeyValuePair<string, string>(record.InternalId, record.Uuid));
+            }
 
             if (submitted.Count > 0)
             {

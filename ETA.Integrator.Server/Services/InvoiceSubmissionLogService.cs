@@ -162,5 +162,10 @@ namespace ETA.Integrator.Server.Services
         {
             return await _invoiceSubmissionLogRepository.GetForOnlySubmittedByInternalIdDescOrdered(internalId);
         }
+
+        public async Task UpdateLog(InvoiceSubmissionLog log)
+        {
+            await _invoiceSubmissionLogRepository.UpdateLog(log);
+        }
     }
 }

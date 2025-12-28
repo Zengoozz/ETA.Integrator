@@ -176,5 +176,20 @@ namespace ETA.Integrator.Server.Repositories
         {
             return await _dbSet.AsNoTracking().Where(l => l.InternalId == internalId && l.Status == InvoiceStatus.Submitted).OrderByDescending(l => l.Id).ToListAsync();
         }
+
+        public async Task UpdateLog(InvoiceSubmissionLog log)
+        {
+            var existedLog = await _dbSet.AsNoTracking().FirstOrDefaultAsync(l => l.Id == log.Id);
+
+            if (existedLog is not null) { 
+                existedLog.SubmissionId = log.SubmissionId;
+                existedLog.SubmissionDate = log.SubmissionDate;
+                existedLog.Uuid = log.Uuid;
+                existedLog.Status = log.Status;
+                existedLog.StatusStringfied = log.StatusStringfied;
+            }
+
+            await _context.SaveChangesAsync();
+        }
     }
 }

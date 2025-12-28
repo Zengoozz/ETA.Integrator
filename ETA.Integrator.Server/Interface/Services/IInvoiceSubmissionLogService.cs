@@ -20,5 +20,6 @@ namespace ETA.Integrator.Server.Interface.Services
         Task UpdateStatus(int id, InvoiceStatus status);
         Task UpdateStatusWithListOfIds(List<int> listOfIds, InvoiceStatus status);
         Task<List<InvoiceSubmissionLog>> GetForOnlySubmittedByInternalIdDescOrdered(string internalId);
+        Task UpdateLog(InvoiceSubmissionLog log);
     }
 }

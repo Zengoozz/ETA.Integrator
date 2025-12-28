@@ -183,7 +183,7 @@ namespace ETA.Integrator.Server.Services
                             InvoiceType = signingProperties.InvoiceType,
                             IsProduction = signingProperties.IsProduction,
                             ForNotes = signingProperties.ForNotes,
-                            References = signingProperties.InternalIdsWithUUIDs.Where(i => i.Key == model.InvoiceId).Select(i => i.Value).ToList()
+                            References = signingProperties.InternalIdsWithUUIDs.Where(i => i.Key == model.ReferenceId).Select(i => i.Value).ToList()
                         });
 
                         document.Signatures = new List<SignatureModel>();
